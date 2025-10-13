@@ -1,0 +1,13 @@
+{
+  "name": "monEZ - Split expenses, not friendships",
+  "short_name": "monEZ",
+  "description": "Luxury expense splitting app with PWA capabilities",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FAFAFA",
+  "theme_color": "#846941",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
