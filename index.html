@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>monEZ - Split expenses, not friendships</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#846941">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+        // Firebase configuration (free tier)
+        const firebaseConfig = {
+            apiKey: "your-api-key-here",
+            authDomain: "monez-expense-app.firebaseapp.com",
+            projectId: "monez-expense-app",
+            storageBucket: "monez-expense-app.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // Global variables
+        let currentUser = null;
+        let expenses = [];
+        let groups = [];
+
+        // Authentication
+        window.signInWithGoogle = async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                currentUser = result.user;
+                showApp();
+                loadUserData();
+            } catch (error) {
+                console.error('Sign in failed:', error);
+            }
+        };
+
+        window.signOutUser = async () => {
+            try {
+                await signOut(auth);
+                currentUser = null;
+                showLogin();
+            } catch (error) {
+                console.error('Sign out failed:', error);
+            }
+        };
+
+        // Real expense management
+        window.addExpense = async () => {
+            if (!currentUser) return;
+
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            const description = document.getElementById('expense-description').value;
+            const category = document.getElementById('expense-category').value;
+
+            if (!amount || !description) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'expenses'), {
+                    amount: amount,
+                    description: description,
+                    category: category,
+                    paidBy: currentUser.uid,
+                    paidByName: currentUser.displayName,
+                    splitWith: [currentUser.uid], // For now, just the user
+                    timestamp: serverTimestamp(),
+                    settled: false
+                });
+
+                // Clear form
+                document.getElementById('expense-amount').value = '';
+                document.getElementById('expense-description').value = '';
+                
+                alert('Expense added successfully!');
+                showTab('home');
+            } catch (error) {
+                console.error('Error adding expense:', error);
+                alert('Failed to add expense');
+            }
+        };
+
+        // Real-time data loading
+        function loadUserData() {
+            if (!currentUser) return;
+
+            // Load expenses
+            const expensesQuery = query(
+                collection(db, 'expenses'),
+                where('splitWith', 'array-contains', currentUser.uid),
+                orderBy('timestamp', 'desc')
+            );
+
+            onSnapshot(expensesQuery, (snapshot) => {
+                expenses = [];
+                let totalBalance = 0;
+
+                snapshot.forEach((doc) => {
+                    const expense = { id: doc.id, ...doc.data() };
+                    expenses.push(expense);
+                    
+                    // Calculate balance
+                    if (expense.paidBy === currentUser.uid) {
+                        totalBalance += expense.amount;
+                    } else {
+                        totalBalance -= expense.amount / expense.splitWith.length;
+                    }
+                });
+
+                updateUI();
+            });
+        }
+
+        // Update UI with real data
+        function updateUI() {
+            // Update balance
+            const balanceEl = document.querySelector('.balance-amount');
+            const totalBalance = expenses.reduce((sum, expense) => {
+                if (expense.paidBy === currentUser.uid) {
+                    return sum + expense.amount;
+                } else {
+                    return sum - (expense.amount / expense.splitWith.length);
+                }
+            }, 0);
+
+            if (balanceEl) {
+                balanceEl.textContent = `₹${totalBalance.toLocaleString('en-IN')}`;
+            }
+
+            // Update recent activity
+            const activityContainer = document.querySelector('.recent-activity');
+            if (activityContainer && expenses.length > 0) {
+                const recentExpenses = expenses.slice(0, 3);
+                activityContainer.innerHTML = recentExpenses.map(expense => `
+                    <div class="activity-item">
+                        <div class="activity-content">
+                            <div class="activity-title">${expense.description}</div>
+                            <div class="activity-subtitle">${expense.category} • ${expense.paidByName}</div>
+                        </div>
+                        <div class="activity-amount ${expense.paidBy === currentUser.uid ? '' : 'negative'}">
+                            ₹${expense.amount.toLocaleString('en-IN')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Update expenses list
+            const expensesContainer = document.querySelector('.expenses-list');
+            if (expensesContainer) {
+                expensesContainer.innerHTML = expenses.map(expense => `
+                    <div class="activity-item">
+                        <div class="activity-content">
+                            <div class="activity-title">${expense.description}</div>
+                            <div class="activity-subtitle">${expense.category} • Paid by ${expense.paidByName}</div>
+                        </div>
+                        <div class="activity-amount ${expense.paidBy === currentUser.uid ? '' : 'negative'}">
+                            ₹${expense.amount.toLocaleString('en-IN')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                showApp();
+                loadUserData();
+            } else {
+                currentUser = null;
+                showLogin();
+            }
+        });
+
+        // UI helpers
+        function showLogin() {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app-screen').style.display = 'none';
+        }
+
+        function showApp() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'block';
+            
+            // Show user info
+            const userInfo = document.querySelector('.user-info');
+            if (userInfo && currentUser) {
+                userInfo.innerHTML = `
+                    <img src="${currentUser.photoURL}" alt="Profile" class="profile-pic">
+                    <span>${currentUser.displayName}</span>
+                `;
+            }
+        }
+
+        // Make functions available globally
+        window.loadUserData = loadUserData;
+        window.updateUI = updateUI;
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', -apple-system, system-ui, sans-serif;
+            background-color: #FAFAFA;
+            color: #232325;
+            line-height: 1.5;
+            letter-spacing: -0.01em;
+        }
+
+        /* Login Screen */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #846941 0%, #A67C52 100%);
+            color: white;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .login-title {
+            font-size: 48px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .login-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 48px;
+        }
+
+        .login-btn {
+            background: white;
+            color: #846941;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* App Screen */
+        #app-screen {
+            display: none;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #FFFFFF;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .header {
+            background: #FFFFFF;
+            padding: 20px 24px;
+            border-bottom: 0.5px solid #ECECEC;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #846941;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #828288;
+        }
+
+        .profile-pic {
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+        }
+
+        .tab-content {
+            padding: 24px;
+            padding-bottom: 100px;
+        }
+
+        .balance-card {
+            background: #FFFFFF;
+            border: 0.5px solid #ECECEC;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(150, 150, 150, 0.06);
+        }
+
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 600;
+            color: #232325;
+            margin-bottom: 8px;
+        }
+
+        .balance-change {
+            font-size: 13px;
+            color: #32775E;
+            font-weight: 500;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .action-btn {
+            background: #846941;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 250ms ease;
+        }
+
+        .action-btn.secondary {
+            background: transparent;
+            color: #3B6270;
+            border: 1px solid #3B6270;
+        }
+
+        .action-btn:hover {
+            transform: scale(0.98);
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #232325;
+            margin-bottom: 16px;
+        }
+
+        .activity-item {
+            background: #FFFFFF;
+            border: 0.5px solid #ECECEC;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #232325;
+            margin-bottom: 4px;
+        }
+
+        .activity-subtitle {
+            font-size: 13px;
+            color: #828288;
+        }
+
+        .activity-amount {
+            font-size: 16px;
+            font-weight: 600;
+            color: #32775E;
+        }
+
+        .activity-amount.negative {
+            color: #C44A44;
+        }
+
+        .expense-form {
+            background: #FFFFFF;
+            border: 0.5px solid #ECECEC;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: #232325;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ECECEC;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #FFFFFF;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #846941;
+        }
+
+        .save-btn {
+            background: #846941;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 400px;
+            background: #FFFFFF;
+            border-top: 0.5px solid #ECECEC;
+            padding: 12px 0;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 250ms ease;
+            background: none;
+            border: none;
+            color: #828288;
+        }
+
+        .nav-item.active {
+            color: #846941;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .premium-card {
+            background: linear-gradient(135deg, #846941 0%, #A67C52 100%);
+            color: #FFFFFF;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .premium-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .premium-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .try-premium-btn {
+            background: #FFFFFF;
+            color: #846941;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .logout-btn {
+            background: #C44A44;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-title">monEZ</div>
+        <div class="login-subtitle">Split expenses, not friendships</div>
+        <button class="login-btn" onclick="signInWithGoogle()">
+            <span>🚀</span>
+            Sign in with Google
+        </button>
+        <p style="margin-top: 24px; opacity: 0.8; font-size: 14px;">
+            Fully functional • Real-time sync • Free Firebase backend
+        </p>
+    </div>
+
+    <!-- App Screen -->
+    <div id="app-screen">
+        <div class="container">
+            <div class="header">
+                <div class="app-title">monEZ</div>
+                <div class="user-info">
+                    <button class="logout-btn" onclick="signOutUser()">Logout</button>
+                </div>
+            </div>
+
+            <!-- Home Tab -->
+            <div id="home-tab" class="tab-content">
+                <div class="balance-card">
+                    <div class="balance-amount">₹0</div>
+                    <div class="balance-change">Real-time balance</div>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="showTab('expenses')">Add Expense</button>
+                    <button class="action-btn secondary">Invite Friends</button>
+                </div>
+
+                <div class="section-title">Recent Activity</div>
+                <div class="recent-activity">
+                    <div class="activity-item">
+                        <div class="activity-content">
+                            <div class="activity-title">Add your first expense!</div>
+                            <div class="activity-subtitle">Click "Add Expense" to get started</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses Tab -->
+            <div id="expenses-tab" class="tab-content hidden">
+                <div class="expense-form">
+                    <div class="form-group">
+                        <label class="form-label">Amount (₹)</label>
+                        <input type="number" id="expense-amount" class="form-input" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" id="expense-description" class="form-input" placeholder="What was this for?">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select id="expense-category" class="form-input">
+                            <option>Dining</option>
+                            <option>Transport</option>
+                            <option>Entertainment</option>
+                            <option>Shopping</option>
+                            <option>Bills</option>
+                        </select>
+                    </div>
+                    <button class="save-btn" onclick="addExpense()">Add Expense</button>
+                </div>
+
+                <div class="section-title">All Expenses</div>
+                <div class="expenses-list">
+                    <div class="activity-item">
+                        <div class="activity-content">
+                            <div class="activity-title">No expenses yet</div>
+                            <div class="activity-subtitle">Add your first expense above</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groups Tab -->
+            <div id="groups-tab" class="tab-content hidden">
+                <div class="section-title">Your Groups</div>
+                <div class="activity-item">
+                    <div class="activity-content">
+                        <div class="activity-title">Coming Soon!</div>
+                        <div class="activity-subtitle">Group management with real friends</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Tab -->
+            <div id="premium-tab" class="tab-content hidden">
+                <div class="premium-card">
+                    <div class="premium-title">This IS Premium!</div>
+                    <div class="premium-subtitle">You're already using a fully functional app with Firebase backend</div>
+                </div>
+
+                <div class="section-title">Current Features</div>
+                <div class="activity-item">
+                    <div class="activity-content">
+                        <div class="activity-title">✅ Real User Accounts</div>
+                        <div class="activity-subtitle">Google authentication</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-content">
+                        <div class="activity-title">✅ Real-time Database</div>
+                        <div class="activity-subtitle">Firebase Firestore</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-content">
+                        <div class="activity-title">✅ Live Sync</div>
+                        <div class="activity-subtitle">Updates instantly across devices</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-content">
+                        <div class="activity-title">✅ PWA Support</div>
+                        <div class="activity-subtitle">Install as native app</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div id="profile-tab" class="tab-content hidden">
+                <div class="section-title">Account</div>
+                <div class="activity-item">
+                    <div class="activity-content">
+                        <div class="activity-title">Signed in with Google</div>
+                        <div class="activity-subtitle">Real authentication system</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-content">
+                        <div class="activity-title">Data Storage</div>
+                        <div class="activity-subtitle">All expenses saved to Firebase</div>
+                    </div>
+                </div>
+                <div class="activity-item" onclick="signOutUser()">
+                    <div class="activity-content">
+                        <div class="activity-title">Sign Out</div>
+                        <div class="activity-subtitle">Logout from your account</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <button class="nav-item active" onclick="showTab('home')">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Home</div>
+                </button>
+                <button class="nav-item" onclick="showTab('expenses')">
+                    <div class="nav-icon">💳</div>
+                    <div class="nav-label">Expenses</div>
+                </button>
+                <button class="nav-item" onclick="showTab('groups')">
+                    <div class="nav-icon">👥</div>
+                    <div class="nav-label">Groups</div>
+                </button>
+                <button class="nav-item" onclick="showTab('premium')">
+                    <div class="nav-icon">✨</div>
+                    <div class="nav-label">Premium</div>
+                </button>
+                <button class="nav-item" onclick="showTab('profile')">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">Profile</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.add('hidden'));
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+            // Update navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        // PWA Installation
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js');
+        }
+    </script>
+</body>
+</html>
