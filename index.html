@@ -13,8 +13,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
         import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 
-        // Firebase configuration (free tier)
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        // Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyC4pZOIZikLKjL_eYAW9x3aC4weSz9PP6I",
           authDomain: "monez-a4619.firebaseapp.com",
@@ -36,38 +35,50 @@
         let expenses = [];
         let groups = [];
 
-        // Authentication
-        window.signInWithGoogle = async () => {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                currentUser = result.user;
-                showApp();
-                loadUserData();
-            } catch (error) {
-                console.error('Sign in failed:', error);
-            }
+        // Authentication - Sign in with Google
+        window.signInWithGoogle = async function() {
+          try {
+            const result = await signInWithPopup(auth, provider);
+            currentUser = result.user;
+            showApp();
+            loadUserData();
+          } catch (error) {
+            alert("Sign in failed: " + error.message);
+            console.error(error);
+          }
+        };
+        
+        // Sign out
+        window.signOutUser = async function() {
+          try {
+            await signOut(auth);
+            currentUser = null;
+            expenses = [];
+            showLogin();
+          } catch (error) {
+            alert("Error signing out: " + error.message);
+            console.error(error);
+          }
         };
 
-        window.signOutUser = async () => {
-            try {
-                await signOut(auth);
-                currentUser = null;
-                showLogin();
-            } catch (error) {
-                console.error('Sign out failed:', error);
-            }
-        };
-
-        // Real expense management
+        // Add expense
         window.addExpense = async () => {
-            if (!currentUser) return;
+            if (!currentUser) {
+                alert('Please sign in first');
+                return;
+            }
 
             const amount = parseFloat(document.getElementById('expense-amount').value);
-            const description = document.getElementById('expense-description').value;
+            const description = document.getElementById('expense-description').value.trim();
             const category = document.getElementById('expense-category').value;
 
-            if (!amount || !description) {
-                alert('Please fill all fields');
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            if (!description) {
+                alert('Please enter a description');
                 return;
             }
 
@@ -78,7 +89,7 @@
                     category: category,
                     paidBy: currentUser.uid,
                     paidByName: currentUser.displayName,
-                    splitWith: [currentUser.uid], // For now, just the user
+                    splitWith: [currentUser.uid],
                     timestamp: serverTimestamp(),
                     settled: false
                 });
@@ -86,12 +97,13 @@
                 // Clear form
                 document.getElementById('expense-amount').value = '';
                 document.getElementById('expense-description').value = '';
+                document.getElementById('expense-category').selectedIndex = 0;
                 
                 alert('Expense added successfully!');
                 showTab('home');
             } catch (error) {
                 console.error('Error adding expense:', error);
-                alert('Failed to add expense');
+                alert('Failed to add expense: ' + error.message);
             }
         };
 
@@ -108,28 +120,23 @@
 
             onSnapshot(expensesQuery, (snapshot) => {
                 expenses = [];
-                let totalBalance = 0;
 
                 snapshot.forEach((doc) => {
                     const expense = { id: doc.id, ...doc.data() };
                     expenses.push(expense);
-                    
-                    // Calculate balance
-                    if (expense.paidBy === currentUser.uid) {
-                        totalBalance += expense.amount;
-                    } else {
-                        totalBalance -= expense.amount / expense.splitWith.length;
-                    }
                 });
 
                 updateUI();
+            }, (error) => {
+                console.error('Error loading expenses:', error);
             });
         }
 
         // Update UI with real data
         function updateUI() {
-            // Update balance
-            const balanceEl = document.querySelector('.balance-amount');
+            if (!currentUser) return;
+
+            // Calculate total balance
             const totalBalance = expenses.reduce((sum, expense) => {
                 if (expense.paidBy === currentUser.uid) {
                     return sum + expense.amount;
@@ -138,42 +145,73 @@
                 }
             }, 0);
 
+            // Update balance
+            const balanceEl = document.querySelector('.balance-amount');
             if (balanceEl) {
-                balanceEl.textContent = `₹${totalBalance.toLocaleString('en-IN')}`;
+                balanceEl.textContent = `₹${totalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             }
 
-            // Update recent activity
+            // Update recent activity (top 3)
             const activityContainer = document.querySelector('.recent-activity');
-            if (activityContainer && expenses.length > 0) {
-                const recentExpenses = expenses.slice(0, 3);
-                activityContainer.innerHTML = recentExpenses.map(expense => `
-                    <div class="activity-item">
-                        <div class="activity-content">
-                            <div class="activity-title">${expense.description}</div>
-                            <div class="activity-subtitle">${expense.category} • ${expense.paidByName}</div>
+            if (activityContainer) {
+                if (expenses.length > 0) {
+                    const recentExpenses = expenses.slice(0, 3);
+                    activityContainer.innerHTML = recentExpenses.map(expense => `
+                        <div class="activity-item">
+                            <div class="activity-content">
+                                <div class="activity-title">${escapeHtml(expense.description)}</div>
+                                <div class="activity-subtitle">${expense.category} • ${escapeHtml(expense.paidByName)}</div>
+                            </div>
+                            <div class="activity-amount ${expense.paidBy === currentUser.uid ? '' : 'negative'}">
+                                ₹${expense.amount.toLocaleString('en-IN')}
+                            </div>
                         </div>
-                        <div class="activity-amount ${expense.paidBy === currentUser.uid ? '' : 'negative'}">
-                            ₹${expense.amount.toLocaleString('en-IN')}
+                    `).join('');
+                } else {
+                    activityContainer.innerHTML = `
+                        <div class="activity-item">
+                            <div class="activity-content">
+                                <div class="activity-title">Add your first expense!</div>
+                                <div class="activity-subtitle">Click "Add Expense" to get started</div>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }
             }
 
-            // Update expenses list
+            // Update expenses list (all expenses)
             const expensesContainer = document.querySelector('.expenses-list');
             if (expensesContainer) {
-                expensesContainer.innerHTML = expenses.map(expense => `
-                    <div class="activity-item">
-                        <div class="activity-content">
-                            <div class="activity-title">${expense.description}</div>
-                            <div class="activity-subtitle">${expense.category} • Paid by ${expense.paidByName}</div>
+                if (expenses.length > 0) {
+                    expensesContainer.innerHTML = expenses.map(expense => `
+                        <div class="activity-item">
+                            <div class="activity-content">
+                                <div class="activity-title">${escapeHtml(expense.description)}</div>
+                                <div class="activity-subtitle">${expense.category} • Paid by ${escapeHtml(expense.paidByName)}</div>
+                            </div>
+                            <div class="activity-amount ${expense.paidBy === currentUser.uid ? '' : 'negative'}">
+                                ₹${expense.amount.toLocaleString('en-IN')}
+                            </div>
                         </div>
-                        <div class="activity-amount ${expense.paidBy === currentUser.uid ? '' : 'negative'}">
-                            ₹${expense.amount.toLocaleString('en-IN')}
+                    `).join('');
+                } else {
+                    expensesContainer.innerHTML = `
+                        <div class="activity-item">
+                            <div class="activity-content">
+                                <div class="activity-title">No expenses yet</div>
+                                <div class="activity-subtitle">Add your first expense above</div>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }
             }
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Auth state listener
@@ -184,6 +222,7 @@
                 loadUserData();
             } else {
                 currentUser = null;
+                expenses = [];
                 showLogin();
             }
         });
@@ -199,14 +238,40 @@
             document.getElementById('app-screen').style.display = 'block';
             
             // Show user info
-            const userInfo = document.querySelector('.user-info');
-            if (userInfo && currentUser) {
-                userInfo.innerHTML = `
-                    <img src="${currentUser.photoURL}" alt="Profile" class="profile-pic">
-                    <span>${currentUser.displayName}</span>
-                `;
+            if (currentUser) {
+                const userInfo = document.querySelector('.user-info');
+                if (userInfo) {
+                    userInfo.innerHTML = `
+                        <img src="${currentUser.photoURL}" alt="Profile" class="profile-pic">
+                        <span>${escapeHtml(currentUser.displayName)}</span>
+                    `;
+                }
             }
         }
+
+        // Make showTab available globally
+        window.showTab = function(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.add('hidden'));
+
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+            }
+
+            // Update navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                const onclick = item.getAttribute('onclick');
+                if (onclick && onclick.includes(`'${tabName}'`)) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        };
 
         // Make functions available globally
         window.loadUserData = loadUserData;
@@ -463,6 +528,10 @@
             cursor: pointer;
         }
 
+        .save-btn:hover {
+            opacity: 0.9;
+        }
+
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -549,6 +618,10 @@
             font-size: 14px;
             cursor: pointer;
         }
+
+        .logout-btn:hover {
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
@@ -578,7 +651,7 @@
             <!-- Home Tab -->
             <div id="home-tab" class="tab-content">
                 <div class="balance-card">
-                    <div class="balance-amount">₹0</div>
+                    <div class="balance-amount">₹0.00</div>
                     <div class="balance-change">Real-time balance</div>
                 </div>
 
@@ -603,7 +676,7 @@
                 <div class="expense-form">
                     <div class="form-group">
                         <label class="form-label">Amount (₹)</label>
-                        <input type="number" id="expense-amount" class="form-input" placeholder="0.00" step="0.01">
+                        <input type="number" id="expense-amount" class="form-input" placeholder="0.00" step="0.01" min="0">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Description</label>
@@ -693,7 +766,7 @@
                         <div class="activity-subtitle">All expenses saved to Firebase</div>
                     </div>
                 </div>
-                <div class="activity-item" onclick="signOutUser()">
+                <div class="activity-item" onclick="signOutUser()" style="cursor: pointer;">
                     <div class="activity-content">
                         <div class="activity-title">Sign Out</div>
                         <div class="activity-subtitle">Logout from your account</div>
@@ -728,20 +801,6 @@
     </div>
 
     <script>
-        function showTab(tabName) {
-            // Hide all tabs
-            const tabs = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => tab.classList.add('hidden'));
-
-            // Show selected tab
-            document.getElementById(tabName + '-tab').classList.remove('hidden');
-
-            // Update navigation
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => item.classList.remove('active'));
-            event.target.closest('.nav-item').classList.add('active');
-        }
-
         // PWA Installation
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -751,7 +810,9 @@
 
         // Service Worker Registration
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js');
+            navigator.serviceWorker.register('service-worker.js').catch(err => {
+                console.log('Service worker registration failed:', err);
+            });
         }
     </script>
 </body>
