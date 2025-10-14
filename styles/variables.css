@@ -1,0 +1,63 @@
+/* monEZ Luxury Banking Design System */
+:root {
+  /* Luxury Banking Colors */
+  --background: #FAFAFA;
+  --surface: #FFFFFF;
+  --primary-text: #232325;
+  --secondary-text: #828288;
+  --borders: #ECECEC;
+  --gold-accent: #846941;
+  --steel-blue: #3B6270;
+  --success: #32775E;
+  --error: #C44A44;
+  --glass: rgba(255,255,255,0.95);
+  
+  /* Luxury Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  
+  /* Sophisticated Typography */
+  --font-family: 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --letter-spacing: -0.01em;
+  
+  /* Luxury Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  
+  /* Subtle Shadows */
+  --shadow-sm: 0 2px 8px rgba(150,150,150,0.06);
+  --shadow-md: 0 4px 12px rgba(150,150,150,0.08);
+  --shadow-lg: 0 8px 24px rgba(150,150,150,0.10);
+  --shadow-floating: 0 12px 40px rgba(132,105,65,0.15);
+}
+
+/* Keyframe Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ripple { 
+  to { transform: scale(2); opacity: 0; } 
+}
