@@ -3,817 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>monEZ - Split expenses, not friendships</title>
-    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#846941">
+    <meta name="description" content="monEZ - Split expenses, not friendships">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>💰</text></svg>">
+    <link rel="manifest" href="manifest.json">
+    <title>monEZ - Split expenses, not friendships</title>
     
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
-
-        // Firebase configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyC4pZOIZikLKjL_eYAW9x3aC4weSz9PP6I",
-          authDomain: "monez-a4619.firebaseapp.com",
-          projectId: "monez-a4619",
-          storageBucket: "monez-a4619.firebasestorage.app",
-          messagingSenderId: "754794079933",
-          appId: "1:754794079933:web:fb794db5e96a94dd9f39d4",
-          measurementId: "G-LTF8XKRR6P"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-
-        // Global variables
-        let currentUser = null;
-        let expenses = [];
-        let groups = [];
-
-        // Authentication - Sign in with Google
-        window.signInWithGoogle = async function() {
-          try {
-            const result = await signInWithPopup(auth, provider);
-            currentUser = result.user;
-            showApp();
-            loadUserData();
-          } catch (error) {
-            alert("Sign in failed: " + error.message);
-            console.error(error);
-          }
-        };
-        
-        // Sign out
-        window.signOutUser = async function() {
-          try {
-            await signOut(auth);
-            currentUser = null;
-            expenses = [];
-            showLogin();
-          } catch (error) {
-            alert("Error signing out: " + error.message);
-            console.error(error);
-          }
-        };
-
-        // Add expense
-        window.addExpense = async () => {
-            if (!currentUser) {
-                alert('Please sign in first');
-                return;
-            }
-
-            const amount = parseFloat(document.getElementById('expense-amount').value);
-            const description = document.getElementById('expense-description').value.trim();
-            const category = document.getElementById('expense-category').value;
-
-            if (!amount || amount <= 0) {
-                alert('Please enter a valid amount');
-                return;
-            }
-
-            if (!description) {
-                alert('Please enter a description');
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, 'expenses'), {
-                    amount: amount,
-                    description: description,
-                    category: category,
-                    paidBy: currentUser.uid,
-                    paidByName: currentUser.displayName,
-                    splitWith: [currentUser.uid],
-                    timestamp: serverTimestamp(),
-                    settled: false
-                });
-
-                // Clear form
-                document.getElementById('expense-amount').value = '';
-                document.getElementById('expense-description').value = '';
-                document.getElementById('expense-category').selectedIndex = 0;
-                
-                alert('Expense added successfully!');
-                showTab('home');
-            } catch (error) {
-                console.error('Error adding expense:', error);
-                alert('Failed to add expense: ' + error.message);
-            }
-        };
-
-        // Real-time data loading
-        function loadUserData() {
-            if (!currentUser) return;
-
-            // Load expenses
-            const expensesQuery = query(
-                collection(db, 'expenses'),
-                where('splitWith', 'array-contains', currentUser.uid),
-                orderBy('timestamp', 'desc')
-            );
-
-            onSnapshot(expensesQuery, (snapshot) => {
-                expenses = [];
-
-                snapshot.forEach((doc) => {
-                    const expense = { id: doc.id, ...doc.data() };
-                    expenses.push(expense);
-                });
-
-                updateUI();
-            }, (error) => {
-                console.error('Error loading expenses:', error);
-            });
-        }
-
-        // Update UI with real data
-        function updateUI() {
-            if (!currentUser) return;
-
-            // Calculate total balance
-            const totalBalance = expenses.reduce((sum, expense) => {
-                if (expense.paidBy === currentUser.uid) {
-                    return sum + expense.amount;
-                } else {
-                    return sum - (expense.amount / expense.splitWith.length);
-                }
-            }, 0);
-
-            // Update balance
-            const balanceEl = document.querySelector('.balance-amount');
-            if (balanceEl) {
-                balanceEl.textContent = `₹${totalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            }
-
-            // Update recent activity (top 3)
-            const activityContainer = document.querySelector('.recent-activity');
-            if (activityContainer) {
-                if (expenses.length > 0) {
-                    const recentExpenses = expenses.slice(0, 3);
-                    activityContainer.innerHTML = recentExpenses.map(expense => `
-                        <div class="activity-item">
-                            <div class="activity-content">
-                                <div class="activity-title">${escapeHtml(expense.description)}</div>
-                                <div class="activity-subtitle">${expense.category} • ${escapeHtml(expense.paidByName)}</div>
-                            </div>
-                            <div class="activity-amount ${expense.paidBy === currentUser.uid ? '' : 'negative'}">
-                                ₹${expense.amount.toLocaleString('en-IN')}
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    activityContainer.innerHTML = `
-                        <div class="activity-item">
-                            <div class="activity-content">
-                                <div class="activity-title">Add your first expense!</div>
-                                <div class="activity-subtitle">Click "Add Expense" to get started</div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-
-            // Update expenses list (all expenses)
-            const expensesContainer = document.querySelector('.expenses-list');
-            if (expensesContainer) {
-                if (expenses.length > 0) {
-                    expensesContainer.innerHTML = expenses.map(expense => `
-                        <div class="activity-item">
-                            <div class="activity-content">
-                                <div class="activity-title">${escapeHtml(expense.description)}</div>
-                                <div class="activity-subtitle">${expense.category} • Paid by ${escapeHtml(expense.paidByName)}</div>
-                            </div>
-                            <div class="activity-amount ${expense.paidBy === currentUser.uid ? '' : 'negative'}">
-                                ₹${expense.amount.toLocaleString('en-IN')}
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    expensesContainer.innerHTML = `
-                        <div class="activity-item">
-                            <div class="activity-content">
-                                <div class="activity-title">No expenses yet</div>
-                                <div class="activity-subtitle">Add your first expense above</div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-        }
-
-        // Helper function to escape HTML
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Auth state listener
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                showApp();
-                loadUserData();
-            } else {
-                currentUser = null;
-                expenses = [];
-                showLogin();
-            }
-        });
-
-        // UI helpers
-        function showLogin() {
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('app-screen').style.display = 'none';
-        }
-
-        function showApp() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-screen').style.display = 'block';
-            
-            // Show user info
-            if (currentUser) {
-                const userInfo = document.querySelector('.user-info');
-                if (userInfo) {
-                    userInfo.innerHTML = `
-                        <img src="${currentUser.photoURL}" alt="Profile" class="profile-pic">
-                        <span>${escapeHtml(currentUser.displayName)}</span>
-                    `;
-                }
-            }
-        }
-
-        // Make showTab available globally
-        window.showTab = function(tabName) {
-            // Hide all tabs
-            const tabs = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => tab.classList.add('hidden'));
-
-            // Show selected tab
-            const selectedTab = document.getElementById(tabName + '-tab');
-            if (selectedTab) {
-                selectedTab.classList.remove('hidden');
-            }
-
-            // Update navigation
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                const onclick = item.getAttribute('onclick');
-                if (onclick && onclick.includes(`'${tabName}'`)) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
-            });
-        };
-
-        // Make functions available globally
-        window.loadUserData = loadUserData;
-        window.updateUI = updateUI;
-    </script>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', -apple-system, system-ui, sans-serif;
-            background-color: #FAFAFA;
-            color: #232325;
-            line-height: 1.5;
-            letter-spacing: -0.01em;
-        }
-
-        /* Login Screen */
-        #login-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #846941 0%, #A67C52 100%);
-            color: white;
-            text-align: center;
-            padding: 24px;
-        }
-
-        .login-title {
-            font-size: 48px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-
-        .login-subtitle {
-            font-size: 18px;
-            opacity: 0.9;
-            margin-bottom: 48px;
-        }
-
-        .login-btn {
-            background: white;
-            color: #846941;
-            border: none;
-            border-radius: 12px;
-            padding: 16px 32px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: transform 0.2s;
-        }
-
-        .login-btn:hover {
-            transform: scale(1.05);
-        }
-
-        /* App Screen */
-        #app-screen {
-            display: none;
-        }
-
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: #FFFFFF;
-            min-height: 100vh;
-            position: relative;
-        }
-
-        .header {
-            background: #FFFFFF;
-            padding: 20px 24px;
-            border-bottom: 0.5px solid #ECECEC;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .app-title {
-            font-size: 32px;
-            font-weight: 600;
-            color: #846941;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: #828288;
-        }
-
-        .profile-pic {
-            width: 32px;
-            height: 32px;
-            border-radius: 16px;
-        }
-
-        .tab-content {
-            padding: 24px;
-            padding-bottom: 100px;
-        }
-
-        .balance-card {
-            background: #FFFFFF;
-            border: 0.5px solid #ECECEC;
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 8px rgba(150, 150, 150, 0.06);
-        }
-
-        .balance-amount {
-            font-size: 32px;
-            font-weight: 600;
-            color: #232325;
-            margin-bottom: 8px;
-        }
-
-        .balance-change {
-            font-size: 13px;
-            color: #32775E;
-            font-weight: 500;
-        }
-
-        .quick-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .action-btn {
-            background: #846941;
-            color: #FFFFFF;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 250ms ease;
-        }
-
-        .action-btn.secondary {
-            background: transparent;
-            color: #3B6270;
-            border: 1px solid #3B6270;
-        }
-
-        .action-btn:hover {
-            transform: scale(0.98);
-        }
-
-        .section-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #232325;
-            margin-bottom: 16px;
-        }
-
-        .activity-item {
-            background: #FFFFFF;
-            border: 0.5px solid #ECECEC;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .activity-content {
-            flex: 1;
-        }
-
-        .activity-title {
-            font-size: 16px;
-            font-weight: 500;
-            color: #232325;
-            margin-bottom: 4px;
-        }
-
-        .activity-subtitle {
-            font-size: 13px;
-            color: #828288;
-        }
-
-        .activity-amount {
-            font-size: 16px;
-            font-weight: 600;
-            color: #32775E;
-        }
-
-        .activity-amount.negative {
-            color: #C44A44;
-        }
-
-        .expense-form {
-            background: #FFFFFF;
-            border: 0.5px solid #ECECEC;
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 16px;
-            font-weight: 500;
-            color: #232325;
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #ECECEC;
-            border-radius: 8px;
-            font-size: 16px;
-            background: #FFFFFF;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #846941;
-        }
-
-        .save-btn {
-            background: #846941;
-            color: #FFFFFF;
-            border: none;
-            border-radius: 8px;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
-        }
-
-        .save-btn:hover {
-            opacity: 0.9;
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 400px;
-            background: #FFFFFF;
-            border-top: 0.5px solid #ECECEC;
-            padding: 12px 0;
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px;
-            cursor: pointer;
-            transition: all 250ms ease;
-            background: none;
-            border: none;
-            color: #828288;
-        }
-
-        .nav-item.active {
-            color: #846941;
-        }
-
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 4px;
-        }
-
-        .nav-label {
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .premium-card {
-            background: linear-gradient(135deg, #846941 0%, #A67C52 100%);
-            color: #FFFFFF;
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 16px;
-        }
-
-        .premium-title {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .premium-subtitle {
-            font-size: 16px;
-            opacity: 0.9;
-            margin-bottom: 20px;
-        }
-
-        .try-premium-btn {
-            background: #FFFFFF;
-            color: #846941;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .logout-btn {
-            background: #C44A44;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .logout-btn:hover {
-            opacity: 0.9;
-        }
-    </style>
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="styles/variables.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="login-screen">
-        <div class="login-title">monEZ</div>
-        <div class="login-subtitle">Split expenses, not friendships</div>
-        <button class="login-btn" onclick="signInWithGoogle()">
-            <span>🚀</span>
-            Sign in with Google
-        </button>
-        <p style="margin-top: 24px; opacity: 0.8; font-size: 14px;">
-            Fully functional • Real-time sync • Free Firebase backend
-        </p>
-    </div>
+    <div class="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-content">
+                <div class="logo-large">mon<span class="accent">EZ</span></div>
+                <div class="tagline">Split expenses, not friendships</div>
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading your financial companion...</div>
+            </div>
+        </div>
 
-    <!-- App Screen -->
-    <div id="app-screen">
-        <div class="container">
-            <div class="header">
-                <div class="app-title">monEZ</div>
-                <div class="user-info">
-                    <button class="logout-btn" onclick="signOutUser()">Logout</button>
+        <!-- PWA Install Prompt -->
+        <div id="pwa-prompt" class="pwa-prompt hidden">
+            <div class="pwa-content">
+                <div class="pwa-icon">📱</div>
+                <div class="pwa-text">
+                    <h3>Install monEZ</h3>
+                    <p>Get the full app experience on your home screen</p>
+                </div>
+                <div class="pwa-actions">
+                    <button class="btn-secondary" onclick="dismissPWAPrompt()">Maybe later</button>
+                    <button class="btn-primary" onclick="installPWA()">Install</button>
                 </div>
             </div>
+        </div>
 
-            <!-- Home Tab -->
-            <div id="home-tab" class="tab-content">
-                <div class="balance-card">
-                    <div class="balance-amount">₹0.00</div>
-                    <div class="balance-change">Real-time balance</div>
+        <!-- Main App -->
+        <div id="main-app" style="display: none;">
+            <!-- App Header -->
+            <header class="app-header">
+                <div class="header-left">
+                    <div class="logo">mon<span class="accent">EZ</span></div>
+                    <div class="balance-summary">
+                        <div class="balance-label">Your balance</div>
+                        <div class="balance-amount" id="balance-hero">₹1,160</div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="icon-btn" onclick="showNotifications()">
+                        <span class="icon">🔔</span>
+                        <span class="badge">3</span>
+                    </button>
+                    <button class="icon-btn" onclick="showProfile()">
+                        <div class="avatar">Y</div>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Views Container -->
+            <main class="main-content">
+                <!-- Home View -->
+                <div id="home-view" class="view active">
+                    <!-- Quick Stats -->
+                    <div class="quick-stats">
+                        <div class="stat-card positive">
+                            <div class="stat-icon">💚</div>
+                            <div class="stat-content">
+                                <div class="stat-label">You're owed</div>
+                                <div class="stat-value">₹1,320</div>
+                            </div>
+                        </div>
+                        <div class="stat-card negative">
+                            <div class="stat-icon">💸</div>
+                            <div class="stat-content">
+                                <div class="stat-label">You owe</div>
+                                <div class="stat-value">₹865</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <button class="action-card primary" onclick="showAddExpense()">
+                            <div class="action-icon">➕</div>
+                            <div class="action-label">Add Expense</div>
+                        </button>
+                        <button class="action-card" onclick="showSplitBill()">
+                            <div class="action-icon">🧮</div>
+                            <div class="action-label">Split Bill</div>
+                        </button>
+                        <button class="action-card" onclick="showSettle()">
+                            <div class="action-icon">💳</div>
+                            <div class="action-label">Settle Up</div>
+                        </button>
+                        <button class="action-card premium" onclick="showPremiumFeatures()">
+                            <div class="action-icon">✨</div>
+                            <div class="action-label">AI Insights</div>
+                            <div class="premium-badge">PRO</div>
+                        </button>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <section class="activity-section">
+                        <div class="section-header">
+                            <h3>Recent Activity</h3>
+                            <button class="view-all" onclick="showExpenses()">View all</button>
+                        </div>
+                        <div id="recent-expenses" class="activity-list"></div>
+                    </section>
+
+                    <!-- Groups Preview -->
+                    <section class="groups-section">
+                        <div class="section-header">
+                            <h3>Your Groups</h3>
+                            <div class="group-limit">2/3 groups</div>
+                            <button class="view-all" onclick="showGroups()">View all</button>
+                        </div>
+                        <div class="groups-preview" id="groups-preview"></div>
+                    </section>
                 </div>
 
-                <div class="quick-actions">
-                    <button class="action-btn" onclick="showTab('expenses')">Add Expense</button>
-                    <button class="action-btn secondary">Invite Friends</button>
+                <!-- Add Expense View -->
+                <div id="add-expense-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>Add Expense</h2>
+                        <button class="voice-btn" onclick="startVoiceInput()">🎤</button>
+                    </div>
+            
+                    <form id="expense-form" class="expense-form">
+                        <div class="form-group">
+                            <label class="form-label">Amount</label>
+                            <div class="amount-input-container">
+                                <span class="currency-symbol">₹</span>
+                                <input type="number" id="amount" class="form-input amount-field" placeholder="0.00" step="0.01" required>
+                                <button type="button" class="ai-suggest-btn" onclick="aiSuggestAmount()" title="AI Suggestion">
+                                    <span class="ai-icon">🤖</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <input type="text" id="description" class="form-input" placeholder="What was this for?" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <div class="category-selector">
+                                <button type="button" class="category-btn" data-category="🍽️">🍽️ Food</button>
+                                <button type="button" class="category-btn" data-category="🚗">🚗 Transport</button>
+                                <button type="button" class="category-btn" data-category="🎬">🎬 Entertainment</button>
+                                <button type="button" class="category-btn" data-category="🛍️">🛍️ Shopping</button>
+                                <button type="button" class="category-btn" data-category="💡">💡 Bills</button>
+                                <button type="button" class="category-btn" data-category="✈️">✈️ Travel</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Split with</label>
+                            <div class="people-selector" id="people-selector"></div>
+                        </div>
+                        
+                        <div class="split-options">
+                            <div class="split-type">
+                                <button type="button" class="split-btn active" data-type="equal">Equal Split</button>
+                                <button type="button" class="split-btn" data-type="percentage">By Percentage</button>
+                                <button type="button" class="split-btn premium" data-type="custom" onclick="showPremiumModal()">Custom Split <span class="pro-tag">PRO</span></button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="showHome()">Cancel</button>
+                            <button type="submit" class="btn-primary">
+                                <span class="btn-text">Save Expense</span>
+                                <span class="btn-icon">💾</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
-                <div class="section-title">Recent Activity</div>
-                <div class="recent-activity">
-                    <div class="activity-item">
-                        <div class="activity-content">
-                            <div class="activity-title">Add your first expense!</div>
-                            <div class="activity-subtitle">Click "Add Expense" to get started</div>
+                <!-- Expenses View -->
+                <div id="expenses-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>All Expenses</h2>
+                        <button class="filter-btn" onclick="showFilters()">🔍</button>
+                    </div>
+                    
+                    <div class="expenses-stats">
+                        <div class="stat-summary">
+                            <div class="stat-item">
+                                <span class="stat-number" id="total-expenses">₹8,450</span>
+                                <span class="stat-label">Total Spent</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="this-month">₹3,280</span>
+                                <span class="stat-label">This Month</span>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="activity-list" id="all-expenses-list"></div>
+                </div>
+
+                <!-- Balances View -->
+                <div id="balances-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>Balances</h2>
+                        <button class="settle-all-btn" onclick="settleAll()">Settle All</button>
+                    </div>
+            
+                    <div class="balances-list" id="balances-list"></div>
+                </div>
+
+                <!-- Groups View -->
+                <div id="groups-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>Groups</h2>
+                        <button class="create-group-btn" onclick="showCreateGroup()">+</button>
+                    </div>
+                    
+                    <div class="groups-grid" id="groups-grid"></div>
+                </div>
+
+                <!-- Premium Features View -->
+                <div id="premium-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>Premium Features</h2>
+                        <div class="premium-status">FREE TIER</div>
+                    </div>
+                    
+                    <div id="premium-features"></div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="settings-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>Settings</h2>
+                    </div>
+                    
+                    <div class="settings-sections">
+                        <div class="settings-section">
+                            <h3>Account</h3>
+                            <div class="setting-item" onclick="showProfile()">
+                                <div class="setting-icon">👤</div>
+                                <div class="setting-content">
+                                    <div class="setting-title">Profile</div>
+                                    <div class="setting-desc">Manage your account details</div>
+                                </div>
+                                <div class="setting-arrow">›</div>
+                            </div>
+                            <div class="setting-item" onclick="showPaymentMethods()">
+                                <div class="setting-icon">💳</div>
+                                <div class="setting-content">
+                                    <div class="setting-title">Payment Methods</div>
+                                    <div class="setting-desc">UPI, Cards, Bank accounts</div>
+                                </div>
+                                <div class="setting-arrow">›</div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>App</h3>
+                            <div class="setting-item">
+                                <div class="setting-icon">🔔</div>
+                                <div class="setting-content">
+                                    <div class="setting-title">Notifications</div>
+                                    <div class="setting-desc">Push notifications, reminders</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-icon">🌙</div>
+                                <div class="setting-content">
+                                    <div class="setting-title">Dark Mode</div>
+                                    <div class="setting-desc">Switch to dark theme</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>Premium</h3>
+                            <div class="setting-item premium" onclick="showPremiumFeatures()">
+                                <div class="setting-icon">✨</div>
+                                <div class="setting-content">
+                                    <div class="setting-title">Upgrade to Premium</div>
+                                    <div class="setting-desc">Unlock AI features & analytics</div>
+                                </div>
+                                <div class="upgrade-badge">UPGRADE</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Expenses Tab -->
-            <div id="expenses-tab" class="tab-content hidden">
-                <div class="expense-form">
-                    <div class="form-group">
-                        <label class="form-label">Amount (₹)</label>
-                        <input type="number" id="expense-amount" class="form-input" placeholder="0.00" step="0.01" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <input type="text" id="expense-description" class="form-input" placeholder="What was this for?">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Category</label>
-                        <select id="expense-category" class="form-input">
-                            <option>Dining</option>
-                            <option>Transport</option>
-                            <option>Entertainment</option>
-                            <option>Shopping</option>
-                            <option>Bills</option>
-                        </select>
-                    </div>
-                    <button class="save-btn" onclick="addExpense()">Add Expense</button>
-                </div>
-
-                <div class="section-title">All Expenses</div>
-                <div class="expenses-list">
-                    <div class="activity-item">
-                        <div class="activity-content">
-                            <div class="activity-title">No expenses yet</div>
-                            <div class="activity-subtitle">Add your first expense above</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Groups Tab -->
-            <div id="groups-tab" class="tab-content hidden">
-                <div class="section-title">Your Groups</div>
-                <div class="activity-item">
-                    <div class="activity-content">
-                        <div class="activity-title">Coming Soon!</div>
-                        <div class="activity-subtitle">Group management with real friends</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Premium Tab -->
-            <div id="premium-tab" class="tab-content hidden">
-                <div class="premium-card">
-                    <div class="premium-title">This IS Premium!</div>
-                    <div class="premium-subtitle">You're already using a fully functional app with Firebase backend</div>
-                </div>
-
-                <div class="section-title">Current Features</div>
-                <div class="activity-item">
-                    <div class="activity-content">
-                        <div class="activity-title">✅ Real User Accounts</div>
-                        <div class="activity-subtitle">Google authentication</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-content">
-                        <div class="activity-title">✅ Real-time Database</div>
-                        <div class="activity-subtitle">Firebase Firestore</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-content">
-                        <div class="activity-title">✅ Live Sync</div>
-                        <div class="activity-subtitle">Updates instantly across devices</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-content">
-                        <div class="activity-title">✅ PWA Support</div>
-                        <div class="activity-subtitle">Install as native app</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Profile Tab -->
-            <div id="profile-tab" class="tab-content hidden">
-                <div class="section-title">Account</div>
-                <div class="activity-item">
-                    <div class="activity-content">
-                        <div class="activity-title">Signed in with Google</div>
-                        <div class="activity-subtitle">Real authentication system</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-content">
-                        <div class="activity-title">Data Storage</div>
-                        <div class="activity-subtitle">All expenses saved to Firebase</div>
-                    </div>
-                </div>
-                <div class="activity-item" onclick="signOutUser()" style="cursor: pointer;">
-                    <div class="activity-content">
-                        <div class="activity-title">Sign Out</div>
-                        <div class="activity-subtitle">Logout from your account</div>
-                    </div>
-                </div>
-            </div>
+            </main>
 
             <!-- Bottom Navigation -->
-            <div class="bottom-nav">
-                <button class="nav-item active" onclick="showTab('home')">
-                    <div class="nav-icon">🏠</div>
-                    <div class="nav-label">Home</div>
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-view="home" onclick="showHome()">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">Home</span>
                 </button>
-                <button class="nav-item" onclick="showTab('expenses')">
-                    <div class="nav-icon">💳</div>
-                    <div class="nav-label">Expenses</div>
+                <button class="nav-item" data-view="expenses" onclick="showExpenses()">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Expenses</span>
                 </button>
-                <button class="nav-item" onclick="showTab('groups')">
-                    <div class="nav-icon">👥</div>
-                    <div class="nav-label">Groups</div>
+                <button class="nav-item" data-view="balances" onclick="showBalances()">
+                    <span class="nav-icon">⚖️</span>
+                    <span class="nav-label">Balances</span>
                 </button>
-                <button class="nav-item" onclick="showTab('premium')">
-                    <div class="nav-icon">✨</div>
-                    <div class="nav-label">Premium</div>
+                <button class="nav-item" data-view="groups" onclick="showGroups()">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-label">Groups</span>
+                    <span class="group-count">2</span>
                 </button>
-                <button class="nav-item" onclick="showTab('profile')">
-                    <div class="nav-icon">👤</div>
-                    <div class="nav-label">Profile</div>
+                <button class="nav-item" data-view="premium" onclick="showPremiumFeatures()">
+                    <span class="nav-icon">✨</span>
+                    <span class="nav-label">Premium</span>
+                    <span class="premium-indicator">PRO</span>
                 </button>
+            </nav>
+        </div>
+
+        <!-- Floating Add Button -->
+        <button class="fab" onclick="showAddExpense()">
+            <span class="fab-icon">+</span>
+        </button>
+
+        <!-- Modals -->
+        <div id="premium-modal" class="modal hidden">
+            <div class="modal-overlay" onclick="closePremiumModal()"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>✨ Premium Features</h3>
+                    <button class="modal-close" onclick="closePremiumModal()">×</button>
+                </div>
+                <div class="premium-features-list"></div>
             </div>
         </div>
     </div>
 
-    <script>
-        // PWA Installation
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
-
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js').catch(err => {
-                console.log('Service worker registration failed:', err);
-            });
-        }
-    </script>
+    <!-- JavaScript Files -->
+    <script src="js/utils.js"></script>
+    <script src="js/render.js"></script>
+    <script src="js/views.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
