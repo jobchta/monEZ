@@ -1,20 +1,20 @@
 // monEZ - Utility Functions
 
 // Enhanced App State
-const AppState = {
+export const AppState = {
   currentView: 'home',
   expenses: [],
   friends: [
-    { name: 'Raj Kumar', avatar: 'R', color: '#10B981' },
-    { name: 'Priya Singh', avatar: 'P', color: '#F59E0B' },
-    { name: 'Amit Sharma', avatar: 'A', color: '#8B5CF6' },
-    { name: 'Sarah Johnson', avatar: 'S', color: '#EF4444' },
-    { name: 'Mike Chen', avatar: 'M', color: '#06B6D4' }
+    { name: 'Default 1', avatar: 'A', color: '#10B981' },
+    { name: 'Default 2', avatar: 'B', color: '#F59E0B' },
+    { name: 'Default 3', avatar: 'C', color: '#8B5CF6' },
+    { name: 'Default 4', avatar: 'D', color: '#EF4444' },
+    { name: 'Default 5', avatar: 'E', color: '#06B6D4' }
   ],
   groups: [
     {
       id: 1,
-      name: 'College Friends',
+      name: 'Group 1',
       icon: '🎓',
       members: 4,
       balance: -420,
@@ -22,7 +22,7 @@ const AppState = {
     },
     {
       id: 2,
-      name: 'Family Trip',
+      name: 'Group 2',
       icon: '✈️',
       members: 5,
       balance: 150,
@@ -41,52 +41,52 @@ const AppState = {
 };
 
 // Premium Sample Data
-const premiumExpenses = [
+export const premiumExpenses = [
   {
     id: 1,
-    description: 'Gourmet Dinner at Olive Garden',
+    description: 'Gourmet Dinner at Restaurant',
     amount: 2850,
     date: 'Today, 8:30 PM',
     paidBy: 'You',
-    splitWith: ['Raj Kumar', 'Priya Singh'],
+    splitWith: ['Default 1', 'Default 2'],
     category: '🍽️',
-    location: 'Connaught Place, Delhi',
+    location: 'Downtown',
     status: 'pending'
   },
   {
     id: 2,
-    description: 'Premium Uber Ride',
+    description: 'Premium Ride',
     amount: 680,
     date: 'Today, 6:15 PM', 
-    paidBy: 'Raj Kumar',
+    paidBy: 'Default 1',
     splitWith: ['You'],
     category: '🚗',
-    location: 'Airport → Hotel',
+    location: 'Station → Hotel',
     status: 'settled'
   },
   {
     id: 3,
-    description: 'IMAX Movie Experience',
+    description: 'Movie Experience',
     amount: 1200,
     date: 'Yesterday, 9:30 PM',
-    paidBy: 'Priya Singh',
-    splitWith: ['You', 'Amit Sharma'],
+    paidBy: 'Default 2',
+    splitWith: ['You', 'Default 3'],
     category: '🎬',
-    location: 'PVR Director\'s Cut',
+    location: 'Cinema Hall',
     status: 'settled'
   }
 ];
 
 // Enhanced Helper Functions
-function $(id) {
+export function $(id) {
   return document.getElementById(id);
 }
 
-function formatCurrency(amount) {
+export function formatCurrency(amount) {
   return `₹${amount.toLocaleString('en-IN')}`;
 }
 
-function createRippleEffect(element, event) {
+export function createRippleEffect(element, event) {
   const ripple = document.createElement('div');
   const rect = element.getBoundingClientRect();
   const size = Math.max(rect.width, rect.height);
@@ -112,7 +112,7 @@ function createRippleEffect(element, event) {
   }, 600);
 }
 
-function animateNumber(element, start, end, duration = 1000) {
+export function animateNumber(element, start, end, duration = 1000) {
   const startTime = performance.now();
   const range = end - start;
   
@@ -132,7 +132,7 @@ function animateNumber(element, start, end, duration = 1000) {
   requestAnimationFrame(update);
 }
 
-function showNotification(message, type = 'success', duration = 3000) {
+export function showNotification(message, type = 'success', duration = 3000) {
   const notification = document.createElement('div');
   notification.style.cssText = `
     position: fixed;
@@ -170,7 +170,7 @@ function showNotification(message, type = 'success', duration = 3000) {
   }, duration);
 }
 
-function calculateUserBalances() {
+export function calculateUserBalances() {
   const balanceMap = new Map();
   
   AppState.expenses.forEach(expense => {
