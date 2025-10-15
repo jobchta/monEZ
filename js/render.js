@@ -282,3 +282,26 @@ export function renderPremiumFeatures() {
     </div>
   `;
 }
+
+export function updateBalance() {
+  let balance = 0;
+  AppState.expenses.forEach(expense => {
+    const splitAmount = expense.amount / (expense.splitWith.length + 1);
+    if (expense.paidBy === 'You') {
+      balance += expense.amount - splitAmount;
+    } else {
+      balance -= splitAmount;
+    }
+  });
+
+  const previousBalance = AppState.balance;
+  AppState.balance = balance;
+
+  const balanceElement = $('balance-hero');
+  if (balanceElement && AppState.animations.enabled && Math.abs(balance - previousBalance) > 0) {
+    animateNumber(balanceElement, previousBalance, balance, 800);
+  } else if (balanceElement) {
+    balanceElement.textContent = formatCurrency(Math.abs(balance));
+  }
+}
+
