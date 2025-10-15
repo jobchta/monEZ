@@ -1,24 +1,56 @@
 // monEZ - Main Application Logic
 
-// Enhanced App Initialization
+// Enhanced App Initialization with Firebase
 function initApp() {
-  AppState.expenses = [...premiumExpenses];
-  
-  setupExpenseForm();
-  renderRecentExpenses();
-  renderGroupsPreview();
-  updateBalance();
-  
-  setTimeout(() => {
-    showPWAPrompt();
-  }, 3000);
-  
-  setupPWAListeners();
-  
-  setTimeout(() => {
-    showNotification('Welcome to monEZ! 💎 Split expenses, not friendships', 'success', 4000);
-  }, 1000);
+    // Check authentication state
+    if (window.firebase) {
+        window.firebase.onAuthStateChanged((user) => {
+            if (user) {
+                // User signed in
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'flex';
+                loadUserData(user);
+            } else {
+                // User signed out
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('main-app').style.display = 'none';
+            }
+        });
+    }
+    
+    setupExpenseForm();
+    setupPWAListeners();
 }
+
+// Add Google Sign-in function
+window.signInWithGoogle = async function() {
+    try {
+        const result = await window.firebase.signInWithPopup(window.firebase.auth, window.firebase.provider);
+        showNotification(`Welcome ${result.user.displayName}!`, 'success');
+    } catch (error) {
+        showNotification('Sign in failed: ' + error.message, 'error');
+    }
+};
+
+// Add real data loading
+function loadUserData(user) {
+    const q = window.firebase.query(
+        window.firebase.collection(window.firebase.db, 'expenses'),
+        window.firebase.where('userId', '==', user.uid),
+        window.firebase.orderBy('timestamp', 'desc')
+    );
+
+    window.firebase.onSnapshot(q, (snapshot) => {
+        AppState.expenses = [];
+        snapshot.forEach((doc) => {
+            AppState.expenses.push({ id: doc.id, ...doc.data() });
+        });
+        renderRecentExpenses();
+        renderAllExpenses();
+        updateBalance();
+    });
+}
+
 
 function setupPWAListeners() {
   window.addEventListener('beforeinstallprompt', (e) => {
