@@ -8,9 +8,7 @@ export function renderRecentExpenses() {
 
   container.innerHTML = '';
 
-  if (AppState.expenses.length === 0) {
-    AppState.expenses = [...premiumExpenses];
-  }
+
 
   if (AppState.expenses.length === 0) {
     container.innerHTML = `
