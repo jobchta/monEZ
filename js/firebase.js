@@ -3,6 +3,22 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebas
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
+
+const db = getFirestore(app);
+
+// Enable offline persistence
+enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code == 'failed-precondition') {
+        console.log('Multiple tabs open, persistence only in one tab');
+    } else if (err.code == 'unimplemented') {
+        console.log('Browser does not support offline');
+    }
+});
+
+
+
+
 const firebaseConfig = {
   apiKey: "AIzaSyC4pZOIZikLKjL_eYAW9x3aC4weSz9PP6I",
   authDomain: "monez-a4619.firebaseapp.com",
