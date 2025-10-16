@@ -117,21 +117,8 @@ export function updateNavigation(activeView) {
     }
 }
 
-// Enhanced Form Handling
+// Enhanced Form Handling - FIXED VERSION
 export function setupExpenseForm() {
-
-    form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    // ADD THIS FIRST:
-    if (!auth.currentUser) {
-        showNotification('Please log in first', 'error');
-        return;
-    }
-    
-    
-    
-    
     const form = $('expense-form');
     if (!form) return;
     
@@ -158,6 +145,11 @@ export function setupExpenseForm() {
     
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        if (!auth.currentUser) {
+            showNotification('Please log in first', 'error');
+            return;
+        }
         
         const amount = parseFloat($('amount').value);
         const description = $('description').value.trim();
