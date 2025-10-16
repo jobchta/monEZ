@@ -1,23 +1,7 @@
 // firebase.js - Firebase configuration and functions
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
-import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
-
-const db = getFirestore(app);
-
-// Enable offline persistence
-enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code == 'failed-precondition') {
-        console.log('Multiple tabs open, persistence only in one tab');
-    } else if (err.code == 'unimplemented') {
-        console.log('Browser does not support offline');
-    }
-});
-
-
-
+import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC4pZOIZikLKjL_eYAW9x3aC4weSz9PP6I",
@@ -34,6 +18,17 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
+
+// ✨ NEW: Enable offline persistence for better UX
+enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code == 'failed-precondition') {
+        // Multiple tabs open, persistence can only be enabled in one tab at a time
+        console.log('⚠️ Offline persistence disabled: Multiple tabs open');
+    } else if (err.code == 'unimplemented') {
+        // The current browser doesn't support persistence
+        console.log('⚠️ Offline persistence not supported by this browser');
+    }
+});
 
 // Universal export for ES modules (preferred)
 export { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc };
