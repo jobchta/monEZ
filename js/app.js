@@ -67,22 +67,34 @@ window.signInWithGoogle = async function() {
 
 // Add real data loading
 function loadUserData(user) {
+    // Show loading indicator
+    const loadingEl = document.createElement('div');
+    loadingEl.id = 'expense-loading';
+    loadingEl.innerHTML = '💫 Loading your expenses...';
+    loadingEl.style.cssText = 'text-align: center; padding: 20px; color: #666;';
+    document.getElementById('recent-expenses')?.appendChild(loadingEl);
+    
     const q = query(
         collection(db, 'expenses'),
         where('userId', '==', user.uid),
         orderBy('timestamp', 'desc')
     );
-
+    
     onSnapshot(q, (snapshot) => {
+        // Remove loading
+        document.getElementById('expense-loading')?.remove();
+        
         AppState.expenses = [];
         snapshot.forEach((doc) => {
             AppState.expenses.push({ id: doc.id, ...doc.data() });
         });
+        
         renderRecentExpenses();
         renderAllExpenses();
         updateBalance();
     });
 }
+
 
 function setupPWAListeners() {
     window.addEventListener('beforeinstallprompt', (e) => {
