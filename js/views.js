@@ -119,6 +119,19 @@ export function updateNavigation(activeView) {
 
 // Enhanced Form Handling
 export function setupExpenseForm() {
+
+    form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // ADD THIS FIRST:
+    if (!auth.currentUser) {
+        showNotification('Please log in first', 'error');
+        return;
+    }
+    
+    
+    
+    
     const form = $('expense-form');
     if (!form) return;
     
