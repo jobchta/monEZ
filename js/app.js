@@ -1,9 +1,39 @@
-// monEZ - Main Application Logic
+/* monEZ - Main Application Logic */
 
-import { AppState } from './utils.js';
+import { AppState, createRippleEffect, showNotification } from './utils.js';
 import { auth, db, provider, signInWithPopup, onAuthStateChanged, query, collection, where, orderBy, onSnapshot } from './firebase.js';
 import { renderRecentExpenses, renderAllExpenses, updateBalance } from './render.js';
-import { setupExpenseForm } from './views.js';
+import { setupExpenseForm, showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal } from './views.js';
+
+// Expose UI handlers for inline HTML onclicks
+Object.assign(window, {
+    showHome,
+    showAddExpense,
+    showExpenses,
+    showBalances,
+    showGroups,
+    showPremiumFeatures,
+    showSettings,
+    showSplitBill,
+    showSettle,
+    showNotifications,
+    showProfile,
+    showFilters,
+    settleAll,
+    showCreateGroup,
+    aiSuggestAmount,
+    startVoiceInput,
+    tryAIFeature,
+    startPremiumTrial,
+    showPaymentMethods,
+    settleBalance,
+    remindUser,
+    showPWAPrompt,
+    dismissPWAPrompt,
+    installPWA,
+    showPremiumModal,
+    closePremiumModal
+});
 
 // Enhanced App Initialization with Firebase
 function initApp() {

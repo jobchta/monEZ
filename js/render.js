@@ -1,3 +1,5 @@
+import { AppState, premiumExpenses, $, formatCurrency, createRippleEffect, animateNumber, calculateUserBalances, showNotification } from './utils.js';
+
 // monEZ - Render Functions
 
 export function renderRecentExpenses() {

@@ -1,3 +1,6 @@
+import { $, AppState, showNotification, createRippleEffect, formatCurrency } from './utils.js';
+import { renderRecentExpenses, renderGroupsPreview, renderAllExpenses, renderBalances, renderGroups, renderPremiumFeatures, updateBalance, populatePeopleSelector } from './render.js';
+
 // monEZ - View Management Functions
 
 // Enhanced Navigation Functions
@@ -224,27 +227,6 @@ export function resetForm() {
   }
 }
 
-export function updateBalance() {
-  let balance = 0;
-  AppState.expenses.forEach(expense => {
-    const splitAmount = expense.amount / (expense.splitWith.length + 1);
-    if (expense.paidBy === 'You') {
-      balance += expense.amount - splitAmount;
-    } else {
-      balance -= splitAmount;
-    }
-  });
-
-  const previousBalance = AppState.balance;
-  AppState.balance = balance;
-
-  const balanceElement = $('balance-hero');
-  if (balanceElement && AppState.animations.enabled && Math.abs(balance - previousBalance) > 0) {
-    animateNumber(balanceElement, previousBalance, balance, 800);
-  } else if (balanceElement) {
-    balanceElement.textContent = formatCurrency(Math.abs(balance));
-  }
-}
 
 // AI and Premium Features
 export function aiSuggestAmount() {
