@@ -78,9 +78,12 @@ export const premiumExpenses = [
 ];
 
 // Enhanced Helper Functions
-export function $(id) {
-  return document.getElementById(id);
+export function safeGet(id) {
+  const el = document.getElementById(id);
+  if (!el) console.warn(`Missing element: ${id}`);
+  return el;
 }
+
 
 export function formatCurrency(amount) {
   return `₹${amount.toLocaleString('en-IN')}`;
