@@ -18,6 +18,220 @@
     <link rel="stylesheet" href="styles/components.css">
 </head>
 <body>
+
+    <!-- Onboarding Screen -->
+<div id="onboarding-screen" class="onboarding-screen hidden">
+  
+  <!-- Step 1: Country Selection -->
+  <div class="onboarding-step" id="onboarding-country">
+    <div class="step-header">
+      <div class="step-icon">🌍</div>
+      <h2>Where are you based?</h2>
+      <p>We'll customize monEZ for your region</p>
+    </div>
+    
+    <div class="country-search">
+      <input 
+        type="text" 
+        id="country-search-input" 
+        placeholder="🔍 Search country..."
+        autocomplete="country-name"
+      />
+    </div>
+    
+    <div class="country-list-popular">
+      <h3>Popular Countries</h3>
+      <div class="country-grid" id="popular-countries">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+    
+    <button class="show-all-btn" id="show-all-countries-btn">
+      Show all countries ▼
+    </button>
+    
+    <div class="country-list-all hidden" id="all-countries-container">
+      <h3>All Countries</h3>
+      <div class="country-grid" id="all-countries">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Step 2: Confirm Settings -->
+  <div class="onboarding-step hidden" id="onboarding-confirm">
+    <div class="step-header">
+      <div class="step-icon">✨</div>
+      <h2>We've set up monEZ for you!</h2>
+      <p>Based on <strong id="selected-country-display"></strong></p>
+    </div>
+    
+    <div class="settings-preview">
+      <!-- Language -->
+      <div class="setting-row">
+        <div class="setting-icon">🗣️</div>
+        <div class="setting-content">
+          <div class="setting-label">Language</div>
+          <div class="setting-value" id="selected-language-display">
+            English
+          </div>
+        </div>
+        <button class="change-btn" id="change-language-btn">Change</button>
+      </div>
+      
+      <!-- Currency -->
+      <div class="setting-row">
+        <div class="setting-icon">💰</div>
+        <div class="setting-content">
+          <div class="setting-label">Currency</div>
+          <div class="setting-value" id="selected-currency-display">
+            USD ($)
+          </div>
+        </div>
+        <button class="change-btn" id="change-currency-btn">Change</button>
+      </div>
+      
+      <!-- Timezone -->
+      <div class="setting-row">
+        <div class="setting-icon">🕐</div>
+        <div class="setting-content">
+          <div class="setting-label">Timezone</div>
+          <div class="setting-value" id="selected-timezone-display">
+            Auto-detected
+          </div>
+        </div>
+        <button class="change-btn" id="change-timezone-btn">Change</button>
+      </div>
+      
+      <!-- Date Format -->
+      <div class="setting-row">
+        <div class="setting-icon">📅</div>
+        <div class="setting-content">
+          <div class="setting-label">Date Format</div>
+          <div class="setting-value" id="selected-dateformat-display">
+            MM/DD/YYYY
+          </div>
+        </div>
+        <button class="change-btn" id="change-dateformat-btn">Change</button>
+      </div>
+    </div>
+    
+    <div class="form-actions">
+      <button class="btn-secondary" id="onboarding-back-btn">
+        ← Back
+      </button>
+      <button class="btn-primary" id="onboarding-continue-btn">
+        Looks good! Continue →
+      </button>
+    </div>
+  </div>
+  
+</div>
+
+<!-- Language Picker Modal -->
+<div class="modal hidden" id="language-picker-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Choose Language</h3>
+      <button class="modal-close" id="close-language-modal">×</button>
+    </div>
+    <div class="modal-body">
+      <input 
+        type="text" 
+        id="language-search-input" 
+        placeholder="🔍 Search language..."
+      />
+      
+      <div class="language-groups">
+        <!-- Suggested Languages -->
+        <div class="language-group">
+          <h4>Suggested for your region</h4>
+          <div class="language-list" id="suggested-languages-list">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+        
+        <!-- Popular Languages -->
+        <div class="language-group">
+          <h4>Popular Languages</h4>
+          <div class="language-list" id="popular-languages-list">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+        
+        <!-- All Languages -->
+        <div class="language-group">
+          <h4>All Languages</h4>
+          <div class="language-list" id="all-languages-list">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Currency Picker Modal -->
+<div class="modal hidden" id="currency-picker-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Choose Currency</h3>
+      <button class="modal-close" id="close-currency-modal">×</button>
+    </div>
+    <div class="modal-body">
+      <input 
+        type="text" 
+        id="currency-search-input" 
+        placeholder="🔍 Search currency..."
+      />
+      
+      <div class="currency-list" id="currency-list">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Date Format Picker Modal -->
+<div class="modal hidden" id="dateformat-picker-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Choose Date Format</h3>
+      <button class="modal-close" id="close-dateformat-modal">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="dateformat-list" id="dateformat-list">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Timezone Picker Modal -->
+<div class="modal hidden" id="timezone-picker-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Choose Timezone</h3>
+      <button class="modal-close" id="close-timezone-modal">×</button>
+    </div>
+    <div class="modal-body">
+      <input 
+        type="text" 
+        id="timezone-search-input" 
+        placeholder="🔍 Search timezone..."
+      />
+      
+      <div class="timezone-list" id="timezone-list">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>
+
     <div class="app">
         <!-- Loading Screen -->
         <div id="loading-screen" class="loading-screen">
