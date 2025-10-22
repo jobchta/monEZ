@@ -1,9 +1,10 @@
 /* monEZ - Main Application Logic */
 
 import { AppState, createRippleEffect, showNotification, safeGet, checkOnboardingStatus } from './utils.js';
-import { auth, db, provider, signInWithPopup, onAuthStateChanged, query, collection, where, orderBy, onSnapshot } from './firebase.js';
+import { auth, db, provider, signInWithPopup, onAuthStateChanged, query, collection, where, orderBy, onSnapshot, doc, getDoc } from './firebase.js';
 import { renderRecentExpenses, renderAllExpenses, updateBalance } from './render.js';
 import { setupExpenseForm, showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal } from './views.js';
+import { initOnboarding, checkOnboardingStatus as checkOnboardingComplete } from './onboarding.js';
 
 // Expose UI handlers for inline HTML onclicks
 Object.assign(window, {
@@ -37,31 +38,130 @@ Object.assign(window, {
 
 // Enhanced App Initialization with Firebase
 function initApp() {
-    // IMPORTANT: Check if user has already completed onboarding
+    // Check if user has already completed onboarding
     checkOnboardingStatus();
 
     // Check authentication state
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         const loginScreen = safeGet('login-screen');
         const mainApp = safeGet('main-app');
+        const onboardingScreen = safeGet('onboarding-screen');
+        
         if (user) {
             // User signed in
-            if (loginScreen && mainApp) {
-                loginScreen.style.display = 'none';
-                mainApp.style.display = 'flex';
+            console.log('User authenticated:', user.email);
+            
+            // Check if user has completed onboarding
+            const hasCompletedOnboarding = await checkUserOnboarding(user.uid);
+            
+            if (!hasCompletedOnboarding) {
+                // Show onboarding for new user
+                if (loginScreen) loginScreen.style.display = 'none';
+                if (mainApp) mainApp.style.display = 'none';
+                if (onboardingScreen) onboardingScreen.classList.remove('hidden');
+                
+                // Initialize onboarding
+                initOnboarding();
+            } else {
+                // Load user preferences and show main app
+                await loadUserPreferences(user.uid);
+                
+                if (loginScreen) loginScreen.style.display = 'none';
+                if (onboardingScreen) onboardingScreen.classList.add('hidden');
+                if (mainApp) {
+                    mainApp.style.display = 'flex';
+                    mainApp.style.flexDirection = 'column';
+                    mainApp.style.minHeight = '100vh';
+                }
+                
+                loadUserData(user);
             }
-            loadUserData(user);
         } else {
             // User signed out
-            if (loginScreen && mainApp) {
-                loginScreen.style.display = 'flex';
-                mainApp.style.display = 'none';
-            }
+            if (loginScreen) loginScreen.style.display = 'flex';
+            if (mainApp) mainApp.style.display = 'none';
+            if (onboardingScreen) onboardingScreen.classList.add('hidden');
         }
     });
 
     setupExpenseForm();
     setupPWAListeners();
+}
+
+// Check if user has completed onboarding in Firebase
+async function checkUserOnboarding(userId) {
+    try {
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            return userData.onboardingCompleted === true;
+        }
+        
+        // New user - needs onboarding
+        return false;
+    } catch (error) {
+        console.error('Error checking onboarding status:', error);
+        // If error, check localStorage as fallback
+        return checkOnboardingComplete();
+    }
+}
+
+// Load user preferences from Firebase
+async function loadUserPreferences(userId) {
+    try {
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            
+            if (userData.preferences) {
+                // Store in AppState
+                AppState.userPreferences = userData.preferences;
+                
+                // Store in localStorage for quick access
+                localStorage.setItem('userPreferences', JSON.stringify(userData.preferences));
+                
+                // Apply preferences (currency, language, etc.)
+                applyUserPreferences(userData.preferences);
+                
+                console.log('User preferences loaded:', userData.preferences);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading user preferences:', error);
+    }
+}
+
+// Apply user preferences to the app
+function applyUserPreferences(prefs) {
+    // Set default currency
+    if (prefs.currency) {
+        AppState.defaultCurrency = prefs.currency;
+    }
+    
+    // Set timezone
+    if (prefs.timezone) {
+        AppState.timezone = prefs.timezone;
+    }
+    
+    // Set date format
+    if (prefs.dateFormat) {
+        AppState.dateFormat = prefs.dateFormat;
+    }
+    
+    // Set number format
+    if (prefs.numberFormat) {
+        AppState.numberFormat = prefs.numberFormat;
+    }
+    
+    // TODO: Apply language when i18n is implemented
+    if (prefs.language) {
+        AppState.language = prefs.language;
+        // await i18n.loadLanguage(prefs.language);
+    }
+    
+    console.log('Preferences applied to AppState');
 }
 
 // Add Google Sign-in function
@@ -70,6 +170,7 @@ window.signInWithGoogle = async function() {
         const result = await signInWithPopup(auth, provider);
         showNotification(`Welcome ${result.user.displayName}!`, 'success');
     } catch (error) {
+        console.error('Sign in error:', error);
         showNotification('Sign in failed: ' + error.message, 'error');
     }
 };
@@ -130,9 +231,6 @@ function hideLoadingScreen() {
             loadingScreen.style.opacity = '0';
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
-                mainApp.style.display = 'flex';
-                mainApp.style.flexDirection = 'column';
-                mainApp.style.minHeight = '100vh';
             }, 300);
         }, 2000);
     }
