@@ -1,4 +1,4 @@
-import { safeGet, AppState, showNotification, createRippleEffect, formatCurrency } from './utils.js';
+import { safeGet, AppState, showNotification, createRippleEffect, formatCurrency, hideExampleData, checkOnboardingStatus } from './utils.js';
 import { renderRecentExpenses, renderGroupsPreview, renderAllExpenses, renderBalances, renderGroups, renderPremiumFeatures, updateBalance, populatePeopleSelector } from './render.js';
 import { auth, db, collection, addDoc, serverTimestamp } from './firebase.js';
 
@@ -221,6 +221,9 @@ export function setupExpenseForm() {
 
         try {
             await addDoc(collection(db, 'expenses'), expense);
+
+            // IMPORTANT: Hide onboarding after first expense is added
+            hideExampleData();
 
             if (submitBtn) {
                 submitBtn.innerHTML = '✅ Saved!';
