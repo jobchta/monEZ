@@ -1,35 +1,12 @@
 // monEZ - Utility Functions
 
-// --- Enhanced App State ---
+// --- Enhanced App State (NO DUMMY DATA) ---
 export const AppState = {
   currentView: 'home',
-  expenses: [],
-  friends: [
-    { name: 'Default 1', avatar: 'A', color: '#10B981' },
-    { name: 'Default 2', avatar: 'B', color: '#F59E0B' },
-    { name: 'Default 3', avatar: 'C', color: '#8B5CF6' },
-    { name: 'Default 4', avatar: 'D', color: '#EF4444' },
-    { name: 'Default 5', avatar: 'E', color: '#06B6D4' }
-  ],
-  groups: [
-    {
-      id: 1,
-      name: 'Group 1',
-      icon: '🎓',
-      members: 4,
-      balance: -420,
-      color: '#10B981'
-    },
-    {
-      id: 2,
-      name: 'Group 2',
-      icon: '✈️',
-      members: 5,
-      balance: 150,
-      color: '#F59E0B'
-    }
-  ],
-  balance: 2450,
+  expenses: [],          // EMPTY - user will add real data
+  friends: [],           // EMPTY - user will add real data  
+  groups: [],            // EMPTY - user will add real data
+  balance: 0,            // START AT ZERO
   selectedFriends: new Set(),
   selectedCategory: '',
   animations: {
@@ -37,45 +14,9 @@ export const AppState = {
     duration: 300
   },
   pwaPromptShown: false,
-  deferredPrompt: null
+  deferredPrompt: null,
+  showExample: true      // NEW: Controls onboarding guidance
 };
-
-// --- Premium Sample Data ---
-export const premiumExpenses = [
-  {
-    id: 1,
-    description: 'Gourmet Dinner at Restaurant',
-    amount: 2850,
-    date: 'Today, 8:30 PM',
-    paidBy: 'You',
-    splitWith: ['Default 1', 'Default 2'],
-    category: '🍽️',
-    location: 'Downtown',
-    status: 'pending'
-  },
-  {
-    id: 2,
-    description: 'Premium Ride',
-    amount: 680,
-    date: 'Today, 6:15 PM',
-    paidBy: 'Default 1',
-    splitWith: ['You'],
-    category: '🚗',
-    location: 'Station → Hotel',
-    status: 'settled'
-  },
-  {
-    id: 3,
-    description: 'Movie Experience',
-    amount: 1200,
-    date: 'Yesterday, 9:30 PM',
-    paidBy: 'Default 2',
-    splitWith: ['You', 'Default 3'],
-    category: '🎬',
-    location: 'Cinema Hall',
-    status: 'settled'
-  }
-];
 
 // --- Enhanced Helper Functions ---
 
@@ -202,4 +143,18 @@ export function calculateUserBalances() {
   return Array.from(balanceMap.entries())
     .map(([name, amount]) => ({ name, amount }))
     .filter(balance => Math.abs(balance.amount) > 0.01);
+}
+
+// NEW: Hide example/onboarding after user adds first real data
+export function hideExampleData() {
+  AppState.showExample = false;
+  localStorage.setItem('monez.hideExample', '1');
+}
+
+// NEW: Check if user has seen onboarding
+export function checkOnboardingStatus() {
+  const hideExample = localStorage.getItem('monez.hideExample');
+  if (hideExample === '1') {
+    AppState.showExample = false;
+  }
 }
