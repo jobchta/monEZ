@@ -1,4 +1,4 @@
-import { $, AppState, showNotification, createRippleEffect, formatCurrency } from './utils.js';
+import { safeGet, AppState, showNotification, createRippleEffect, formatCurrency } from './utils.js';
 import { renderRecentExpenses, renderGroupsPreview, renderAllExpenses, renderBalances, renderGroups, renderPremiumFeatures, updateBalance, populatePeopleSelector } from './render.js';
 import { auth, db, collection, addDoc, serverTimestamp } from './firebase.js';
 
@@ -88,8 +88,9 @@ export function showView(viewId) {
     document.querySelectorAll('.view').forEach(view => {
         view.classList.remove('active');
     });
-    
-    const targetView = $(viewId + '-view');
+
+    // Replacing $ with safeGet for guaranteed robustness
+    const targetView = safeGet(viewId + '-view');
     if (targetView) {
         setTimeout(() => {
             targetView.classList.add('active');
@@ -102,7 +103,7 @@ export function updateNavigation(activeView) {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
-    
+
     const navMap = {
         'home': 0,
         'expenses': 1,
@@ -110,7 +111,7 @@ export function updateNavigation(activeView) {
         'groups': 3,
         'premium': 4
     };
-    
+
     const navItems = document.querySelectorAll('.nav-item');
     if (navItems[navMap[activeView]]) {
         navItems[navMap[activeView]].classList.add('active');
@@ -119,9 +120,9 @@ export function updateNavigation(activeView) {
 
 // Enhanced Form Handling - FIXED VERSION
 export function setupExpenseForm() {
-    const form = $('expense-form');
+    const form = safeGet('expense-form');
     if (!form) return;
-    
+
     document.querySelectorAll('.category-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -130,7 +131,7 @@ export function setupExpenseForm() {
             createRippleEffect(btn, e);
         });
     });
-    
+
     document.querySelectorAll('.split-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             if (btn.classList.contains('premium')) {
@@ -142,36 +143,38 @@ export function setupExpenseForm() {
             createRippleEffect(btn, e);
         });
     });
-    
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         if (!auth.currentUser) {
             showNotification('Please log in first', 'error');
             return;
         }
-        
-        const amount = parseFloat($('amount').value);
-        const description = $('description').value.trim();
+
+        const amountInput = safeGet('amount');
+        const descInput = safeGet('description');
+        const amount = amountInput ? parseFloat(amountInput.value) : 0;
+        const description = descInput ? descInput.value.trim() : '';
         const selectedFriends = Array.from(AppState.selectedFriends);
-        
+
         if (!amount || amount <= 0) {
             showNotification('Please enter a valid amount', 'error');
-            $('amount').focus();
+            if (amountInput) amountInput.focus();
             return;
         }
-        
+
         if (!description) {
             showNotification('Please enter a description', 'error');
-            $('description').focus();
+            if (descInput) descInput.focus();
             return;
         }
-        
+
         if (selectedFriends.length === 0) {
             showNotification('Please select at least one friend', 'error');
             return;
         }
-        
+
         const expense = {
             userId: auth.currentUser.uid,
             timestamp: serverTimestamp(),
@@ -188,56 +191,64 @@ export function setupExpenseForm() {
             location: 'Current Location',
             status: 'pending'
         };
-        
+
         const submitBtn = form.querySelector('.btn-primary');
-        const originalContent = submitBtn.innerHTML;
-        submitBtn.innerHTML = '💾 Saving...';
-        submitBtn.disabled = true;
-        
+        const originalContent = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+            submitBtn.innerHTML = '💾 Saving...';
+            submitBtn.disabled = true;
+        }
+
         try {
             await addDoc(collection(db, 'expenses'), expense);
-            
-            submitBtn.innerHTML = '✅ Saved!';
-            submitBtn.style.background = '#10B981';
-            
+
+            if (submitBtn) {
+                submitBtn.innerHTML = '✅ Saved!';
+                submitBtn.style.background = '#10B981';
+            }
+
             setTimeout(() => {
                 resetForm();
-                submitBtn.innerHTML = originalContent;
-                submitBtn.style.background = '';
-                submitBtn.disabled = false;
+                if (submitBtn) {
+                    submitBtn.innerHTML = originalContent;
+                    submitBtn.style.background = '';
+                    submitBtn.disabled = false;
+                }
                 showNotification('Expense added successfully! 🎉', 'success');
                 showHome();
             }, 1000);
         } catch (error) {
             console.error('Error adding expense:', error);
             showNotification('Failed to save: ' + error.message, 'error');
-            submitBtn.innerHTML = originalContent;
-            submitBtn.disabled = false;
+            if (submitBtn) {
+                submitBtn.innerHTML = originalContent;
+                submitBtn.disabled = false;
+            }
         }
     });
 }
 
 export function resetForm() {
-    const form = $('expense-form');
+    const form = safeGet('expense-form');
     if (form) {
         form.reset();
     }
-    
+
     AppState.selectedFriends.clear();
     AppState.selectedCategory = '';
-    
+
     document.querySelectorAll('.person-card').forEach(card => {
         card.classList.remove('selected');
     });
-    
+
     document.querySelectorAll('.category-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     document.querySelectorAll('.split-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     const equalSplitBtn = document.querySelector('.split-btn[data-type="equal"]');
     if (equalSplitBtn) {
         equalSplitBtn.classList.add('active');
@@ -248,15 +259,18 @@ export function resetForm() {
 export function aiSuggestAmount() {
     const amounts = [250, 350, 500, 750, 1200, 1500];
     const suggestedAmount = amounts[Math.floor(Math.random() * amounts.length)];
-    $('amount').value = suggestedAmount;
+    const amountInput = safeGet('amount');
+    if (amountInput) amountInput.value = suggestedAmount;
     showNotification(`🤖 AI suggested: ${formatCurrency(suggestedAmount)} based on your spending patterns`, 'info');
 }
 
 export function startVoiceInput() {
     showNotification('🎤 Voice input: "Add 500 rupee dinner split equally with Default 1 and Default 2"', 'info', 4000);
     setTimeout(() => {
-        $('amount').value = '500';
-        $('description').value = 'Dinner at restaurant';
+        const amountInput = safeGet('amount');
+        const descInput = safeGet('description');
+        if (amountInput) amountInput.value = '500';
+        if (descInput) descInput.value = 'Dinner at restaurant';
         AppState.selectedCategory = '🍽️';
         document.querySelector('.category-btn[data-category="🍽️"]')?.classList.add('active');
         AppState.selectedFriends.add('Default 1');
@@ -304,7 +318,7 @@ export function remindUser(friendName) {
 // PWA Features
 export function showPWAPrompt() {
     if (!AppState.pwaPromptShown) {
-        const prompt = $('pwa-prompt');
+        const prompt = safeGet('pwa-prompt');
         if (prompt) {
             prompt.classList.remove('hidden');
             AppState.pwaPromptShown = true;
@@ -313,7 +327,7 @@ export function showPWAPrompt() {
 }
 
 export function dismissPWAPrompt() {
-    const prompt = $('pwa-prompt');
+    const prompt = safeGet('pwa-prompt');
     if (prompt) {
         prompt.classList.add('hidden');
     }
@@ -340,7 +354,7 @@ export function showPremiumModal() {
 }
 
 export function closePremiumModal() {
-    const modal = $('premium-modal');
+    const modal = safeGet('premium-modal');
     if (modal) {
         modal.classList.add('hidden');
     }
