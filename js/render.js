@@ -1,4 +1,4 @@
-import { AppState, premiumExpenses, safeGet, formatCurrency, createRippleEffect, animateNumber, calculateUserBalances, showNotification } from './utils.js';
+import { AppState, safeGet, formatCurrency, createRippleEffect, animateNumber, calculateUserBalances, showNotification } from './utils.js';
 
 // monEZ - Render Functions
 
@@ -8,12 +8,30 @@ export function renderRecentExpenses() {
 
   container.innerHTML = '';
 
-  if (AppState.expenses.length === 0) {
+  // Show onboarding guidance if no expenses yet
+  if (AppState.expenses.length === 0 && AppState.showExample) {
     container.innerHTML = `
       <div style="text-align: center; padding: 40px 20px; color: #64748B;">
         <div style="font-size: 48px; margin-bottom: 16px;">💎</div>
-        <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">No expenses yet</div>
-        <div style="font-size: 14px;">Start splitting bills with style</div>
+        <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">Start tracking expenses!</div>
+        <div style="font-size: 14px; margin-bottom: 20px;">Add your first expense to see it appear here</div>
+        <div style="background: #F6F6F7; padding: 16px; border-radius: 12px; text-align: left; max-width: 320px; margin: 0 auto;">
+          <div style="font-size: 12px; font-weight: 600; color: #846941; margin-bottom: 8px;">💡 EXAMPLE</div>
+          <div style="font-size: 14px; margin-bottom: 4px;"><strong>Dinner with friends</strong></div>
+          <div style="font-size: 13px; color: #828288;">₹800 split equally with 3 friends</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // If no expenses but user has already used app
+  if (AppState.expenses.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; color: #64748B;">
+        <div style="font-size: 48px; margin-bottom: 16px;">😎</div>
+        <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">All caught up!</div>
+        <div style="font-size: 14px;">No recent expenses to show</div>
       </div>
     `;
     return;
@@ -55,6 +73,21 @@ export function renderAllExpenses() {
 
   container.innerHTML = '';
 
+  // Show onboarding guidance if no expenses yet
+  if (AppState.expenses.length === 0 && AppState.showExample) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 60px 20px; color: #64748B;">
+        <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+        <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">Your expense history will appear here</div>
+        <div style="font-size: 14px; margin-bottom: 24px;">Add expenses to track and manage your spending</div>
+        <button onclick="showAddExpense()" style="background: #846941; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+          ➕ Add First Expense
+        </button>
+      </div>
+    `;
+    return;
+  }
+
   if (AppState.expenses.length === 0) {
     container.innerHTML = '<div style="text-align: center; padding: 40px; color: #64748B;">No expenses yet</div>';
     return;
@@ -89,6 +122,26 @@ export function renderBalances() {
   container.innerHTML = '';
 
   const balances = calculateUserBalances();
+
+  // Show onboarding guidance if no balances yet
+  if (balances.length === 0 && AppState.showExample) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 60px 20px; color: #64748B;">
+        <div style="font-size: 48px; margin-bottom: 16px;">⚖️</div>
+        <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">Track who owes what</div>
+        <div style="font-size: 14px; margin-bottom: 20px;">Split expenses with friends and see balances here</div>
+        <div style="background: #F6F6F7; padding: 16px; border-radius: 12px; text-align: left; max-width: 320px; margin: 0 auto;">
+          <div style="font-size: 12px; font-weight: 600; color: #846941; margin-bottom: 8px;">💡 HOW IT WORKS</div>
+          <div style="font-size: 13px; line-height: 1.6;">
+            1. Add an expense<br>
+            2. Select who to split with<br>
+            3. See who owes you (or who you owe)
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
 
   if (balances.length === 0) {
     container.innerHTML = `
@@ -138,6 +191,41 @@ export function populatePeopleSelector() {
 
   container.innerHTML = '';
 
+  // Show guidance if no friends added yet
+  if (AppState.friends.length === 0 && AppState.showExample) {
+    container.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 24px; background: #F6F6F7; border-radius: 12px; color: #64748B;">
+        <div style="font-size: 32px; margin-bottom: 12px;">👥</div>
+        <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Add friends to split with</div>
+        <div style="font-size: 13px; margin-bottom: 16px;">Type a name below and it will be added automatically</div>
+        <input type="text" id="quick-add-friend" placeholder="Friend's name (e.g., Rahul)" style="width: 100%; padding: 12px; border: 1px solid #ECECEC; border-radius: 8px; font-size: 14px;">
+      </div>
+    `;
+    
+    // Add event listener for quick friend add
+    setTimeout(() => {
+      const input = safeGet('quick-add-friend');
+      if (input) {
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter' && input.value.trim()) {
+            addFriend(input.value.trim());
+            input.value = '';
+          }
+        });
+      }
+    }, 100);
+    return;
+  }
+
+  if (AppState.friends.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #64748B;">
+        <div style="font-size: 14px;">No friends added yet. Type a name to add one!</div>
+      </div>
+    `;
+    return;
+  }
+
   AppState.friends.forEach(friend => {
     const card = document.createElement('div');
     card.className = 'person-card';
@@ -168,11 +256,43 @@ export function populatePeopleSelector() {
   });
 }
 
+// Helper function to add friend
+function addFriend(name) {
+  const colors = ['#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#EC4899', '#14B8A6'];
+  const avatar = name.charAt(0).toUpperCase();
+  const color = colors[AppState.friends.length % colors.length];
+  
+  AppState.friends.push({ name, avatar, color });
+  populatePeopleSelector();
+  showNotification(`✅ ${name} added to your friends!`, 'success');
+}
+
 export function renderGroupsPreview() {
   const container = safeGet('groups-preview');
   if (!container) return;
 
   container.innerHTML = '';
+
+  // Show guidance if no groups yet
+  if (AppState.groups.length === 0 && AppState.showExample) {
+    container.innerHTML = `
+      <div style="min-width: 100%; text-align: center; padding: 24px; background: #F6F6F7; border-radius: 12px; color: #64748B;">
+        <div style="font-size: 32px; margin-bottom: 12px;">👥</div>
+        <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Create groups for trips or events</div>
+        <div style="font-size: 13px;">Coming soon!</div>
+      </div>
+    `;
+    return;
+  }
+
+  if (AppState.groups.length === 0) {
+    container.innerHTML = `
+      <div style="min-width: 100%; text-align: center; padding: 20px; color: #64748B;">
+        <div style="font-size: 14px;">No groups yet</div>
+      </div>
+    `;
+    return;
+  }
 
   AppState.groups.forEach(group => {
     const card = document.createElement('div');
@@ -203,6 +323,32 @@ export function renderGroups() {
   if (!container) return;
 
   container.innerHTML = '';
+
+  // Show guidance if no groups yet
+  if (AppState.groups.length === 0 && AppState.showExample) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 60px 20px; color: #64748B;">
+        <div style="font-size: 48px; margin-bottom: 16px;">👥</div>
+        <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">Organize expenses by groups</div>
+        <div style="font-size: 14px; margin-bottom: 20px;">Perfect for trips, roommates, or events</div>
+        <div style="background: #F6F6F7; padding: 16px; border-radius: 12px; text-align: left; max-width: 320px; margin: 0 auto;">
+          <div style="font-size: 12px; font-weight: 600; color: #846941; margin-bottom: 8px;">💡 COMING SOON</div>
+          <div style="font-size: 13px; line-height: 1.6;">
+            Create groups for:<br>
+            🏖️ Vacation trips<br>
+            🏠 Roommate expenses<br>
+            🎉 Events & parties
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if (AppState.groups.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #64748B;">No groups yet</div>';
+    return;
+  }
 
   AppState.groups.forEach(group => {
     const card = document.createElement('div');
