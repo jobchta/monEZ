@@ -41,8 +41,14 @@ function initApp() {
     onAuthStateChanged(auth, (user) => {
         if (user) {
             // User signed in
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'flex';
+            import { safeGet } from './utils.js';
+            const loginScreen = safeGet('login-screen');
+            const mainApp = safeGet('main-app');
+            if (loginScreen && mainApp) {
+              loginScreen.style.display = 'none';
+              mainApp.style.display = 'flex';
+            }
+
             loadUserData(user);
         } else {
             // User signed out
