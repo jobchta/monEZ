@@ -4,6 +4,24 @@ import { auth, db, collection, addDoc, serverTimestamp } from './firebase.js';
 
 // monEZ - View Management Functions
 
+// Helper to show accessible error messages
+function showFormError(message) {
+    const errorRegion = safeGet('form-error-msg');
+    if (errorRegion) {
+        errorRegion.style.display = 'block';
+        errorRegion.textContent = message;
+    }
+    showNotification(message, 'error');
+}
+
+function clearFormError() {
+    const errorRegion = safeGet('form-error-msg');
+    if (errorRegion) {
+        errorRegion.style.display = 'none';
+        errorRegion.textContent = '';
+    }
+}
+
 // Enhanced Navigation Functions
 export function showHome() {
     showView('home');
@@ -18,6 +36,7 @@ export function showAddExpense() {
     AppState.selectedFriends.clear();
     AppState.selectedCategory = '';
     resetForm();
+    clearFormError();
 }
 
 export function showExpenses() {
@@ -89,7 +108,6 @@ export function showView(viewId) {
         view.classList.remove('active');
     });
 
-    // Replacing $ with safeGet for guaranteed robustness
     const targetView = safeGet(viewId + '-view');
     if (targetView) {
         setTimeout(() => {
@@ -118,7 +136,7 @@ export function updateNavigation(activeView) {
     }
 }
 
-// Enhanced Form Handling - FIXED VERSION
+// Enhanced Form Handling with Accessible Error Messages
 export function setupExpenseForm() {
     const form = safeGet('expense-form');
     if (!form) return;
@@ -129,6 +147,7 @@ export function setupExpenseForm() {
             btn.classList.add('active');
             AppState.selectedCategory = btn.dataset.category;
             createRippleEffect(btn, e);
+            clearFormError();
         });
     });
 
@@ -146,9 +165,10 @@ export function setupExpenseForm() {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        clearFormError();
 
         if (!auth.currentUser) {
-            showNotification('Please log in first', 'error');
+            showFormError('Please log in first');
             return;
         }
 
@@ -159,19 +179,19 @@ export function setupExpenseForm() {
         const selectedFriends = Array.from(AppState.selectedFriends);
 
         if (!amount || amount <= 0) {
-            showNotification('Please enter a valid amount', 'error');
+            showFormError('Please enter a valid amount');
             if (amountInput) amountInput.focus();
             return;
         }
 
         if (!description) {
-            showNotification('Please enter a description', 'error');
+            showFormError('Please enter a description');
             if (descInput) descInput.focus();
             return;
         }
 
         if (selectedFriends.length === 0) {
-            showNotification('Please select at least one friend', 'error');
+            showFormError('Please select at least one friend');
             return;
         }
 
@@ -219,7 +239,7 @@ export function setupExpenseForm() {
             }, 1000);
         } catch (error) {
             console.error('Error adding expense:', error);
-            showNotification('Failed to save: ' + error.message, 'error');
+            showFormError('Failed to save: ' + error.message);
             if (submitBtn) {
                 submitBtn.innerHTML = originalContent;
                 submitBtn.disabled = false;
@@ -234,6 +254,7 @@ export function resetForm() {
         form.reset();
     }
 
+    clearFormError();
     AppState.selectedFriends.clear();
     AppState.selectedCategory = '';
 
