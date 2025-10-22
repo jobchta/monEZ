@@ -15,7 +15,15 @@ export const AppState = {
   },
   pwaPromptShown: false,
   deferredPrompt: null,
-  showExample: true      // NEW: Controls onboarding guidance
+  showExample: true,      // Controls onboarding guidance
+  
+  // NEW: User preferences from onboarding
+  userPreferences: null,
+  defaultCurrency: 'USD',
+  language: 'en',
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  dateFormat: 'MM/DD/YYYY',
+  numberFormat: 'en-US'
 };
 
 // --- Enhanced Helper Functions ---
@@ -27,9 +35,31 @@ export function safeGet(id) {
   return el;
 }
 
-// Format currency values for INR
-export function formatCurrency(amount) {
-  return `₹${amount.toLocaleString('en-IN')}`;
+// Format currency values (now supports multiple currencies)
+export function formatCurrency(amount, currency = null) {
+  const userCurrency = currency || AppState.defaultCurrency || 'INR';
+  const locale = AppState.numberFormat || 'en-IN';
+  
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: userCurrency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }).format(amount);
+  } catch (error) {
+    // Fallback if currency/locale not supported
+    const symbols = {
+      'INR': '₹',
+      'USD': '$',
+      'EUR': '€',
+      'GBP': '£',
+      'AED': 'د.إ',
+      'SGD': 'S$'
+    };
+    const symbol = symbols[userCurrency] || userCurrency;
+    return `${symbol}${amount.toLocaleString()}`;
+  }
 }
 
 // Ripple effect for button clicks
@@ -145,13 +175,13 @@ export function calculateUserBalances() {
     .filter(balance => Math.abs(balance.amount) > 0.01);
 }
 
-// NEW: Hide example/onboarding after user adds first real data
+// Hide example/onboarding after user adds first real data
 export function hideExampleData() {
   AppState.showExample = false;
   localStorage.setItem('monez.hideExample', '1');
 }
 
-// NEW: Check if user has seen onboarding
+// Check if user has seen expense onboarding
 export function checkOnboardingStatus() {
   const hideExample = localStorage.getItem('monez.hideExample');
   if (hideExample === '1') {
