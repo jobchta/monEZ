@@ -1,6 +1,6 @@
 /* monEZ - Main Application Logic */
 
-import { AppState, createRippleEffect, showNotification } from './utils.js';
+import { AppState, createRippleEffect, showNotification, safeGet } from './utils.js';
 import { auth, db, provider, signInWithPopup, onAuthStateChanged, query, collection, where, orderBy, onSnapshot } from './firebase.js';
 import { renderRecentExpenses, renderAllExpenses, updateBalance } from './render.js';
 import { setupExpenseForm, showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal } from './views.js';
@@ -39,21 +39,21 @@ Object.assign(window, {
 function initApp() {
     // Check authentication state
     onAuthStateChanged(auth, (user) => {
+        const loginScreen = safeGet('login-screen');
+        const mainApp = safeGet('main-app');
         if (user) {
             // User signed in
-            import { safeGet } from './utils.js';
-            const loginScreen = safeGet('login-screen');
-            const mainApp = safeGet('main-app');
             if (loginScreen && mainApp) {
-              loginScreen.style.display = 'none';
-              mainApp.style.display = 'flex';
+                loginScreen.style.display = 'none';
+                mainApp.style.display = 'flex';
             }
-
             loadUserData(user);
         } else {
             // User signed out
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('main-app').style.display = 'none';
+            if (loginScreen && mainApp) {
+                loginScreen.style.display = 'flex';
+                mainApp.style.display = 'none';
+            }
         }
     });
 
@@ -74,12 +74,15 @@ window.signInWithGoogle = async function() {
 // Add real data loading
 function loadUserData(user) {
     // Show loading indicator
-    const loadingEl = document.createElement('div');
-    loadingEl.id = 'expense-loading';
-    loadingEl.innerHTML = '💫 Loading your expenses...';
-    loadingEl.style.cssText = 'text-align: center; padding: 20px; color: #666;';
-    document.getElementById('recent-expenses')?.appendChild(loadingEl);
-    
+    const recentExpenses = safeGet('recent-expenses');
+    if (recentExpenses) {
+        const loadingEl = document.createElement('div');
+        loadingEl.id = 'expense-loading';
+        loadingEl.innerHTML = '💫 Loading your expenses...';
+        loadingEl.style.cssText = 'text-align: center; padding: 20px; color: #666;';
+        recentExpenses.appendChild(loadingEl);
+    }
+
     const q = query(
         collection(db, 'expenses'),
         where('userId', '==', user.uid),
@@ -87,8 +90,7 @@ function loadUserData(user) {
     );
     
     onSnapshot(q, (snapshot) => {
-        // Remove loading
-        document.getElementById('expense-loading')?.remove();
+        safeGet('expense-loading')?.remove();
         
         AppState.expenses = [];
         snapshot.forEach((doc) => {
@@ -100,7 +102,6 @@ function loadUserData(user) {
         updateBalance();
     });
 }
-
 
 function setupPWAListeners() {
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -118,8 +119,8 @@ function setupPWAListeners() {
 
 // Loading Screen Management
 function hideLoadingScreen() {
-    const loadingScreen = document.getElementById('loading-screen');
-    const mainApp = document.getElementById('main-app');
+    const loadingScreen = safeGet('loading-screen');
+    const mainApp = safeGet('main-app');
 
     if (loadingScreen && mainApp) {
         setTimeout(() => {
@@ -137,7 +138,6 @@ function hideLoadingScreen() {
 // Enhanced Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     hideLoadingScreen();
-
     setTimeout(() => {
         initApp();
     }, 2300);
