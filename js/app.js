@@ -1,6 +1,6 @@
 /* monEZ - Main Application Logic */
 
-import { AppState, createRippleEffect, showNotification, safeGet } from './utils.js';
+import { AppState, createRippleEffect, showNotification, safeGet, checkOnboardingStatus } from './utils.js';
 import { auth, db, provider, signInWithPopup, onAuthStateChanged, query, collection, where, orderBy, onSnapshot } from './firebase.js';
 import { renderRecentExpenses, renderAllExpenses, updateBalance } from './render.js';
 import { setupExpenseForm, showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal } from './views.js';
@@ -37,6 +37,9 @@ Object.assign(window, {
 
 // Enhanced App Initialization with Firebase
 function initApp() {
+    // IMPORTANT: Check if user has already completed onboarding
+    checkOnboardingStatus();
+
     // Check authentication state
     onAuthStateChanged(auth, (user) => {
         const loginScreen = safeGet('login-screen');
@@ -138,6 +141,7 @@ function hideLoadingScreen() {
 // Enhanced Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     hideLoadingScreen();
+
     setTimeout(() => {
         initApp();
     }, 2300);
