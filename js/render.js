@@ -1,14 +1,12 @@
-import { AppState, premiumExpenses, $, formatCurrency, createRippleEffect, animateNumber, calculateUserBalances, showNotification } from './utils.js';
+import { AppState, premiumExpenses, safeGet, formatCurrency, createRippleEffect, animateNumber, calculateUserBalances, showNotification } from './utils.js';
 
 // monEZ - Render Functions
 
 export function renderRecentExpenses() {
-  const container = $('recent-expenses');
+  const container = safeGet('recent-expenses');
   if (!container) return;
 
   container.innerHTML = '';
-
-
 
   if (AppState.expenses.length === 0) {
     container.innerHTML = `
@@ -52,7 +50,7 @@ export function renderRecentExpenses() {
 }
 
 export function renderAllExpenses() {
-  const container = $('all-expenses-list');
+  const container = safeGet('all-expenses-list');
   if (!container) return;
 
   container.innerHTML = '';
@@ -85,7 +83,7 @@ export function renderAllExpenses() {
 }
 
 export function renderBalances() {
-  const container = $('balances-list');
+  const container = safeGet('balances-list');
   if (!container) return;
 
   container.innerHTML = '';
@@ -135,7 +133,7 @@ export function renderBalances() {
 }
 
 export function populatePeopleSelector() {
-  const container = $('people-selector');
+  const container = safeGet('people-selector');
   if (!container) return;
 
   container.innerHTML = '';
@@ -171,7 +169,7 @@ export function populatePeopleSelector() {
 }
 
 export function renderGroupsPreview() {
-  const container = $('groups-preview');
+  const container = safeGet('groups-preview');
   if (!container) return;
 
   container.innerHTML = '';
@@ -201,7 +199,7 @@ export function renderGroupsPreview() {
 }
 
 export function renderGroups() {
-  const container = $('groups-grid');
+  const container = safeGet('groups-grid');
   if (!container) return;
 
   container.innerHTML = '';
@@ -231,7 +229,7 @@ export function renderGroups() {
 }
 
 export function renderPremiumFeatures() {
-  const container = $('premium-features');
+  const container = safeGet('premium-features');
   if (!container) return;
 
   container.innerHTML = `
@@ -297,11 +295,10 @@ export function updateBalance() {
   const previousBalance = AppState.balance;
   AppState.balance = balance;
 
-  const balanceElement = $('balance-hero');
+  const balanceElement = safeGet('balance-hero');
   if (balanceElement && AppState.animations.enabled && Math.abs(balance - previousBalance) > 0) {
     animateNumber(balanceElement, previousBalance, balance, 800);
   } else if (balanceElement) {
     balanceElement.textContent = formatCurrency(Math.abs(balance));
   }
 }
-
