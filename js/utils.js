@@ -1,6 +1,6 @@
 // monEZ - Utility Functions
 
-// Enhanced App State
+// --- Enhanced App State ---
 export const AppState = {
   currentView: 'home',
   expenses: [],
@@ -40,7 +40,7 @@ export const AppState = {
   deferredPrompt: null
 };
 
-// Premium Sample Data
+// --- Premium Sample Data ---
 export const premiumExpenses = [
   {
     id: 1,
@@ -57,7 +57,7 @@ export const premiumExpenses = [
     id: 2,
     description: 'Premium Ride',
     amount: 680,
-    date: 'Today, 6:15 PM', 
+    date: 'Today, 6:15 PM',
     paidBy: 'Default 1',
     splitWith: ['You'],
     category: '🚗',
@@ -77,25 +77,28 @@ export const premiumExpenses = [
   }
 ];
 
-// Enhanced Helper Functions
+// --- Enhanced Helper Functions ---
+
+// Safe DOM lookup – prevents UI crashes if an ID is wrong or missing
 export function safeGet(id) {
   const el = document.getElementById(id);
   if (!el) console.warn(`Missing element: ${id}`);
   return el;
 }
 
-
+// Format currency values for INR
 export function formatCurrency(amount) {
   return `₹${amount.toLocaleString('en-IN')}`;
 }
 
+// Ripple effect for button clicks
 export function createRippleEffect(element, event) {
   const ripple = document.createElement('div');
   const rect = element.getBoundingClientRect();
   const size = Math.max(rect.width, rect.height);
   const x = event.clientX - rect.left - size / 2;
   const y = event.clientY - rect.top - size / 2;
-  
+
   ripple.style.width = ripple.style.height = size + 'px';
   ripple.style.left = x + 'px';
   ripple.style.top = y + 'px';
@@ -105,36 +108,38 @@ export function createRippleEffect(element, event) {
   ripple.style.transform = 'scale(0)';
   ripple.style.animation = 'ripple 0.6s ease-out';
   ripple.style.pointerEvents = 'none';
-  
+
   element.style.position = 'relative';
   element.style.overflow = 'hidden';
   element.appendChild(ripple);
-  
+
   setTimeout(() => {
     ripple.remove();
   }, 600);
 }
 
+// Animate number transitions for balances
 export function animateNumber(element, start, end, duration = 1000) {
   const startTime = performance.now();
   const range = end - start;
-  
+
   function update(currentTime) {
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
     const easeOutQuart = 1 - Math.pow(1 - progress, 4);
     const current = Math.round(start + range * easeOutQuart);
-    
+
     element.textContent = formatCurrency(current);
-    
+
     if (progress < 1) {
       requestAnimationFrame(update);
     }
   }
-  
+
   requestAnimationFrame(update);
 }
 
+// Robust user notifications for all actions/errors
 export function showNotification(message, type = 'success', duration = 3000) {
   const notification = document.createElement('div');
   notification.style.cssText = `
@@ -160,28 +165,29 @@ export function showNotification(message, type = 'success', duration = 3000) {
       <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; margin-left: 8px; font-size: 16px;">×</button>
     </div>
   `;
-  
+
   document.body.appendChild(notification);
-  
+
   setTimeout(() => {
     notification.style.transform = 'translateX(0)';
   }, 100);
-  
+
   setTimeout(() => {
     notification.style.transform = 'translateX(400px)';
     setTimeout(() => notification.remove(), 300);
   }, duration);
 }
 
+// Calculate user balances from expenses
 export function calculateUserBalances() {
   const balanceMap = new Map();
-  
+
   AppState.expenses.forEach(expense => {
     if (!expense.splitWith) return;
-    
+
     const totalPeople = expense.splitWith.length + 1;
     const sharePerPerson = expense.amount / totalPeople;
-    
+
     expense.splitWith.forEach(friendName => {
       if (expense.paidBy === 'You') {
         const currentBalance = balanceMap.get(friendName) || 0;
@@ -192,7 +198,7 @@ export function calculateUserBalances() {
       }
     });
   });
-  
+
   return Array.from(balanceMap.entries())
     .map(([name, amount]) => ({ name, amount }))
     .filter(balance => Math.abs(balance.amount) > 0.01);
