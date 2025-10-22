@@ -30,20 +30,19 @@
         </div>
 
         <!-- Login Screen -->
-<div id="login-screen" class="login-screen" style="display: flex;">
-    <div class="login-content">
-        <div class="logo-large">mon<span class="accent">EZ</span></div>
-        <div class="tagline">Split expenses, not friendships</div>
-        <button class="login-button" onclick="signInWithGoogle()">
-            <span>🚀</span>
-            Sign in with Google
-        </button>
-        <div class="login-features">
-            Real-time sync • Secure • Free
+        <div id="login-screen" class="login-screen" style="display: flex;">
+            <div class="login-content">
+                <div class="logo-large">mon<span class="accent">EZ</span></div>
+                <div class="tagline">Split expenses, not friendships</div>
+                <button class="login-button" onclick="signInWithGoogle()">
+                    <span>🚀</span>
+                    Sign in with Google
+                </button>
+                <div class="login-features">
+                    Real-time sync • Secure • Free
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-
 
         <!-- PWA Install Prompt -->
         <div id="pwa-prompt" class="pwa-prompt hidden">
@@ -72,11 +71,11 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <button class="icon-btn" onclick="showNotifications()">
+                    <button class="icon-btn" onclick="showNotifications()" aria-label="Notifications">
                         <span class="icon">🔔</span>
                         <span class="badge">3</span>
                     </button>
-                    <button class="icon-btn" onclick="showProfile()">
+                    <button class="icon-btn" onclick="showProfile()" aria-label="Profile">
                         <div class="avatar">Y</div>
                     </button>
                 </div>
@@ -148,37 +147,57 @@
                 <!-- Add Expense View -->
                 <div id="add-expense-view" class="view">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
                         <h2>Add Expense</h2>
-                        <button class="voice-btn" onclick="startVoiceInput()">🎤</button>
+                        <button class="voice-btn" onclick="startVoiceInput()" aria-label="Voice Input">🎤</button>
                     </div>
             
                     <form id="expense-form" class="expense-form">
+                        <div id="form-error-msg" aria-live="polite" style="display: none; color: #EF4444; font-size: 14px; padding: 8px 0;"></div>
+                        
                         <div class="form-group">
-                            <label class="form-label">Amount</label>
+                            <label class="form-label" for="amount">Amount</label>
                             <div class="amount-input-container">
                                 <span class="currency-symbol">₹</span>
-                                <input type="number" id="amount" class="form-input amount-field" placeholder="0.00" step="0.01" required>
-                                <button type="button" class="ai-suggest-btn" onclick="aiSuggestAmount()" title="AI Suggestion">
+                                <input 
+                                    type="number" 
+                                    id="amount" 
+                                    class="form-input amount-field" 
+                                    placeholder="0.00" 
+                                    step="0.01" 
+                                    aria-label="Amount in rupees" 
+                                    required>
+                                <button 
+                                    type="button" 
+                                    class="ai-suggest-btn" 
+                                    onclick="aiSuggestAmount()" 
+                                    title="AI Suggestion"
+                                    aria-label="AI Suggest Amount">
                                     <span class="ai-icon">🤖</span>
                                 </button>
                             </div>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Description</label>
-                            <input type="text" id="description" class="form-input" placeholder="What was this for?" required>
+                            <label class="form-label" for="description">Description</label>
+                            <input 
+                                type="text" 
+                                id="description" 
+                                class="form-input" 
+                                placeholder="What was this for?" 
+                                aria-label="Expense description" 
+                                required>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">Category</label>
                             <div class="category-selector">
-                                <button type="button" class="category-btn" data-category="🍽️">🍽️ Food</button>
-                                <button type="button" class="category-btn" data-category="🚗">🚗 Transport</button>
-                                <button type="button" class="category-btn" data-category="🎬">🎬 Entertainment</button>
-                                <button type="button" class="category-btn" data-category="🛍️">🛍️ Shopping</button>
-                                <button type="button" class="category-btn" data-category="💡">💡 Bills</button>
-                                <button type="button" class="category-btn" data-category="✈️">✈️ Travel</button>
+                                <button type="button" class="category-btn" data-category="🍽️" aria-label="Food category">🍽️ Food</button>
+                                <button type="button" class="category-btn" data-category="🚗" aria-label="Transport category">🚗 Transport</button>
+                                <button type="button" class="category-btn" data-category="🎬" aria-label="Entertainment category">🎬 Entertainment</button>
+                                <button type="button" class="category-btn" data-category="🛍️" aria-label="Shopping category">🛍️ Shopping</button>
+                                <button type="button" class="category-btn" data-category="💡" aria-label="Bills category">💡 Bills</button>
+                                <button type="button" class="category-btn" data-category="✈️" aria-label="Travel category">✈️ Travel</button>
                             </div>
                         </div>
                         
@@ -189,9 +208,9 @@
                         
                         <div class="split-options">
                             <div class="split-type">
-                                <button type="button" class="split-btn active" data-type="equal">Equal Split</button>
-                                <button type="button" class="split-btn" data-type="percentage">By Percentage</button>
-                                <button type="button" class="split-btn premium" data-type="custom" onclick="showPremiumModal()">Custom Split <span class="pro-tag">PRO</span></button>
+                                <button type="button" class="split-btn active" data-type="equal" aria-label="Equal split">Equal Split</button>
+                                <button type="button" class="split-btn" data-type="percentage" aria-label="Split by percentage">By Percentage</button>
+                                <button type="button" class="split-btn premium" data-type="custom" onclick="showPremiumModal()" aria-label="Custom split - Premium feature">Custom Split <span class="pro-tag">PRO</span></button>
                             </div>
                         </div>
                         
@@ -208,9 +227,9 @@
                 <!-- Expenses View -->
                 <div id="expenses-view" class="view">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
                         <h2>All Expenses</h2>
-                        <button class="filter-btn" onclick="showFilters()">🔍</button>
+                        <button class="filter-btn" onclick="showFilters()" aria-label="Filter expenses">🔍</button>
                     </div>
                     
                     <div class="expenses-stats">
@@ -232,7 +251,7 @@
                 <!-- Balances View -->
                 <div id="balances-view" class="view">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
                         <h2>Balances</h2>
                         <button class="settle-all-btn" onclick="settleAll()">Settle All</button>
                     </div>
@@ -243,9 +262,9 @@
                 <!-- Groups View -->
                 <div id="groups-view" class="view">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
                         <h2>Groups</h2>
-                        <button class="create-group-btn" onclick="showCreateGroup()">+</button>
+                        <button class="create-group-btn" onclick="showCreateGroup()" aria-label="Create new group">+</button>
                     </div>
                     
                     <div class="groups-grid" id="groups-grid"></div>
@@ -254,7 +273,7 @@
                 <!-- Premium Features View -->
                 <div id="premium-view" class="view">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
                         <h2>Premium Features</h2>
                         <div class="premium-status">FREE TIER</div>
                     </div>
@@ -265,7 +284,7 @@
                 <!-- Settings View -->
                 <div id="settings-view" class="view">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
                         <h2>Settings</h2>
                     </div>
                     
@@ -299,7 +318,7 @@
                                     <div class="setting-desc">Push notifications, reminders</div>
                                 </div>
                                 <label class="toggle-switch">
-                                    <input type="checkbox" checked>
+                                    <input type="checkbox" checked aria-label="Enable notifications">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -310,7 +329,7 @@
                                     <div class="setting-desc">Switch to dark theme</div>
                                 </div>
                                 <label class="toggle-switch">
-                                    <input type="checkbox">
+                                    <input type="checkbox" aria-label="Enable dark mode">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -333,24 +352,24 @@
 
             <!-- Bottom Navigation -->
             <nav class="bottom-nav">
-                <button class="nav-item active" data-view="home" onclick="showHome()">
+                <button class="nav-item active" data-view="home" onclick="showHome()" aria-label="Home">
                     <span class="nav-icon">🏠</span>
                     <span class="nav-label">Home</span>
                 </button>
-                <button class="nav-item" data-view="expenses" onclick="showExpenses()">
+                <button class="nav-item" data-view="expenses" onclick="showExpenses()" aria-label="Expenses">
                     <span class="nav-icon">📊</span>
                     <span class="nav-label">Expenses</span>
                 </button>
-                <button class="nav-item" data-view="balances" onclick="showBalances()">
+                <button class="nav-item" data-view="balances" onclick="showBalances()" aria-label="Balances">
                     <span class="nav-icon">⚖️</span>
                     <span class="nav-label">Balances</span>
                 </button>
-                <button class="nav-item" data-view="groups" onclick="showGroups()">
+                <button class="nav-item" data-view="groups" onclick="showGroups()" aria-label="Groups">
                     <span class="nav-icon">👥</span>
                     <span class="nav-label">Groups</span>
                     <span class="group-count">2</span>
                 </button>
-                <button class="nav-item" data-view="premium" onclick="showPremiumFeatures()">
+                <button class="nav-item" data-view="premium" onclick="showPremiumFeatures()" aria-label="Premium features">
                     <span class="nav-icon">✨</span>
                     <span class="nav-label">Premium</span>
                     <span class="premium-indicator">PRO</span>
@@ -359,7 +378,7 @@
         </div>
 
         <!-- Floating Add Button -->
-        <button class="fab" onclick="showAddExpense()">
+        <button class="fab" onclick="showAddExpense()" aria-label="Add new expense">
             <span class="fab-icon">+</span>
         </button>
 
@@ -369,14 +388,13 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>✨ Premium Features</h3>
-                    <button class="modal-close" onclick="closePremiumModal()">×</button>
+                    <button class="modal-close" onclick="closePremiumModal()" aria-label="Close modal">×</button>
                 </div>
                 <div class="premium-features-list"></div>
             </div>
         </div>
     </div>
 
-
-<script type="module" src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
