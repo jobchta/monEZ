@@ -1,8 +1,18 @@
-/* Luxury Base Styles */
-* {
+/* ===================================
+   LUXURY BASE STYLES
+   =================================== */
+
+/* Universal Reset */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Body & HTML */
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -15,9 +25,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  min-height: 100vh;
 }
 
-/* Luxury App Container */
+/* ===================================
+   APP CONTAINER
+   =================================== */
 .app {
   max-width: 400px;
   margin: 0 auto;
@@ -25,51 +38,94 @@ body {
   background: var(--background);
   position: relative;
   box-shadow: 0 0 40px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
 }
 
-/* Main Content */
+/* ===================================
+   MAIN CONTENT
+   =================================== */
 .main-content {
   flex: 1;
   overflow-y: auto;
   padding: 0 var(--space-md) 100px;
+  scroll-behavior: smooth;
 }
 
-/* View Management */
+/* Custom Scrollbar */
+.main-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: var(--gold-accent);
+  border-radius: var(--radius-full);
+}
+
+/* ===================================
+   VIEW MANAGEMENT
+   =================================== */
 .view {
   display: none;
   padding-top: var(--space-md);
-  animation: fadeIn 0.3s ease;
+  animation: fadeInView 0.3s ease;
 }
 
 .view.active {
   display: block;
 }
 
+@keyframes fadeInView {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================
+   VIEW HEADERS
+   =================================== */
 .view-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-xl);
+  gap: var(--space-md);
 }
 
 .view-header h2 {
+  flex: 1;
+  text-align: center;
   font-size: var(--text-2xl);
   font-weight: var(--weight-semibold);
   color: var(--primary-text);
+  margin: 0;
 }
 
-/* Section Headers */
+/* ===================================
+   SECTION HEADERS
+   =================================== */
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-lg);
+  gap: var(--space-md);
 }
 
 .section-header h3 {
   font-size: var(--text-lg);
   font-weight: var(--weight-semibold);
   color: var(--primary-text);
+  margin: 0;
 }
 
 .view-all {
@@ -80,17 +136,300 @@ body {
   font-weight: var(--weight-medium);
   cursor: pointer;
   text-decoration: none;
+  transition: all 0.3s ease;
+  padding: var(--space-xs);
 }
 
-/* Utility Classes */
+.view-all:hover {
+  opacity: 0.8;
+  transform: translateX(2px);
+}
+
+/* ===================================
+   TYPOGRAPHY
+   =================================== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--weight-semibold);
+  line-height: 1.2;
+  color: var(--primary-text);
+}
+
+h1 {
+  font-size: var(--text-3xl);
+}
+
+h2 {
+  font-size: var(--text-2xl);
+}
+
+h3 {
+  font-size: var(--text-xl);
+}
+
+p {
+  margin-bottom: var(--space-md);
+}
+
+a {
+  color: var(--gold-accent);
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+/* ===================================
+   BUTTONS BASE
+   =================================== */
+button {
+  font-family: var(--font-family);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===================================
+   INPUTS BASE
+   =================================== */
+input, textarea, select {
+  font-family: var(--font-family);
+  font-size: var(--text-base);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--secondary-text);
+  opacity: 0.6;
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
 .hidden {
   display: none !important;
 }
 
-/* Responsive */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Spacing Utilities */
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+.mt-xl { margin-top: var(--space-xl); }
+
+.mb-sm { margin-bottom: var(--space-sm); }
+.mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+.mb-xl { margin-bottom: var(--space-xl); }
+
+.pt-sm { padding-top: var(--space-sm); }
+.pt-md { padding-top: var(--space-md); }
+.pt-lg { padding-top: var(--space-lg); }
+
+.pb-sm { padding-bottom: var(--space-sm); }
+.pb-md { padding-bottom: var(--space-md); }
+.pb-lg { padding-bottom: var(--space-lg); }
+
+/* ===================================
+   ANIMATIONS
+   =================================== */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ===================================
+   FOCUS STATES
+   =================================== */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--gold-accent);
+  outline-offset: 2px;
+}
+
+/* ===================================
+   SELECTION
+   =================================== */
+::selection {
+  background: var(--gold-accent);
+  color: white;
+}
+
+::-moz-selection {
+  background: var(--gold-accent);
+  color: white;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
 @media (max-width: 480px) {
   .app {
     max-width: 100%;
     box-shadow: none;
+  }
+
+  .main-content {
+    padding: 0 var(--space-sm) 100px;
+  }
+
+  .view {
+    padding-top: var(--space-sm);
+  }
+
+  .view-header {
+    margin-bottom: var(--space-md);
+  }
+  
+  .section-header {
+    margin-bottom: var(--space-md);
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .app {
+    max-width: 500px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===================================
+   PRINT STYLES
+   =================================== */
+@media print {
+  .bottom-nav,
+  .fab,
+  .pwa-prompt {
+    display: none !important;
+  }
+
+  .app {
+    box-shadow: none;
+  }
+
+  body {
+    background: white;
+  }
+}
+
+/* ===================================
+   DARK MODE PREPARATION (Optional)
+   =================================== */
+@media (prefers-color-scheme: dark) {
+  /* Add dark mode variables here if implementing dark theme */
+}
+
+/* ===================================
+   EMPTY STATES
+   =================================== */
+.empty-state {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--secondary-text);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-md);
+  opacity: 0.5;
+}
+
+.empty-state-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-xs);
+  color: var(--primary-text);
+}
+
+.empty-state-desc {
+  font-size: var(--text-sm);
+  color: var(--secondary-text);
+}
+
+/* ===================================
+   LOADING STATES
+   =================================== */
+.loading {
+  display: inline-block;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(132, 105, 65, 0.05) 25%,
+    rgba(132, 105, 65, 0.1) 50%,
+    rgba(132, 105, 65, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
