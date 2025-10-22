@@ -1,27 +1,76 @@
-/* monEZ Luxury Banking Design System */
+/* ===================================
+   monEZ LUXURY BANKING DESIGN SYSTEM
+   =================================== */
+
 :root {
-  /* Luxury Banking Colors */
+  /* ===================================
+     COLOR PALETTE - Luxury Banking
+     =================================== */
+  
+  /* Base Colors */
   --background: #FAFAFA;
   --surface: #FFFFFF;
+  --surface-elevated: #FFFFFF;
+  --overlay: rgba(0, 0, 0, 0.5);
+  
+  /* Text Colors */
   --primary-text: #232325;
   --secondary-text: #828288;
-  --borders: #ECECEC;
-  --gold-accent: #846941;
-  --steel-blue: #3B6270;
-  --success: #32775E;
-  --error: #C44A44;
-  --glass: rgba(255,255,255,0.95);
+  --tertiary-text: #9E9EA3;
+  --text-on-accent: #FFFFFF;
   
-  /* Luxury Spacing */
+  /* Border & Divider Colors */
+  --borders: #ECECEC;
+  --divider: rgba(0, 0, 0, 0.08);
+  
+  /* Brand Colors */
+  --gold-accent: #846941;
+  --gold-dark: #73553A;
+  --gold-light: #A67C52;
+  --steel-blue: #3B6270;
+  --steel-dark: #2A4851;
+  
+  /* Semantic Colors */
+  --success: #32775E;
+  --success-light: #4A9976;
+  --success-dark: #245A47;
+  --error: #C44A44;
+  --error-light: #D66660;
+  --error-dark: #A03C37;
+  --warning: #F59E0B;
+  --warning-light: #FBBF24;
+  --warning-dark: #D97706;
+  --info: #3B82F6;
+  --info-light: #60A5FA;
+  --info-dark: #2563EB;
+  
+  /* Glass & Transparency */
+  --glass: rgba(255, 255, 255, 0.95);
+  --glass-strong: rgba(255, 255, 255, 0.98);
+  --backdrop-blur: blur(20px);
+  
+  /* ===================================
+     SPACING SYSTEM
+     =================================== */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
   --space-lg: 24px;
   --space-xl: 32px;
   --space-2xl: 48px;
+  --space-3xl: 64px;
   
-  /* Sophisticated Typography */
-  --font-family: 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  /* ===================================
+     TYPOGRAPHY SYSTEM
+     =================================== */
+  
+  /* Font Families */
+  --font-family: 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 
+                 -apple-system, BlinkMacSystemFont, 'Segoe UI', 
+                 system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  
+  /* Font Sizes */
   --text-xs: 11px;
   --text-sm: 13px;
   --text-base: 16px;
@@ -29,35 +78,325 @@
   --text-xl: 22px;
   --text-2xl: 24px;
   --text-3xl: 32px;
+  --text-4xl: 40px;
+  
+  /* Font Weights */
+  --weight-light: 300;
   --weight-normal: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
-  --letter-spacing: -0.01em;
+  --weight-bold: 700;
   
-  /* Luxury Radius */
+  /* Line Heights */
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+  
+  /* Letter Spacing */
+  --letter-spacing: -0.01em;
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-wide: 0.02em;
+  
+  /* ===================================
+     BORDER RADIUS
+     =================================== */
+  --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
   --radius-full: 9999px;
   
-  /* Subtle Shadows */
-  --shadow-sm: 0 2px 8px rgba(150,150,150,0.06);
-  --shadow-md: 0 4px 12px rgba(150,150,150,0.08);
-  --shadow-lg: 0 8px 24px rgba(150,150,150,0.10);
-  --shadow-floating: 0 12px 40px rgba(132,105,65,0.15);
+  /* ===================================
+     SHADOWS - Subtle & Luxury
+     =================================== */
+  --shadow-xs: 0 1px 2px rgba(150, 150, 150, 0.04);
+  --shadow-sm: 0 2px 8px rgba(150, 150, 150, 0.06);
+  --shadow-md: 0 4px 12px rgba(150, 150, 150, 0.08);
+  --shadow-lg: 0 8px 24px rgba(150, 150, 150, 0.10);
+  --shadow-xl: 0 12px 32px rgba(150, 150, 150, 0.12);
+  --shadow-2xl: 0 16px 48px rgba(150, 150, 150, 0.14);
+  --shadow-floating: 0 12px 40px rgba(132, 105, 65, 0.15);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  
+  /* ===================================
+     Z-INDEX SCALE
+     =================================== */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-notification: 1000;
+  --z-loading: 9999;
+  
+  /* ===================================
+     TRANSITIONS & ANIMATIONS
+     =================================== */
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+  
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-luxury: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* ===================================
+     BREAKPOINTS (for reference)
+     =================================== */
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  
+  /* ===================================
+     COMPONENT-SPECIFIC
+     =================================== */
+  
+  /* Buttons */
+  --button-height: 52px;
+  --button-height-sm: 40px;
+  --button-height-lg: 60px;
+  
+  /* Inputs */
+  --input-height: 48px;
+  --input-height-sm: 40px;
+  --input-height-lg: 56px;
+  
+  /* Navigation */
+  --nav-height: 72px;
+  --bottom-nav-height: 80px;
+  
+  /* Content Width */
+  --content-max-width: 400px;
 }
 
-/* Keyframe Animations */
+/* ===================================
+   KEYFRAME ANIMATIONS LIBRARY
+   =================================== */
+
+/* Spin (Loading) */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
+/* Fade In */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@keyframes ripple { 
-  to { transform: scale(2); opacity: 0; } 
+/* Fade Out */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Slide Up */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Slide Down */
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Slide In from Right */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Slide In from Left */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Scale In */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Scale Out */
+@keyframes scaleOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* Ripple Effect */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Pulse */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Bounce */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Shimmer (Loading Skeleton) */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Shake (Error) */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+/* Progress Bar */
+@keyframes progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Glow */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 10px var(--gold-accent);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--gold-accent);
+  }
+}
+
+/* ===================================
+   MEDIA QUERY HELPERS
+   =================================== */
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0ms;
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+    --duration-slower: 0ms;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode preparation (optional future enhancement) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Add dark mode color overrides here when implementing */
+    /* Example:
+    --background: #1A1A1A;
+    --surface: #2A2A2A;
+    --primary-text: #F5F5F5;
+    */
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --borders: #000000;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+  }
 }
