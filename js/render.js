@@ -292,16 +292,8 @@ window.showAddFriendModal = function() {
 };
 
 
-// Helper function to add friend
-function addFriend(name) {
-  const colors = ['#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#EC4899', '#14B8A6'];
-  const avatar = name.charAt(0).toUpperCase();
-  const color = colors[AppState.friends.length % colors.length];
-  
-  AppState.friends.push({ name, avatar, color });
-  populatePeopleSelector();
-  showNotification(`✅ ${name} added to your friends!`, 'success');
-}
+import { addFriend, searchFriends } from './friends.js';
+
 
 export function renderGroupsPreview() {
   const container = safeGet('groups-preview');
