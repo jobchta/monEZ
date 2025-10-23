@@ -175,18 +175,21 @@ window.signInWithGoogle = async function() {
     }
 };
 
-// Add real data loading
+import { startFriendsListener } from './friends.js';
+
+// Update loadUserData function
 function loadUserData(user) {
     // Show loading indicator
     const recentExpenses = safeGet('recent-expenses');
     if (recentExpenses) {
         const loadingEl = document.createElement('div');
         loadingEl.id = 'expense-loading';
-        loadingEl.innerHTML = '💫 Loading your expenses...';
+        loadingEl.innerHTML = '💫 Loading your data...';
         loadingEl.style.cssText = 'text-align: center; padding: 20px; color: #666;';
         recentExpenses.appendChild(loadingEl);
     }
 
+    // Start listening to expenses
     const q = query(
         collection(db, 'expenses'),
         where('userId', '==', user.uid),
@@ -205,7 +208,11 @@ function loadUserData(user) {
         renderAllExpenses();
         updateBalance();
     });
+    
+    // NEW: Start listening to friends
+    startFriendsListener(user.uid);
 }
+
 
 function setupPWAListeners() {
     window.addEventListener('beforeinstallprompt', (e) => {
