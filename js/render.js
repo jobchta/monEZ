@@ -185,6 +185,8 @@ export function renderBalances() {
   });
 }
 
+import { addFriend, searchFriends } from './friends.js';
+
 export function populatePeopleSelector() {
   const container = safeGet('people-selector');
   if (!container) return;
@@ -197,8 +199,13 @@ export function populatePeopleSelector() {
       <div style="grid-column: 1/-1; text-align: center; padding: 24px; background: #F6F6F7; border-radius: 12px; color: #64748B;">
         <div style="font-size: 32px; margin-bottom: 12px;">👥</div>
         <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Add friends to split with</div>
-        <div style="font-size: 13px; margin-bottom: 16px;">Type a name below and it will be added automatically</div>
-        <input type="text" id="quick-add-friend" placeholder="Friend's name (e.g., Rahul)" style="width: 100%; padding: 12px; border: 1px solid #ECECEC; border-radius: 8px; font-size: 14px;">
+        <div style="font-size: 13px; margin-bottom: 16px;">Type a name below and press Enter</div>
+        <input 
+          type="text" 
+          id="quick-add-friend" 
+          placeholder="Friend's name (e.g., Rahul)" 
+          style="width: 100%; padding: 12px; border: 1px solid #ECECEC; border-radius: 8px; font-size: 14px;"
+        >
       </div>
     `;
     
@@ -206,9 +213,10 @@ export function populatePeopleSelector() {
     setTimeout(() => {
       const input = safeGet('quick-add-friend');
       if (input) {
-        input.addEventListener('keypress', (e) => {
+        input.addEventListener('keypress', async (e) => {
           if (e.key === 'Enter' && input.value.trim()) {
-            addFriend(input.value.trim());
+            const name = input.value.trim();
+            await addFriend(name);
             input.value = '';
           }
         });
@@ -220,16 +228,23 @@ export function populatePeopleSelector() {
   if (AppState.friends.length === 0) {
     container.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #64748B;">
-        <div style="font-size: 14px;">No friends added yet. Type a name to add one!</div>
+        <div style="font-size: 14px; margin-bottom: 12px;">No friends added yet</div>
+        <button 
+          onclick="showAddFriendModal()" 
+          style="background: var(--gold-accent); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;"
+        >
+          + Add Friend
+        </button>
       </div>
     `;
     return;
   }
 
+  // Render friend cards
   AppState.friends.forEach(friend => {
     const card = document.createElement('div');
     card.className = 'person-card';
-    card.dataset.friendName = friend.name;
+    card.dataset.friendId = friend.id;
 
     card.innerHTML = `
       <div class="person-avatar" style="background: ${friend.color}">
@@ -243,10 +258,10 @@ export function populatePeopleSelector() {
 
       if (isSelected) {
         card.classList.remove('selected');
-        AppState.selectedFriends.delete(friend.name);
+        AppState.selectedFriends.delete(friend.id);
       } else {
         card.classList.add('selected');
-        AppState.selectedFriends.add(friend.name);
+        AppState.selectedFriends.add(friend.id);
       }
 
       createRippleEffect(card, e);
@@ -254,7 +269,28 @@ export function populatePeopleSelector() {
 
     container.appendChild(card);
   });
+  
+  // Add "Add Friend" button at the end
+  const addBtn = document.createElement('div');
+  addBtn.className = 'person-card add-friend-card';
+  addBtn.innerHTML = `
+    <div class="person-avatar" style="background: var(--gold-accent);">
+      +
+    </div>
+    <div class="person-name">Add</div>
+  `;
+  addBtn.addEventListener('click', () => showAddFriendModal());
+  container.appendChild(addBtn);
 }
+
+// Add Friend Modal (you'll need to add HTML for this)
+window.showAddFriendModal = function() {
+  const name = prompt('Enter friend\'s name:');
+  if (name && name.trim()) {
+    addFriend(name.trim());
+  }
+};
+
 
 // Helper function to add friend
 function addFriend(name) {
