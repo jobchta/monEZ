@@ -230,13 +230,17 @@ export function populatePeopleSelector() {
       <div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #64748B;">
         <div style="font-size: 14px; margin-bottom: 12px;">No friends added yet</div>
         <button 
-          onclick="showAddFriendModal()" 
+          id="add-friend-btn"
           style="background: var(--gold-accent); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;"
         >
           + Add Friend
         </button>
       </div>
     `;
+    const addFriendBtn = safeGet('add-friend-btn');
+    if (addFriendBtn) {
+      addFriendBtn.addEventListener('click', () => showAddFriendModal());
+    }
     return;
   }
 
@@ -284,12 +288,12 @@ export function populatePeopleSelector() {
 }
 
 // Add Friend Modal (you'll need to add HTML for this)
-window.showAddFriendModal = function() {
+function showAddFriendModal() {
   const name = prompt('Enter friend\'s name:');
   if (name && name.trim()) {
     addFriend(name.trim());
   }
-};
+}
 
 
 // Helper function to add friend
