@@ -1,8 +1,32 @@
-// firebase.js - Firebase configuration and functions
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+// monEZ - Firebase Configuration
+
+// Import Firebase modules
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  onAuthStateChanged,
+  signOut 
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  updateDoc,
+  deleteDoc,
+  doc, 
+  getDoc,
+  getDocs,
+  setDoc,
+  query, 
+  where, 
+  orderBy, 
+  onSnapshot, 
+  serverTimestamp,
+  Timestamp
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyC4pZOIZikLKjL_eYAW9x3aC4weSz9PP6I",
@@ -14,37 +38,31 @@ const firebaseConfig = {
   measurementId: "G-LTF8XKRR6P"
 };
 
-// Initialize Firebase and core services
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const provider = new GoogleAuthProvider();
 
-// ✨ NEW: Enable offline persistence for better UX
-enableIndexedDbPersistence(db).catch((err) => {
-  if (err.code === 'failed-precondition') {
-    // Multiple tabs open, persistence can only be enabled in one tab at a time
-    console.log('⚠️ Offline persistence disabled: Multiple tabs open');
-  } else if (err.code === 'unimplemented') {
-    // The current browser doesn't support persistence
-    console.log('⚠️ Offline persistence not supported by this browser');
-  } else {
-    console.log('⚠️ Offline persistence error:', err);
-  }
-});
+// Initialize Firebase services
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const provider = new GoogleAuthProvider();
 
-// Universal export for ES modules (preferred)
-export {
-  auth, db, provider,
-  signInWithPopup, signOut, onAuthStateChanged,
-  collection, addDoc, onSnapshot, query, where, orderBy,
-  serverTimestamp, doc, updateDoc
-};
-
-// Optional: Expose for legacy/global usage (should not be needed in ES modules, but safe for compatibility)
-window.firebase = {
-  auth, db, provider,
-  signInWithPopup, signOut, onAuthStateChanged,
-  collection, addDoc, onSnapshot, query, where, orderBy,
-  serverTimestamp, doc, updateDoc
+// Export Firebase methods
+export { 
+  signInWithPopup, 
+  onAuthStateChanged,
+  signOut,
+  collection, 
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  query, 
+  where, 
+  orderBy, 
+  onSnapshot, 
+  serverTimestamp,
+  Timestamp
 };
