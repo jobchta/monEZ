@@ -3,6 +3,7 @@
 import { countries, countryDefaults, currencies, languages } from './countries-data.js';
 import { auth, db, doc, setDoc, serverTimestamp } from './firebase.js';
 import { showNotification, safeGet } from './utils.js';
+import { showHome } from './views.js';
 
 // Onboarding State
 const OnboardingState = {
@@ -617,8 +618,8 @@ async function confirmAndFinishOnboarding() {
     }
     
     // Trigger app initialization
-    if (window.showHome) {
-      window.showHome();
+    if (showHome) {
+      showHome();
     }
     
   } catch (error) {
