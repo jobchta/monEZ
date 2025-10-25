@@ -2,7 +2,7 @@
 
 import { AppState, createRippleEffect, showNotification, safeGet, checkOnboardingStatus } from './utils.js';
 import { auth, db, provider, signInWithPopup, onAuthStateChanged, query, collection, where, orderBy, onSnapshot, doc, getDoc } from './firebase.js';
-import { renderRecentExpenses, renderAllExpenses, updateBalance } from './render.js';
+import { renderRecentExpenses, renderAllExpenses, updateBalance, showAddFriendModal } from './render.js';
 import { setupExpenseForm, showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal } from './views.js';
 import { initOnboarding, checkOnboardingStatus as checkOnboardingComplete } from './onboarding.js';
 
@@ -33,7 +33,8 @@ Object.assign(window, {
     dismissPWAPrompt,
     installPWA,
     showPremiumModal,
-    closePremiumModal
+    closePremiumModal,
+    showAddFriendModal
 });
 
 // Enhanced App Initialization with Firebase

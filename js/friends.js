@@ -139,18 +139,6 @@ export async function deleteFriend(friendId) {
   }
 }
 
-// Search friends by name
-export function searchFriends(searchTerm) {
-  if (!searchTerm || searchTerm.trim().length === 0) {
-    return AppState.friends;
-  }
-  
-  const term = searchTerm.toLowerCase();
-  return AppState.friends.filter(friend =>
-    friend.name.toLowerCase().includes(term)
-  );
-}
-
 // Get friend by ID
 export function getFriendById(friendId) {
   return AppState.friends.find(f => f.id === friendId);

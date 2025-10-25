@@ -185,7 +185,7 @@ export function renderBalances() {
   });
 }
 
-import { addFriend, searchFriends } from './friends.js';
+import { addFriend } from './friends.js';
 
 export function populatePeopleSelector() {
   const container = safeGet('people-selector');
@@ -287,24 +287,11 @@ export function populatePeopleSelector() {
   container.appendChild(addBtn);
 }
 
-// Add Friend Modal (you'll need to add HTML for this)
-function showAddFriendModal() {
-  const name = prompt('Enter friend\'s name:');
+export function showAddFriendModal() {
+  const name = prompt("Enter friend's name:");
   if (name && name.trim()) {
     addFriend(name.trim());
   }
-}
-
-
-// Helper function to add friend
-function addFriend(name) {
-  const colors = ['#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#EC4899', '#14B8A6'];
-  const avatar = name.charAt(0).toUpperCase();
-  const color = colors[AppState.friends.length % colors.length];
-  
-  AppState.friends.push({ name, avatar, color });
-  populatePeopleSelector();
-  showNotification(`✅ ${name} added to your friends!`, 'success');
 }
 
 export function renderGroupsPreview() {

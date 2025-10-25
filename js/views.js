@@ -32,7 +32,7 @@ export function showHome() {
 
 export function showAddExpense() {
     showView('add-expense');
-    populatePeopleSelector();
+    setTimeout(populatePeopleSelector, 0);
     AppState.selectedFriends.clear();
     AppState.selectedCategory = '';
     resetForm();
