@@ -296,10 +296,128 @@ export function renderGroupsPreview() {
     container.appendChild(card);
   });
 }
+
+
+
+// Complete the renderGroups() function:
 export function renderGroups() {
   const container = safeGet('groups-grid');
   if (!container) return;
   container.innerHTML = '';
+  
   // Show guidance if no groups yet
   if (AppState.groups.length === 0 && AppState.showExample) {
     container.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">👥</span>
+        <h3>Organize expenses by groups</h3>
+        <p>Perfect for trips, roommates, or events</p>
+        <div class="info-box">
+          <strong>💡 COMING SOON</strong>
+          <ul>
+            <li>Create groups for:</li>
+            <li>🏖️ Vacation trips</li>
+            <li>🏠 Roommate expenses</li>
+            <li>🎉 Events & parties</li>
+          </ul>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
+  if (AppState.groups.length === 0) {
+    container.innerHTML = 'No groups yet';
+    return;
+  }
+  
+  AppState.groups.forEach(group => {
+    const card = document.createElement('div');
+    card.className = 'group-card-full';
+    card.innerHTML = `
+      <div class="group-header">
+        <span class="group-icon">${group.icon}</span>
+        <div>
+          <h4>${group.name}</h4>
+          <p>${group.members} members</p>
+        </div>
+      </div>
+      <div class="group-balance">
+        <span>Your balance</span>
+        <strong class="${group.balance >= 0 ? 'positive' : 'negative'}">
+          ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
+        </strong>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+export function renderPremiumFeatures() {
+  const container = safeGet('premium-features');
+  if (!container) return;
+  
+  container.innerHTML = `
+    <div class="premium-hero">
+      <span class="hero-icon">🚀</span>
+      <h2>Premium Features</h2>
+      <p>Unlock the full potential of monEZ</p>
+      <div class="price-tag">
+        <span class="old-price">₹299</span>
+        <span class="new-price">₹119/month</span>
+        <span class="discount">60% OFF</span>
+      </div>
+    </div>
+    
+    <div class="feature-grid">
+      <div class="feature-card" onclick="tryAIFeature('receipt')">
+        <span class="feature-icon">📸</span>
+        <div>
+          <h3>AI Receipt Scanning</h3>
+          <p>Scan receipts with 98.5% accuracy</p>
+        </div>
+        <button class="try-btn">TRY</button>
+      </div>
+      
+      <div class="feature-card" onclick="tryAIFeature('voice')">
+        <span class="feature-icon">🎤</span>
+        <div>
+          <h3>Voice Commands</h3>
+          <p>Add expenses in 22 languages</p>
+        </div>
+        <button class="try-btn">TRY</button>
+      </div>
+      
+      <div class="feature-card" onclick="tryAIFeature('analytics')">
+        <span class="feature-icon">📊</span>
+        <div>
+          <h3>Advanced Analytics</h3>
+          <p>AI-powered spending insights</p>
+        </div>
+        <button class="try-btn">TRY</button>
+      </div>
+    </div>
+  `;
+}
+
+export function updateBalance() {
+  let balance = 0;
+  AppState.expenses.forEach(expense => {
+    const splitAmount = expense.amount / (expense.splitWith.length + 1);
+    if (expense.paidBy === 'You') {
+      balance += expense.amount - splitAmount;
+    } else {
+      balance -= splitAmount;
+    }
+  });
+  
+  const previousBalance = AppState.balance;
+  AppState.balance = balance;
+  
+  const balanceElement = safeGet('balance-hero');
+  if (balanceElement && AppState.animations.enabled && Math.abs(balance - previousBalance) > 0) {
+    animateNumber(balanceElement, previousBalance, balance, 800);
+  } else if (balanceElement) {
+    balanceElement.textContent = formatCurrency(Math.abs(balance));
+  }
+}
