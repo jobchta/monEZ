@@ -1,5 +1,4 @@
 /* monEZ - Main Application Logic */
-
 import { AppState, createRippleEffect, showNotification, safeGet, checkOnboardingStatus } from './utils.js';
 import { auth, db, provider, signInWithPopup, onAuthStateChanged, query, collection, where, orderBy, onSnapshot, doc, getDoc } from './firebase.js';
 import { renderRecentExpenses, renderAllExpenses, updateBalance } from './render.js';
@@ -38,9 +37,13 @@ Object.assign(window, {
 
 // Enhanced App Initialization with Firebase
 function initApp() {
+    console.log('🚀 Initializing monEZ app...');
+    
     // Check if user has already completed onboarding
     checkOnboardingStatus();
-
+    
+    console.log('⏳ Setting up authentication state listener...');
+    
     // Check authentication state
     onAuthStateChanged(auth, async (user) => {
         const loginScreen = safeGet('login-screen');
@@ -49,13 +52,14 @@ function initApp() {
         
         if (user) {
             // User signed in
-            console.log('User authenticated:', user.email);
+            console.log('✅ User authenticated:', user.email);
             
             // Check if user has completed onboarding
             const hasCompletedOnboarding = await checkUserOnboarding(user.uid);
             
             if (!hasCompletedOnboarding) {
                 // Show onboarding for new user
+                console.log('📋 Showing onboarding for new user');
                 if (loginScreen) loginScreen.style.display = 'none';
                 if (mainApp) mainApp.style.display = 'none';
                 if (onboardingScreen) onboardingScreen.classList.remove('hidden');
@@ -64,6 +68,7 @@ function initApp() {
                 initOnboarding();
             } else {
                 // Load user preferences and show main app
+                console.log('🏠 Loading main app for existing user');
                 await loadUserPreferences(user.uid);
                 
                 if (loginScreen) loginScreen.style.display = 'none';
@@ -77,15 +82,25 @@ function initApp() {
                 loadUserData(user);
             }
         } else {
-            // User signed out
-            if (loginScreen) loginScreen.style.display = 'flex';
+            // User signed out - explicitly show login screen
+            console.log('🔐 No authenticated user, showing login screen');
+            if (loginScreen) {
+                loginScreen.style.display = 'flex';
+                loginScreen.style.justifyContent = 'center';
+                loginScreen.style.alignItems = 'center';
+            }
             if (mainApp) mainApp.style.display = 'none';
             if (onboardingScreen) onboardingScreen.classList.add('hidden');
         }
     });
-
+    
+    console.log('📝 Setting up expense form...');
     setupExpenseForm();
+    
+    console.log('📱 Setting up PWA listeners...');
     setupPWAListeners();
+    
+    console.log('✨ App initialization complete');
 }
 
 // Check if user has completed onboarding in Firebase
@@ -213,7 +228,6 @@ function loadUserData(user) {
     startFriendsListener(user.uid);
 }
 
-
 function setupPWAListeners() {
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -232,7 +246,6 @@ function setupPWAListeners() {
 function hideLoadingScreen() {
     const loadingScreen = safeGet('loading-screen');
     const mainApp = safeGet('main-app');
-
     if (loadingScreen && mainApp) {
         setTimeout(() => {
             loadingScreen.style.opacity = '0';
@@ -243,13 +256,18 @@ function hideLoadingScreen() {
     }
 }
 
-// Enhanced Event Listeners
+// Enhanced Event Listeners with error handling
 document.addEventListener('DOMContentLoaded', () => {
-    hideLoadingScreen();
-
-    setTimeout(() => {
-        initApp();
-    }, 2300);
+    try {
+        console.log('📄 DOM Content Loaded');
+        hideLoadingScreen();
+        setTimeout(() => {
+            initApp();
+        }, 2300);
+    } catch (error) {
+        console.error('❌ Error during app initialization:', error);
+        showNotification('Failed to initialize app: ' + error.message, 'error');
+    }
 });
 
 // Add ripple effect to buttons
