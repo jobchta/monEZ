@@ -1,6 +1,23 @@
 /* monEZ - Main Application Logic */
 import { AppState, createRippleEffect, showNotification, safeGet, checkOnboardingStatus } from './utils.js';
-import { auth, db, provider, signInWithPopup, onAuthStateChanged, query, collection, where, orderBy, onSnapshot, doc, getDoc } from './firebase.js';
+import { 
+  auth, 
+  db, 
+  provider, 
+  signInWithPopup, 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
+  onAuthStateChanged, 
+  query, 
+  collection, 
+  where, 
+  orderBy, 
+  onSnapshot, 
+  doc, 
+  getDoc 
+} from './firebase.js';
 import { renderRecentExpenses, renderAllExpenses, updateBalance } from './render.js';
 import { setupExpenseForm, showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal } from './views.js';
 import { initOnboarding, checkOnboardingStatus as checkOnboardingComplete } from './onboarding.js';
@@ -179,7 +196,7 @@ function applyUserPreferences(prefs) {
     console.log('Preferences applied to AppState');
 }
 
-// Add Google Sign-in function
+// Google Sign-in function
 window.signInWithGoogle = async function() {
     try {
         const result = await signInWithPopup(auth, provider);
@@ -187,6 +204,89 @@ window.signInWithGoogle = async function() {
     } catch (error) {
         console.error('Sign in error:', error);
         showNotification('Sign in failed: ' + error.message, 'error');
+    }
+};
+
+// Email/Password Sign-in function
+window.signInWithEmail = async function(email, password) {
+    try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        showNotification(`Welcome back ${result.user.email}!`, 'success');
+    } catch (error) {
+        console.error('Email sign in error:', error);
+        let errorMessage = 'Sign in failed. Please check your credentials.';
+        
+        switch (error.code) {
+            case 'auth/user-not-found':
+                errorMessage = 'No account found with this email address.';
+                break;
+            case 'auth/wrong-password':
+                errorMessage = 'Incorrect password. Please try again.';
+                break;
+            case 'auth/invalid-email':
+                errorMessage = 'Please enter a valid email address.';
+                break;
+            case 'auth/too-many-requests':
+                errorMessage = 'Too many failed attempts. Please try again later.';
+                break;
+        }
+        
+        showNotification(errorMessage, 'error');
+    }
+};
+
+// Email/Password Sign-up function
+window.signUpWithEmail = async function(email, password, displayName) {
+    try {
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Update the user profile with display name
+        if (displayName) {
+            await updateProfile(result.user, {
+                displayName: displayName
+            });
+        }
+        
+        showNotification(`Welcome to monEZ, ${displayName || result.user.email}!`, 'success');
+    } catch (error) {
+        console.error('Email sign up error:', error);
+        let errorMessage = 'Sign up failed. Please try again.';
+        
+        switch (error.code) {
+            case 'auth/email-already-in-use':
+                errorMessage = 'An account with this email already exists.';
+                break;
+            case 'auth/invalid-email':
+                errorMessage = 'Please enter a valid email address.';
+                break;
+            case 'auth/weak-password':
+                errorMessage = 'Password should be at least 6 characters long.';
+                break;
+        }
+        
+        showNotification(errorMessage, 'error');
+    }
+};
+
+// Password Reset function
+window.resetPassword = async function(email) {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        showNotification('Password reset email sent! Check your inbox.', 'success');
+    } catch (error) {
+        console.error('Password reset error:', error);
+        let errorMessage = 'Failed to send password reset email.';
+        
+        switch (error.code) {
+            case 'auth/user-not-found':
+                errorMessage = 'No account found with this email address.';
+                break;
+            case 'auth/invalid-email':
+                errorMessage = 'Please enter a valid email address.';
+                break;
+        }
+        
+        showNotification(errorMessage, 'error');
     }
 };
 
@@ -203,7 +303,7 @@ function loadUserData(user) {
         loadingEl.style.cssText = 'text-align: center; padding: 20px; color: #666;';
         recentExpenses.appendChild(loadingEl);
     }
-
+    
     // Start listening to expenses
     const q = query(
         collection(db, 'expenses'),
@@ -234,7 +334,7 @@ function setupPWAListeners() {
         AppState.deferredPrompt = e;
         showPWAPrompt();
     });
-
+    
     window.addEventListener('appinstalled', () => {
         showNotification('🎉 monEZ installed! Enjoy the native app experience.', 'success');
         AppState.deferredPrompt = null;
