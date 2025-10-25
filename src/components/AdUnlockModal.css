@@ -1,0 +1,337 @@
+/**
+ * Ad Unlock Modal Styles
+ * Modern, responsive design for "Watch Ad to Unlock" UI
+ */
+
+.ad-unlock-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ad-unlock-modal {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  position: relative;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 24px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.modal-content {
+  text-align: center;
+  color: white;
+}
+
+/* Unlock Prompt State */
+.unlock-prompt .feature-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.unlock-prompt h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.feature-name {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+  opacity: 0.95;
+}
+
+.feature-description {
+  font-size: 15px;
+  line-height: 1.5;
+  opacity: 0.85;
+  margin: 0 0 25px 0;
+}
+
+.unlock-offer {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 25px 0;
+  backdrop-filter: blur(10px);
+}
+
+.offer-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.badge-icon {
+  font-size: 28px;
+}
+
+.badge-text {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.unlock-duration {
+  font-size: 16px;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.unlock-duration strong {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* Action Buttons */
+.action-button {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.watch-ad-button {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #333;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.watch-ad-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+}
+
+.watch-ad-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.watch-ad-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.button-icon {
+  font-size: 20px;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(51, 51, 51, 0.3);
+  border-top-color: #333;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.action-button.secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.action-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.action-button.primary {
+  background: white;
+  color: #667eea;
+}
+
+.action-button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+}
+
+.premium-hint {
+  font-size: 13px;
+  margin: 20px 0 0 0;
+  opacity: 0.7;
+}
+
+/* Error Message */
+.error-message {
+  background: rgba(255, 71, 87, 0.2);
+  border: 1px solid rgba(255, 71, 87, 0.4);
+  color: #ffdddd;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-size: 14px;
+}
+
+/* Success State */
+.unlock-success {
+  padding: 20px 0;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin: 0 auto 20px;
+  animation: successPop 0.6s ease-out;
+}
+
+@keyframes successPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.unlock-success h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+.time-remaining {
+  font-size: 16px;
+  margin: 15px 0 30px 0;
+  opacity: 0.9;
+}
+
+.time-remaining strong {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ad-unlock-modal {
+    padding: 30px 20px;
+    max-width: 95%;
+  }
+
+  .unlock-prompt h2 {
+    font-size: 24px;
+  }
+
+  .feature-name {
+    font-size: 18px;
+  }
+
+  .unlock-prompt .feature-icon {
+    font-size: 56px;
+  }
+
+  .action-button {
+    padding: 14px 20px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ad-unlock-modal {
+    padding: 25px 15px;
+  }
+
+  .unlock-prompt h2 {
+    font-size: 22px;
+  }
+
+  .unlock-offer {
+    padding: 15px;
+  }
+
+  .badge-text {
+    font-size: 16px;
+  }
+}
