@@ -18,103 +18,124 @@ class UPISettlement {
 
   /**
    * Generate UPI deep link for payment
+   * Fixed: Use manual encoding instead of URLSearchParams for proper UPI compliance
    * @param {string} upiId - Payee UPI ID
    * @param {number} amount - Payment amount
    * @param {string} note - Payment note/description
    * @returns {string} UPI deep link
    */
   generateUPILink(upiId, amount, note) {
-    const params = new URLSearchParams({
-      pa: upiId,
-      pn: 'monEZ Settlement',
-      am: amount.toFixed(2),
-      cu: 'INR',
-      tn: note || 'Bill settlement via monEZ'
-    });
-    return `upi://pay?${params.toString()}`;
+    // Manual parameter encoding for UPI compliance
+    // URLSearchParams encodes spaces as '+' which causes issues with some UPI apps
+    // encodeURIComponent encodes spaces as '%20' which is UPI-compliant
+    const params = {
+      pa: encodeURIComponent(upiId),
+      pn: encodeURIComponent('monEZ Settlement'),
+      am: encodeURIComponent(amount.toFixed(2)),
+      cu: encodeURIComponent('INR'),
+      tn: encodeURIComponent(note || 'Bill settlement via monEZ')
+    };
+    
+    // Construct query string manually
+    const queryString = Object.entries(params)
+      .map(([key, value]) => `${key}=${value}`)
+      .join('&');
+    
+    return `upi://pay?${queryString}`;
   }
 
   /**
-   * Generate QR code data URL for UPI payment
-   * @param {string} upiLink - UPI deep link
-   * @returns {Promise<string>} Data URL of QR code image
+   * Generate QR code for UPI payment
+   * @param {string} upiId - Payee UPI ID
+   * @param {number} amount - Payment amount
+   * @param {string} note - Payment note
+   * @returns {Promise<string>} QR code data URL
    */
-  async generateQRCode(upiLink) {
-    // Using a simple QR code library (assumes QRCode.js is loaded)
-    return new Promise((resolve, reject) => {
-      if (typeof QRCode === 'undefined') {
-        // Fallback: use online QR API
-        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}`;
-        resolve(qrApiUrl);
-      } else {
-        try {
-          const canvas = document.createElement('canvas');
-          QRCode.toCanvas(canvas, upiLink, { width: 300 }, (error) => {
-            if (error) reject(error);
-            else resolve(canvas.toDataURL());
-          });
-        } catch (error) {
-          reject(error);
+  async generateQRCode(upiId, amount, note) {
+    const upiLink = this.generateUPILink(upiId, amount, note);
+    
+    // Using QRCode library (needs to be imported)
+    if (typeof QRCode !== 'undefined') {
+      const canvas = document.createElement('canvas');
+      await QRCode.toCanvas(canvas, upiLink, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
         }
-      }
-    });
+      });
+      return canvas.toDataURL();
+    }
+    
+    // Fallback: use Google Charts API
+    const size = 256;
+    return `https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(upiLink)}&chs=${size}x${size}&chld=L|0`;
   }
 
   /**
-   * Open UPI payment in native app
-   * @param {string} upiLink - UPI deep link
+   * Initiate UPI payment
+   * @param {string} upiId - Payee UPI ID
+   * @param {number} amount - Payment amount  
+   * @param {string} note - Payment note
+   * @returns {Promise<Object>} Settlement record
    */
-  openUPIApp(upiLink) {
-    if (this.isMobile()) {
+  async initiatePayment(upiId, amount, note) {
+    const upiLink = this.generateUPILink(upiId, amount, note);
+    
+    const settlement = {
+      id: Date.now().toString(),
+      upiId,
+      amount,
+      note,
+      timestamp: new Date().toISOString(),
+      status: 'initiated',
+      upiLink
+    };
+    
+    // Save to settlements array
+    if (!this.settlements) {
+      this.settlements = this.loadSettlements();
+    }
+    this.settlements.push(settlement);
+    this.saveSettlements();
+    
+    // Open UPI app
+    try {
       window.location.href = upiLink;
-    } else {
-      // Desktop: show QR code modal
-      this.showQRModal(upiLink);
+      
+      // Mark as pending after short delay
+      setTimeout(() => {
+        settlement.status = 'pending';
+        this.saveSettlements();
+      }, 1000);
+      
+      return settlement;
+    } catch (error) {
+      console.error('Error initiating UPI payment:', error);
+      settlement.status = 'failed';
+      settlement.error = error.message;
+      this.saveSettlements();
+      throw error;
     }
   }
 
   /**
-   * Check if device is mobile
-   * @returns {boolean}
+   * Mark settlement as completed
+   * @param {string} settlementId - Settlement ID
    */
-  isMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  }
-
-  /**
-   * Show QR code modal for desktop users
-   * @param {string} upiLink - UPI deep link
-   */
-  async showQRModal(upiLink) {
-    const qrUrl = await this.generateQRCode(upiLink);
+  markComplete(settlementId) {
+    if (!this.settlements) {
+      this.settlements = this.loadSettlements();
+    }
     
-    const modal = document.createElement('div');
-    modal.className = 'upi-qr-modal';
-    modal.innerHTML = `
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Scan to Pay via UPI</h3>
-          <button class="close-modal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <img src="${qrUrl}" alt="UPI QR Code" class="qr-code" />
-          <p>Scan this QR code with any UPI app</p>
-          <div class="upi-apps">
-            ${this.upiApps.map(app => `<span class="app-badge">${app.name}</span>`).join('')}
-          </div>
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    modal.querySelector('.close-modal').addEventListener('click', () => {
-      modal.remove();
-    });
-    
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.remove();
-    });
+    const settlement = this.settlements.find(s => s.id === settlementId);
+    if (settlement) {
+      settlement.status = 'completed';
+      settlement.completedAt = new Date().toISOString();
+      this.saveSettlements();
+      this.notifyBalanceUpdate(settlement);
+    }
   }
 }
 
@@ -122,173 +143,105 @@ class UPISettlement {
 class SettlementUI {
   constructor(upiHandler) {
     this.upiHandler = upiHandler;
-    this.settlements = this.loadSettlements();
+    this.settlements = upiHandler.loadSettlements();
   }
 
   /**
-   * Add 'Settle via UPI' button to balance displays
-   * @param {HTMLElement} balanceElement - Element displaying balance
-   * @param {Object} settlementData - { creditor, debtor, amount, balanceId }
+   * Add settle button to element
+   * @param {HTMLElement} element - Element to add button to
+   * @param {Object} data - Settlement data {upiId, amount, note, userName}
    */
-  addSettleButton(balanceElement, settlementData) {
+  addSettleButton(element, data) {
     const button = document.createElement('button');
-    button.className = 'settle-upi-btn';
-    button.innerHTML = '💳 Settle via UPI';
-    button.onclick = () => this.initiateSettlement(settlementData);
-    
-    balanceElement.appendChild(button);
+    button.className = 'settle-btn';
+    button.innerHTML = '💸 Settle via UPI';
+    button.onclick = () => this.showSettleModal(data);
+    element.appendChild(button);
   }
 
   /**
-   * Initiate UPI settlement process
+   * Show settlement modal
    * @param {Object} data - Settlement data
    */
-  async initiateSettlement(data) {
-    // Prompt for UPI ID if not already stored
-    const upiId = await this.getCreditorUPIId(data.creditor);
-    
-    if (!upiId) {
-      alert('UPI ID not found. Please ask the creditor to set up their UPI ID.');
-      return;
-    }
-    
-    const note = `Settlement for ${data.debtor} to ${data.creditor}`;
-    const upiLink = this.upiHandler.generateUPILink(upiId, data.amount, note);
-    
-    // Create settlement record
-    const settlementId = this.createSettlementRecord(data);
-    
-    // Open UPI app or show QR
-    this.upiHandler.openUPIApp(upiLink);
-    
-    // Show confirmation UI
-    this.showSettlementConfirmation(settlementId, data);
-  }
-
-  /**
-   * Get or prompt for creditor's UPI ID
-   * @param {string} creditorId - Creditor user ID
-   * @returns {Promise<string>} UPI ID
-   */
-  async getCreditorUPIId(creditorId) {
-    // Check if stored in user profile
-    const storedUPI = localStorage.getItem(`upi_${creditorId}`);
-    if (storedUPI) return storedUPI;
-    
-    // Prompt user to enter (in real app, this would be fetched from database)
-    const upiId = prompt('Enter creditor\'s UPI ID (e.g., user@upi):');
-    if (upiId && this.validateUPIId(upiId)) {
-      localStorage.setItem(`upi_${creditorId}`, upiId);
-      return upiId;
-    }
-    return null;
-  }
-
-  /**
-   * Validate UPI ID format
-   * @param {string} upiId - UPI ID to validate
-   * @returns {boolean}
-   */
-  validateUPIId(upiId) {
-    const upiRegex = /^[\w.-]+@[\w.-]+$/;
-    return upiRegex.test(upiId);
-  }
-
-  /**
-   * Create settlement record (honor system)
-   * @param {Object} data - Settlement data
-   * @returns {string} Settlement ID
-   */
-  createSettlementRecord(data) {
-    const settlement = {
-      id: Date.now().toString(),
-      ...data,
-      status: 'pending',
-      timestamp: new Date().toISOString(),
-      method: 'UPI'
-    };
-    
-    this.settlements.push(settlement);
-    this.saveSettlements();
-    
-    return settlement.id;
-  }
-
-  /**
-   * Show settlement confirmation dialog
-   * @param {string} settlementId - Settlement ID
-   * @param {Object} data - Settlement data
-   */
-  showSettlementConfirmation(settlementId, data) {
-    const confirmModal = document.createElement('div');
-    confirmModal.className = 'settlement-confirm-modal';
-    confirmModal.innerHTML = `
+  showSettleModal(data) {
+    const modal = document.createElement('div');
+    modal.className = 'settle-modal';
+    modal.innerHTML = `
       <div class="modal-content">
-        <h3>Payment Initiated</h3>
-        <p>Amount: ₹${data.amount.toFixed(2)}</p>
-        <p>To: ${data.creditor}</p>
-        <p>Have you completed the UPI payment?</p>
-        <div class="button-group">
-          <button class="btn-confirm" data-action="confirm">Yes, I've Paid</button>
-          <button class="btn-cancel" data-action="cancel">Cancel</button>
+        <div class="modal-header">
+          <h3>💸 Settle with ${data.userName}</h3>
+          <button class="close-btn" onclick="this.closest('.settle-modal').remove()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="amount-display">
+            <span class="currency">₹</span>
+            <span class="amount">${data.amount.toFixed(2)}</span>
+          </div>
+          <div class="upi-id">
+            <label>UPI ID</label>
+            <input type="text" value="${data.upiId}" readonly />
+          </div>
+          <div class="note">
+            <label>Note</label>
+            <input type="text" value="${data.note || 'Settlement'}" id="settlement-note" />
+          </div>
+          <div class="upi-apps">
+            ${this.upiHandler.upiApps.map(app => `
+              <button class="upi-app-btn" data-app="${app.name}">
+                <span class="app-icon">💳</span>
+                ${app.name}
+              </button>
+            `).join('')}
+          </div>
+          <button class="pay-btn" id="initiate-payment">Pay Now</button>
         </div>
       </div>
     `;
     
-    document.body.appendChild(confirmModal);
+    document.body.appendChild(modal);
+    modal.style.display = 'flex';
     
-    confirmModal.addEventListener('click', (e) => {
-      const action = e.target.dataset.action;
-      if (action === 'confirm') {
-        this.confirmSettlement(settlementId);
-        this.showSuccessMessage(data);
-      } else if (action === 'cancel') {
-        this.cancelSettlement(settlementId);
+    // Add event listeners
+    modal.querySelector('#initiate-payment').onclick = async () => {
+      const note = modal.querySelector('#settlement-note').value;
+      try {
+        await this.upiHandler.initiatePayment(data.upiId, data.amount, note);
+        this.showSuccessToast('Payment initiated!');
+        modal.remove();
+      } catch (error) {
+        this.showErrorToast('Failed to initiate payment');
       }
-      confirmModal.remove();
-    });
+    };
   }
 
   /**
-   * Confirm settlement (honor system)
-   * @param {string} settlementId - Settlement ID
+   * Show success toast
+   * @param {string} message - Message to show
    */
-  confirmSettlement(settlementId) {
-    const settlement = this.settlements.find(s => s.id === settlementId);
-    if (settlement) {
-      settlement.status = 'completed';
-      settlement.completedAt = new Date().toISOString();
-      this.saveSettlements();
-      
-      // Trigger balance update in main app
-      this.notifyBalanceUpdate(settlement);
-    }
-  }
-
-  /**
-   * Cancel settlement
-   * @param {string} settlementId - Settlement ID
-   */
-  cancelSettlement(settlementId) {
-    const settlement = this.settlements.find(s => s.id === settlementId);
-    if (settlement) {
-      settlement.status = 'cancelled';
-      this.saveSettlements();
-    }
-  }
-
-  /**
-   * Show success message with visual feedback
-   * @param {Object} data - Settlement data
-   */
-  showSuccessMessage(data) {
+  showSuccessToast(message) {
     const toast = document.createElement('div');
-    toast.className = 'settlement-toast success';
-    toast.innerHTML = `
-      <span class="icon">✓</span>
-      <span>Settlement of ₹${data.amount.toFixed(2)} recorded!</span>
-    `;
+    toast.className = 'toast toast-success';
+    toast.textContent = message;
+    document.body.appendChild(toast);
     
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  /**
+   * Show error toast
+   * @param {string} message - Message to show
+   */
+  showErrorToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-error';
+    toast.textContent = message;
     document.body.appendChild(toast);
     
     setTimeout(() => {
