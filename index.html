@@ -1,621 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#846941">
-    <meta name="description" content="monEZ - Split expenses, not friendships">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>💰</text></svg>">
-    <link rel="manifest" href="manifest.json">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#846941" />
+    <meta name="description" content="monEZ - Split expenses, not friendships" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="icon" href="data:image/svg+xml,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' text-anchor='middle' font-size='50' fill='white'>💰</text></svg>" />
+    <link rel="manifest" href="manifest.json" />
     <title>monEZ - Split expenses, not friendships</title>
-    
     <!-- CSS Files -->
-    <link rel="stylesheet" href="styles/variables.css">
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/components.css">
-    <link rel="stylesheet" href="styles/onboarding.css">
-
-</head>
-<body>
-
-    <!-- Onboarding Screen -->
-<div id="onboarding-screen" class="onboarding-screen hidden">
-  
-  <!-- Step 1: Country Selection -->
-  <div class="onboarding-step" id="onboarding-country">
-    <div class="step-header">
-      <div class="step-icon">🌍</div>
-      <h2>Where are you based?</h2>
-      <p>We'll customize monEZ for your region</p>
-    </div>
-    
-    <div class="country-search">
-      <input 
-        type="text" 
-        id="country-search-input" 
-        placeholder="🔍 Search country..."
-        autocomplete="country-name"
-      />
-    </div>
-    
-    <div class="country-list-popular">
-      <h3>Popular Countries</h3>
-      <div class="country-grid" id="popular-countries">
-        <!-- Populated by JavaScript -->
-      </div>
-    </div>
-    
-    <button class="show-all-btn" id="show-all-countries-btn">
-      Show all countries ▼
-    </button>
-    
-    <div class="country-list-all hidden" id="all-countries-container">
-      <h3>All Countries</h3>
-      <div class="country-grid" id="all-countries">
-        <!-- Populated by JavaScript -->
-      </div>
-    </div>
-  </div>
-  
-  <!-- Step 2: Confirm Settings -->
-  <div class="onboarding-step hidden" id="onboarding-confirm">
-    <div class="step-header">
-      <div class="step-icon">✨</div>
-      <h2>We've set up monEZ for you!</h2>
-      <p>Based on <strong id="selected-country-display"></strong></p>
-    </div>
-    
-    <div class="settings-preview">
-      <!-- Language -->
-      <div class="setting-row">
-        <div class="setting-icon">🗣️</div>
-        <div class="setting-content">
-          <div class="setting-label">Language</div>
-          <div class="setting-value" id="selected-language-display">
-            English
-          </div>
-        </div>
-        <button class="change-btn" id="change-language-btn">Change</button>
-      </div>
-      
-      <!-- Currency -->
-      <div class="setting-row">
-        <div class="setting-icon">💰</div>
-        <div class="setting-content">
-          <div class="setting-label">Currency</div>
-          <div class="setting-value" id="selected-currency-display">
-            USD ($)
-          </div>
-        </div>
-        <button class="change-btn" id="change-currency-btn">Change</button>
-      </div>
-      
-      <!-- Timezone -->
-      <div class="setting-row">
-        <div class="setting-icon">🕐</div>
-        <div class="setting-content">
-          <div class="setting-label">Timezone</div>
-          <div class="setting-value" id="selected-timezone-display">
-            Auto-detected
-          </div>
-        </div>
-        <button class="change-btn" id="change-timezone-btn">Change</button>
-      </div>
-      
-      <!-- Date Format -->
-      <div class="setting-row">
-        <div class="setting-icon">📅</div>
-        <div class="setting-content">
-          <div class="setting-label">Date Format</div>
-          <div class="setting-value" id="selected-dateformat-display">
-            MM/DD/YYYY
-          </div>
-        </div>
-        <button class="change-btn" id="change-dateformat-btn">Change</button>
-      </div>
-    </div>
-    
-    <div class="form-actions">
-      <button class="btn-secondary" id="onboarding-back-btn">
-        ← Back
-      </button>
-      <button class="btn-primary" id="onboarding-continue-btn">
-        Looks good! Continue →
-      </button>
-    </div>
-  </div>
-  
-</div>
-
-<!-- Language Picker Modal -->
-<div class="modal hidden" id="language-picker-modal">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Choose Language</h3>
-      <button class="modal-close" id="close-language-modal">×</button>
-    </div>
-    <div class="modal-body">
-      <input 
-        type="text" 
-        id="language-search-input" 
-        placeholder="🔍 Search language..."
-      />
-      
-      <div class="language-groups">
-        <!-- Suggested Languages -->
-        <div class="language-group">
-          <h4>Suggested for your region</h4>
-          <div class="language-list" id="suggested-languages-list">
-            <!-- Populated by JavaScript -->
-          </div>
-        </div>
-        
-        <!-- Popular Languages -->
-        <div class="language-group">
-          <h4>Popular Languages</h4>
-          <div class="language-list" id="popular-languages-list">
-            <!-- Populated by JavaScript -->
-          </div>
-        </div>
-        
-        <!-- All Languages -->
-        <div class="language-group">
-          <h4>All Languages</h4>
-          <div class="language-list" id="all-languages-list">
-            <!-- Populated by JavaScript -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Currency Picker Modal -->
-<div class="modal hidden" id="currency-picker-modal">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Choose Currency</h3>
-      <button class="modal-close" id="close-currency-modal">×</button>
-    </div>
-    <div class="modal-body">
-      <input 
-        type="text" 
-        id="currency-search-input" 
-        placeholder="🔍 Search currency..."
-      />
-      
-      <div class="currency-list" id="currency-list">
-        <!-- Populated by JavaScript -->
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Date Format Picker Modal -->
-<div class="modal hidden" id="dateformat-picker-modal">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Choose Date Format</h3>
-      <button class="modal-close" id="close-dateformat-modal">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="dateformat-list" id="dateformat-list">
-        <!-- Populated by JavaScript -->
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Timezone Picker Modal -->
-<div class="modal hidden" id="timezone-picker-modal">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Choose Timezone</h3>
-      <button class="modal-close" id="close-timezone-modal">×</button>
-    </div>
-    <div class="modal-body">
-      <input 
-        type="text" 
-        id="timezone-search-input" 
-        placeholder="🔍 Search timezone..."
-      />
-      
-      <div class="timezone-list" id="timezone-list">
-        <!-- Populated by JavaScript -->
-      </div>
-    </div>
-  </div>
-</div>
+    <link rel="stylesheet" href="styles/variables.css" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/components.css" />
+    <link rel="stylesheet" href="styles/onboarding.css" />
+  </head>
+  <body>
+    <!-- Onboarding Screen (unchanged structure) -->
+    <div id="onboarding-screen" class="onboarding-screen hidden" aria-hidden="true"></div>
 
     <div class="app">
-        <!-- Loading Screen -->
-        <div id="loading-screen" class="loading-screen">
-            <div class="loading-content">
-                <div class="logo-large">mon<span class="accent">EZ</span></div>
-                <div class="tagline">Split expenses, not friendships</div>
-                <div class="loading-spinner"></div>
-                <div class="loading-text">Loading your financial companion...</div>
+      <!-- Loading Screen -->
+      <div id="loading-screen" class="loading-screen" aria-live="polite" aria-busy="true">
+        <div class="loading-content">
+          <div class="logo-large">mon<span class="accent">EZ</span></div>
+          <div class="tagline">Split expenses, not friendships</div>
+          <div class="loading-spinner" role="status" aria-label="Loading"></div>
+          <div class="loading-text">Loading your financial companion...</div>
+        </div>
+      </div>
+
+      <!-- Login Screen -->
+      <div id="login-screen" class="login-screen" style="display: flex;" aria-labelledby="login-title">
+        <div class="login-content">
+          <div class="logo-large" id="login-title">mon<span class="accent">EZ</span></div>
+          <div class="tagline">Split expenses, not friendships</div>
+
+          <!-- Social login remains available -->
+          <button class="login-button" onclick="signInWithGoogle()" aria-label="Sign in with Google">
+            🚀 Sign in with Google
+          </button>
+
+          <!-- Email/Password Auth Tabs -->
+          <div class="auth-card" role="region" aria-label="Email authentication">
+            <div class="tablist" role="tablist" aria-label="Authentication tabs">
+              <button id="tab-login" role="tab" aria-selected="true" aria-controls="panel-login" class="tab active">Log in</button>
+              <button id="tab-signup" role="tab" aria-selected="false" aria-controls="panel-signup" class="tab">Sign up</button>
+              <button id="tab-reset" role="tab" aria-selected="false" aria-controls="panel-reset" class="tab">Reset password</button>
             </div>
-        </div>
 
-        <!-- Login Screen -->
-        <div id="login-screen" class="login-screen" style="display: flex;">
-            <div class="login-content">
-                <div class="logo-large">mon<span class="accent">EZ</span></div>
-                <div class="tagline">Split expenses, not friendships</div>
-                <button class="login-button" onclick="signInWithGoogle()">
-                    <span>🚀</span>
-                    Sign in with Google
-                </button>
-                <div class="login-features">
-                    Real-time sync • Secure • Free
+            <!-- Log in panel -->
+            <div id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+              <form id="email-login-form" aria-describedby="login-message" novalidate>
+                <div class="form-group">
+                  <label for="login-email">Email</label>
+                  <input id="login-email" name="email" type="email" class="form-input" placeholder="you@example.com" autocomplete="email" required aria-required="true" aria-label="Email address" />
                 </div>
+                <div class="form-group">
+                  <label for="login-password">Password</label>
+                  <input id="login-password" name="password" type="password" class="form-input" placeholder="Your password" autocomplete="current-password" required aria-required="true" aria-label="Password" />
+                </div>
+                <div id="login-message" class="form-message" aria-live="polite" aria-atomic="true"></div>
+                <button type="submit" class="btn-primary" aria-label="Log in with email">Log in</button>
+              </form>
             </div>
-        </div>
 
-        <!-- PWA Install Prompt -->
-        <div id="pwa-prompt" class="pwa-prompt hidden">
-            <div class="pwa-content">
-                <div class="pwa-icon">📱</div>
-                <div class="pwa-text">
-                    <h3>Install monEZ</h3>
-                    <p>Get the full app experience on your home screen</p>
+            <!-- Sign up panel -->
+            <div id="panel-signup" role="tabpanel" aria-labelledby="tab-signup" hidden>
+              <form id="email-signup-form" aria-describedby="signup-message" novalidate>
+                <div class="form-group">
+                  <label for="signup-email">Email</label>
+                  <input id="signup-email" name="email" type="email" class="form-input" placeholder="you@example.com" autocomplete="email" required aria-required="true" aria-label="Email address" />
                 </div>
-                <div class="pwa-actions">
-                    <button class="btn-secondary" onclick="dismissPWAPrompt()">Maybe later</button>
-                    <button class="btn-primary" onclick="installPWA()">Install</button>
+                <div class="form-group">
+                  <label for="signup-password">Password</label>
+                  <input id="signup-password" name="password" type="password" class="form-input" placeholder="Create a password" autocomplete="new-password" required aria-required="true" minlength="6" aria-label="Password" />
                 </div>
+                <div id="signup-message" class="form-message" aria-live="polite" aria-atomic="true"></div>
+                <button type="submit" class="btn-primary" aria-label="Create account">Create account</button>
+              </form>
             </div>
-        </div>
 
-        <!-- Main App -->
-        <div id="main-app" style="display: none;">
-            <!-- App Header -->
-            <header class="app-header">
-                <div class="header-left">
-                    <div class="logo">mon<span class="accent">EZ</span></div>
-                    <div class="balance-summary">
-                        <div class="balance-label">Your balance</div>
-                        <div class="balance-amount" id="balance-hero">₹1,160</div>
-                    </div>
+            <!-- Reset panel -->
+            <div id="panel-reset" role="tabpanel" aria-labelledby="tab-reset" hidden>
+              <form id="password-reset-form" aria-describedby="reset-message" novalidate>
+                <div class="form-group">
+                  <label for="reset-email">Email</label>
+                  <input id="reset-email" name="email" type="email" class="form-input" placeholder="you@example.com" autocomplete="email" required aria-required="true" aria-label="Email address" />
                 </div>
-                <div class="header-right">
-                    <button class="icon-btn" onclick="showNotifications()" aria-label="Notifications">
-                        <span class="icon">🔔</span>
-                        <span class="badge">3</span>
-                    </button>
-                    <button class="icon-btn" onclick="showProfile()" aria-label="Profile">
-                        <div class="avatar">Y</div>
-                    </button>
-                </div>
-            </header>
-
-            <!-- Views Container -->
-            <main class="main-content">
-                <!-- Home View -->
-                <div id="home-view" class="view active">
-                    <!-- Quick Stats -->
-                    <div class="quick-stats">
-                        <div class="stat-card positive">
-                            <div class="stat-icon">💚</div>
-                            <div class="stat-content">
-                                <div class="stat-label">You're owed</div>
-                                <div class="stat-value">₹1,320</div>
-                            </div>
-                        </div>
-                        <div class="stat-card negative">
-                            <div class="stat-icon">💸</div>
-                            <div class="stat-content">
-                                <div class="stat-label">You owe</div>
-                                <div class="stat-value">₹865</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="quick-actions">
-                        <button class="action-card primary" onclick="showAddExpense()">
-                            <div class="action-icon">➕</div>
-                            <div class="action-label">Add Expense</div>
-                        </button>
-                        <button class="action-card" onclick="showSplitBill()">
-                            <div class="action-icon">🧮</div>
-                            <div class="action-label">Split Bill</div>
-                        </button>
-                        <button class="action-card" onclick="showSettle()">
-                            <div class="action-icon">💳</div>
-                            <div class="action-label">Settle Up</div>
-                        </button>
-                        <button class="action-card premium" onclick="showPremiumFeatures()">
-                            <div class="action-icon">✨</div>
-                            <div class="action-label">AI Insights</div>
-                            <div class="premium-badge">PRO</div>
-                        </button>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <section class="activity-section">
-                        <div class="section-header">
-                            <h3>Recent Activity</h3>
-                            <button class="view-all" onclick="showExpenses()">View all</button>
-                        </div>
-                        <div id="recent-expenses" class="activity-list"></div>
-                    </section>
-
-                    <!-- Groups Preview -->
-                    <section class="groups-section">
-                        <div class="section-header">
-                            <h3>Your Groups</h3>
-                            <div class="group-limit">2/3 groups</div>
-                            <button class="view-all" onclick="showGroups()">View all</button>
-                        </div>
-                        <div class="groups-preview" id="groups-preview"></div>
-                    </section>
-                </div>
-
-                <!-- Add Expense View -->
-                <div id="add-expense-view" class="view">
-                    <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
-                        <h2>Add Expense</h2>
-                        <button class="voice-btn" onclick="startVoiceInput()" aria-label="Voice Input">🎤</button>
-                    </div>
-            
-                    <form id="expense-form" class="expense-form">
-                        <div id="form-error-msg" aria-live="polite" style="display: none; color: #EF4444; font-size: 14px; padding: 8px 0;"></div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="amount">Amount</label>
-                            <div class="amount-input-container">
-                                <span class="currency-symbol">₹</span>
-                                <input 
-                                    type="number" 
-                                    id="amount" 
-                                    class="form-input amount-field" 
-                                    placeholder="0.00" 
-                                    step="0.01" 
-                                    aria-label="Amount in rupees" 
-                                    required>
-                                <button 
-                                    type="button" 
-                                    class="ai-suggest-btn" 
-                                    onclick="aiSuggestAmount()" 
-                                    title="AI Suggestion"
-                                    aria-label="AI Suggest Amount">
-                                    <span class="ai-icon">🤖</span>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="description">Description</label>
-                            <input 
-                                type="text" 
-                                id="description" 
-                                class="form-input" 
-                                placeholder="What was this for?" 
-                                aria-label="Expense description" 
-                                required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Category</label>
-                            <div class="category-selector">
-                                <button type="button" class="category-btn" data-category="🍽️" aria-label="Food category">🍽️ Food</button>
-                                <button type="button" class="category-btn" data-category="🚗" aria-label="Transport category">🚗 Transport</button>
-                                <button type="button" class="category-btn" data-category="🎬" aria-label="Entertainment category">🎬 Entertainment</button>
-                                <button type="button" class="category-btn" data-category="🛍️" aria-label="Shopping category">🛍️ Shopping</button>
-                                <button type="button" class="category-btn" data-category="💡" aria-label="Bills category">💡 Bills</button>
-                                <button type="button" class="category-btn" data-category="✈️" aria-label="Travel category">✈️ Travel</button>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Split with</label>
-                            <div class="people-selector" id="people-selector"></div>
-                        </div>
-                        
-                        <div class="split-options">
-                            <div class="split-type">
-                                <button type="button" class="split-btn active" data-type="equal" aria-label="Equal split">Equal Split</button>
-                                <button type="button" class="split-btn" data-type="percentage" aria-label="Split by percentage">By Percentage</button>
-                                <button type="button" class="split-btn premium" data-type="custom" onclick="showPremiumModal()" aria-label="Custom split - Premium feature">Custom Split <span class="pro-tag">PRO</span></button>
-                            </div>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <button type="button" class="btn-secondary" onclick="showHome()">Cancel</button>
-                            <button type="submit" class="btn-primary">
-                                <span class="btn-text">Save Expense</span>
-                                <span class="btn-icon">💾</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Expenses View -->
-                <div id="expenses-view" class="view">
-                    <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
-                        <h2>All Expenses</h2>
-                        <button class="filter-btn" onclick="showFilters()" aria-label="Filter expenses">🔍</button>
-                    </div>
-                    
-                    <div class="expenses-stats">
-                        <div class="stat-summary">
-                            <div class="stat-item">
-                                <span class="stat-number" id="total-expenses">₹8,450</span>
-                                <span class="stat-label">Total Spent</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-number" id="this-month">₹3,280</span>
-                                <span class="stat-label">This Month</span>
-                            </div>
-                        </div>
-                    </div>
-            
-                    <div class="activity-list" id="all-expenses-list"></div>
-                </div>
-
-                <!-- Balances View -->
-                <div id="balances-view" class="view">
-                    <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
-                        <h2>Balances</h2>
-                        <button class="settle-all-btn" onclick="settleAll()">Settle All</button>
-                    </div>
-            
-                    <div class="balances-list" id="balances-list"></div>
-                </div>
-
-                <!-- Groups View -->
-                <div id="groups-view" class="view">
-                    <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
-                        <h2>Groups</h2>
-                        <button class="create-group-btn" onclick="showCreateGroup()" aria-label="Create new group">+</button>
-                    </div>
-                    
-                    <div class="groups-grid" id="groups-grid"></div>
-                </div>
-
-                <!-- Premium Features View -->
-                <div id="premium-view" class="view">
-                    <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
-                        <h2>Premium Features</h2>
-                        <div class="premium-status">FREE TIER</div>
-                    </div>
-                    
-                    <div id="premium-features"></div>
-                </div>
-
-                <!-- Settings View -->
-                <div id="settings-view" class="view">
-                    <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
-                        <h2>Settings</h2>
-                    </div>
-                    
-                    <div class="settings-sections">
-                        <div class="settings-section">
-                            <h3>Account</h3>
-                            <div class="setting-item" onclick="showProfile()">
-                                <div class="setting-icon">👤</div>
-                                <div class="setting-content">
-                                    <div class="setting-title">Profile</div>
-                                    <div class="setting-desc">Manage your account details</div>
-                                </div>
-                                <div class="setting-arrow">›</div>
-                            </div>
-                            <div class="setting-item" onclick="showPaymentMethods()">
-                                <div class="setting-icon">💳</div>
-                                <div class="setting-content">
-                                    <div class="setting-title">Payment Methods</div>
-                                    <div class="setting-desc">UPI, Cards, Bank accounts</div>
-                                </div>
-                                <div class="setting-arrow">›</div>
-                            </div>
-                        </div>
-                        
-                        <div class="settings-section">
-                            <h3>App</h3>
-                            <div class="setting-item">
-                                <div class="setting-icon">🔔</div>
-                                <div class="setting-content">
-                                    <div class="setting-title">Notifications</div>
-                                    <div class="setting-desc">Push notifications, reminders</div>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked aria-label="Enable notifications">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="setting-item">
-                                <div class="setting-icon">🌙</div>
-                                <div class="setting-content">
-                                    <div class="setting-title">Dark Mode</div>
-                                    <div class="setting-desc">Switch to dark theme</div>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" aria-label="Enable dark mode">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="settings-section">
-                            <h3>Premium</h3>
-                            <div class="setting-item premium" onclick="showPremiumFeatures()">
-                                <div class="setting-icon">✨</div>
-                                <div class="setting-content">
-                                    <div class="setting-title">Upgrade to Premium</div>
-                                    <div class="setting-desc">Unlock AI features & analytics</div>
-                                </div>
-                                <div class="upgrade-badge">UPGRADE</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <!-- Bottom Navigation -->
-            <nav class="bottom-nav">
-                <button class="nav-item active" data-view="home" onclick="showHome()" aria-label="Home">
-                    <span class="nav-icon">🏠</span>
-                    <span class="nav-label">Home</span>
-                </button>
-                <button class="nav-item" data-view="expenses" onclick="showExpenses()" aria-label="Expenses">
-                    <span class="nav-icon">📊</span>
-                    <span class="nav-label">Expenses</span>
-                </button>
-                <button class="nav-item" data-view="balances" onclick="showBalances()" aria-label="Balances">
-                    <span class="nav-icon">⚖️</span>
-                    <span class="nav-label">Balances</span>
-                </button>
-                <button class="nav-item" data-view="groups" onclick="showGroups()" aria-label="Groups">
-                    <span class="nav-icon">👥</span>
-                    <span class="nav-label">Groups</span>
-                    <span class="group-count">2</span>
-                </button>
-                <button class="nav-item" data-view="premium" onclick="showPremiumFeatures()" aria-label="Premium features">
-                    <span class="nav-icon">✨</span>
-                    <span class="nav-label">Premium</span>
-                    <span class="premium-indicator">PRO</span>
-                </button>
-            </nav>
-        </div>
-
-        <!-- Floating Add Button -->
-        <button class="fab" onclick="showAddExpense()" aria-label="Add new expense">
-            <span class="fab-icon">+</span>
-        </button>
-
-        <!-- Modals -->
-        <div id="premium-modal" class="modal hidden">
-            <div class="modal-overlay" onclick="closePremiumModal()"></div>
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>✨ Premium Features</h3>
-                    <button class="modal-close" onclick="closePremiumModal()" aria-label="Close modal">×</button>
-                </div>
-                <div class="premium-features-list"></div>
+                <div id="reset-message" class="form-message" aria-live="polite" aria-atomic="true"></div>
+                <button type="submit" class="btn-primary" aria-label="Send reset email">Send reset link</button>
+              </form>
             </div>
+          </div>
+
+          <div class="login-features" aria-hidden="true">Real-time sync • Secure • Free</div>
         </div>
+      </div>
+
+      <!-- Main App container remains as before; initially hidden by app logic -->
+      <div id="main-app" style="display:none" hidden></div>
     </div>
 
+    <!-- Scripts -->
     <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/countries-data.js"></script>
+    <script type="module" src="js/onboarding.js"></script>
 
-    <!-- Add after other script tags -->
-<script type="module" src="js/countries-data.js"></script>
-<script type="module" src="js/onboarding.js"></script>
+    <!-- Inline minimal controller to wire UI to existing window methods without introducing new logic -->
+    <script>
+      (function () {
+        const $ = (s) => document.querySelector(s);
+        const tabs = [
+          { tab: '#tab-login', panel: '#panel-login' },
+          { tab: '#tab-signup', panel: '#panel-signup' },
+          { tab: '#tab-reset', panel: '#panel-reset' }
+        ];
+        function showPanel(id) {
+          tabs.forEach(({ tab, panel }) => {
+            const t = $(tab); const p = $(panel);
+            const active = panel === id;
+            t.setAttribute('aria-selected', active ? 'true' : 'false');
+            t.classList.toggle('active', active);
+            if (active) { p.removeAttribute('hidden'); } else { p.setAttribute('hidden', ''); }
+          });
+        }
+        tabs.forEach(({ tab, panel }) => {
+          $(tab).addEventListener('click', () => showPanel(panel));
+        });
 
-</body>
+        // Login
+        $('#email-login-form')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = $('#login-email').value.trim();
+          const password = $('#login-password').value;
+          const msg = $('#login-message');
+          msg.textContent = '';
+          msg.className = 'form-message';
+          try {
+            msg.textContent = 'Signing in…';
+            await window.signInWithEmail(email, password);
+            msg.textContent = 'Success! Redirecting…';
+          } catch (err) {
+            msg.textContent = err?.message || 'Login failed. Please try again.';
+          }
+        });
+
+        // Sign up
+        $('#email-signup-form')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = $('#signup-email').value.trim();
+          const password = $('#signup-password').value;
+          const msg = $('#signup-message');
+          msg.textContent = '';
+          try {
+            msg.textContent = 'Creating account…';
+            await window.signUpWithEmail(email, password);
+            msg.textContent = 'Account created! You can now log in.';
+            showPanel('#panel-login');
+          } catch (err) {
+            msg.textContent = err?.message || 'Sign up failed. Please try again.';
+          }
+        });
+
+        // Reset
+        $('#password-reset-form')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = $('#reset-email').value.trim();
+          const msg = $('#reset-message');
+          msg.textContent = '';
+          try {
+            msg.textContent = 'Sending reset email…';
+            await window.resetPassword(email);
+            msg.textContent = 'Password reset email sent. Check your inbox.';
+          } catch (err) {
+            msg.textContent = err?.message || 'Failed to send reset email.';
+          }
+        });
+      })();
+    </script>
+  </body>
 </html>
