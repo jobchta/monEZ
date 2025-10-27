@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#846941" />
@@ -52,101 +52,19 @@
           <input id="signup-password" type="password" autocomplete="new-password" required minlength="8" aria-label="Password" />
           <button type="submit" class="btn gold-btn" aria-label="Create account with email">Create account</button>
         </form>
-        <button type="button" class="btn google-btn" aria-label="Continue with Google">Continue with Google</button>
-        <button type="button" class="btn gold-btn" aria-label="Go to login" data-target="#panel-login">Back to login</button>
+        <button type="button" class="btn gold-btn" aria-label="Back to login" data-target="#panel-login">Back to Login</button>
         <div id="signup-message" class="form-message" role="status" aria-live="polite"></div>
       </section>
       <section id="panel-reset" aria-labelledby="reset-heading" hidden>
-        <h2 id="reset-heading" class="visually-hidden">Reset password</h2>
+        <h2 id="reset-heading" class="visually-hidden">Reset Password</h2>
         <form id="password-reset-form">
           <input id="reset-email" type="email" autocomplete="email" required aria-label="Email" />
-          <button type="submit" class="btn gold-btn" aria-label="Send reset email">Send reset email</button>
+          <button type="submit" class="btn gold-btn" aria-label="Send password reset email">Send Reset Email</button>
         </form>
-        <button type="button" class="btn gold-btn" aria-label="Go to login" data-target="#panel-login">Back to login</button>
+        <button type="button" class="btn gold-btn" aria-label="Back to login" data-target="#panel-login">Back to Login</button>
         <div id="reset-message" class="form-message" role="status" aria-live="polite"></div>
       </section>
-      <!-- Main App Screen (shown after auth) -->
-      <div id="main-app" class="main-app" hidden>
-        <header class="app-header">
-          <div class="logo">mon<span class="accent">EZ</span></div>
-          <button id="menu-button" class="icon-button" aria-label="Open menu" aria-haspopup="true" aria-expanded="false">☰</button>
-        </header>
-        <nav id="side-menu" class="side-menu" aria-label="Main navigation" hidden>
-          <button id="close-menu" class="close-button" aria-label="Close menu">✕</button>
-          <a href="#" class="menu-item" data-screen="home">🏠 Home</a>
-          <a href="#" class="menu-item" data-screen="groups">👥 Groups</a>
-          <a href="#" class="menu-item" data-screen="expenses">💰 Expenses</a>
-          <a href="#" class="menu-item" data-screen="balance">📊 Balance</a>
-          <a href="#" class="menu-item" data-screen="settings">⚙️ Settings</a>
-          <button id="sign-out-button" class="menu-item sign-out-button">🚪 Sign out</button>
-        </nav>
-        <main class="main-content">
-          <div id="home-screen" class="screen" role="main"></div>
-          <div id="groups-screen" class="screen" hidden></div>
-          <div id="expenses-screen" class="screen" hidden></div>
-          <div id="balance-screen" class="screen" hidden></div>
-          <div id="settings-screen" class="screen" hidden></div>
-        </main>
-      </div>
     </div>
-    <script>
-      const $ = (sel) => document.querySelector(sel);
-      function showPanel(panelId) {
-        document.querySelectorAll('[id^="panel-"]').forEach(p => p.setAttribute('hidden', ''));
-        const target = $(panelId);
-        if (target) target.removeAttribute('hidden');
-      }
-      document.querySelectorAll('[data-target]').forEach(btn => {
-        const panel = btn.getAttribute('data-target');
-        btn.addEventListener('click', () => showPanel(panel));
-      });
-      // Login
-      $('#email-login-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = $('#login-email').value.trim();
-        const password = $('#login-password').value;
-        const msg = $('#login-message');
-        msg.textContent = '';
-        msg.className = 'form-message';
-        try {
-          msg.textContent = 'Signing in…';
-          await window.signInWithEmail(email, password);
-          msg.textContent = 'Success! Redirecting…';
-        } catch (err) {
-          msg.textContent = err?.message || 'Login failed. Please try again.';
-        }
-      });
-      // Sign up
-      $('#email-signup-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = $('#signup-email').value.trim();
-        const password = $('#signup-password').value;
-        const msg = $('#signup-message');
-        msg.textContent = '';
-        try {
-          msg.textContent = 'Creating account…';
-          await window.signUpWithEmail(email, password);
-          msg.textContent = 'Account created! You can now log in.';
-          showPanel('#panel-login');
-        } catch (err) {
-          msg.textContent = err?.message || 'Sign up failed. Please try again.';
-        }
-      });
-      // Reset
-      $('#password-reset-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = $('#reset-email').value.trim();
-        const msg = $('#reset-message');
-        msg.textContent = '';
-        try {
-          msg.textContent = 'Sending reset email…';
-          await window.resetPassword(email);
-          msg.textContent = 'Password reset email sent. Check your inbox.';
-        } catch (err) {
-          msg.textContent = err?.message || 'Failed to send reset email.';
-        }
-      });
-    </script>
     <!-- Firebase and App Scripts -->
     <script src="js/firebase.js"></script>
     <script src="js/app.js"></script>
