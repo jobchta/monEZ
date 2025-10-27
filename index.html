@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#846941" />
@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <link rel="icon" href="data:image/svg+xml,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' text-anchor='middle' font-size='50' fill='white'>💰</text></svg>" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>💰</text></svg>" />
     <link rel="manifest" href="manifest.json" />
     <title>monEZ - Split expenses, not friendships</title>
     <!-- CSS Files -->
@@ -22,7 +22,6 @@
   <body>
     <!-- Onboarding Screen (unchanged structure) -->
     <div id="onboarding-screen" class="onboarding-screen hidden" aria-hidden="true"></div>
-
     <div class="app">
       <!-- Loading Screen -->
       <div id="loading-screen" class="loading-screen" aria-live="polite" aria-busy="true">
@@ -33,7 +32,6 @@
           <div class="loading-text">Loading your financial companion...</div>
         </div>
       </div>
-
       <!-- Auth Panels (buttons standardized) -->
       <section id="panel-login" aria-labelledby="login-heading">
         <h2 id="login-heading" class="visually-hidden">Login</h2>
@@ -47,7 +45,6 @@
         <button type="button" class="btn gold-btn" aria-label="Forgot password" data-target="#panel-reset">Forgot password?</button>
         <div id="login-message" class="form-message" role="status" aria-live="polite"></div>
       </section>
-
       <section id="panel-signup" aria-labelledby="signup-heading" hidden>
         <h2 id="signup-heading" class="visually-hidden">Sign up</h2>
         <form id="email-signup-form">
@@ -55,37 +52,54 @@
           <input id="signup-password" type="password" autocomplete="new-password" required minlength="8" aria-label="Password" />
           <button type="submit" class="btn gold-btn" aria-label="Create account with email">Create account</button>
         </form>
-        <button type="button" class="btn google-btn" aria-label="Sign up with Google">Sign up with Google</button>
-        <button type="button" class="btn gold-btn" aria-label="Back to login" data-target="#panel-login">Back to login</button>
+        <button type="button" class="btn google-btn" aria-label="Continue with Google">Continue with Google</button>
+        <button type="button" class="btn gold-btn" aria-label="Go to login" data-target="#panel-login">Back to login</button>
         <div id="signup-message" class="form-message" role="status" aria-live="polite"></div>
       </section>
-
       <section id="panel-reset" aria-labelledby="reset-heading" hidden>
-        <h2 id="reset-heading" class="visually-hidden">Password reset</h2>
+        <h2 id="reset-heading" class="visually-hidden">Reset password</h2>
         <form id="password-reset-form">
           <input id="reset-email" type="email" autocomplete="email" required aria-label="Email" />
-          <button type="submit" class="btn gold-btn" aria-label="Send password reset email">Send reset email</button>
+          <button type="submit" class="btn gold-btn" aria-label="Send reset email">Send reset email</button>
         </form>
-        <button type="button" class="btn gold-btn" aria-label="Back to login" data-target="#panel-login">Back to login</button>
+        <button type="button" class="btn gold-btn" aria-label="Go to login" data-target="#panel-login">Back to login</button>
         <div id="reset-message" class="form-message" role="status" aria-live="polite"></div>
       </section>
+      <!-- Main App Screen (shown after auth) -->
+      <div id="main-app" class="main-app" hidden>
+        <header class="app-header">
+          <div class="logo">mon<span class="accent">EZ</span></div>
+          <button id="menu-button" class="icon-button" aria-label="Open menu" aria-haspopup="true" aria-expanded="false">☰</button>
+        </header>
+        <nav id="side-menu" class="side-menu" aria-label="Main navigation" hidden>
+          <button id="close-menu" class="close-button" aria-label="Close menu">✕</button>
+          <a href="#" class="menu-item" data-screen="home">🏠 Home</a>
+          <a href="#" class="menu-item" data-screen="groups">👥 Groups</a>
+          <a href="#" class="menu-item" data-screen="expenses">💰 Expenses</a>
+          <a href="#" class="menu-item" data-screen="balance">📊 Balance</a>
+          <a href="#" class="menu-item" data-screen="settings">⚙️ Settings</a>
+          <button id="sign-out-button" class="menu-item sign-out-button">🚪 Sign out</button>
+        </nav>
+        <main class="main-content">
+          <div id="home-screen" class="screen" role="main"></div>
+          <div id="groups-screen" class="screen" hidden></div>
+          <div id="expenses-screen" class="screen" hidden></div>
+          <div id="balance-screen" class="screen" hidden></div>
+          <div id="settings-screen" class="screen" hidden></div>
+        </main>
+      </div>
     </div>
-
     <script>
-      const $ = (s, root = document) => root.querySelector(s);
-      const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
-      const showPanel = (sel) => {
-        $$('#panel-login, #panel-signup, #panel-reset').forEach(p => p.hidden = true);
-        const p = $(sel);
-        if (p) p.hidden = false;
-      };
-
-      // Simple panel toggles
-      $$('[data-target]').forEach(btn => {
+      const $ = (sel) => document.querySelector(sel);
+      function showPanel(panelId) {
+        document.querySelectorAll('[id^="panel-"]').forEach(p => p.setAttribute('hidden', ''));
+        const target = $(panelId);
+        if (target) target.removeAttribute('hidden');
+      }
+      document.querySelectorAll('[data-target]').forEach(btn => {
         const panel = btn.getAttribute('data-target');
         btn.addEventListener('click', () => showPanel(panel));
       });
-
       // Login
       $('#email-login-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -102,7 +116,6 @@
           msg.textContent = err?.message || 'Login failed. Please try again.';
         }
       });
-
       // Sign up
       $('#email-signup-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -119,7 +132,6 @@
           msg.textContent = err?.message || 'Sign up failed. Please try again.';
         }
       });
-
       // Reset
       $('#password-reset-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -135,5 +147,8 @@
         }
       });
     </script>
+    <!-- Firebase and App Scripts -->
+    <script src="js/firebase.js"></script>
+    <script src="js/app.js"></script>
   </body>
 </html>
