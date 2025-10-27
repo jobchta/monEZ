@@ -16,8 +16,8 @@
     <link rel="stylesheet" href="styles/main.css" />
     <link rel="stylesheet" href="styles/components.css" />
     <link rel="stylesheet" href="styles/onboarding.css" />
-    <link rel="stylesheet" href="styles/auth.css">
-
+    <!-- Removed old auth.css -->
+    <link rel="stylesheet" href="styles/auth-modern.css" />
   </head>
   <body>
     <!-- Onboarding Screen (unchanged structure) -->
@@ -34,154 +34,106 @@
         </div>
       </div>
 
-      <!-- Login Screen -->
-      <div id="login-screen" class="login-screen" style="display: flex;" aria-labelledby="login-title">
-        <div class="login-content">
-          <div class="logo-large" id="login-title">mon<span class="accent">EZ</span></div>
-          <div class="tagline">Split expenses, not friendships</div>
+      <!-- Auth Panels (buttons standardized) -->
+      <section id="panel-login" aria-labelledby="login-heading">
+        <h2 id="login-heading" class="visually-hidden">Login</h2>
+        <form id="email-login-form">
+          <input id="login-email" type="email" autocomplete="email" required aria-label="Email" />
+          <input id="login-password" type="password" autocomplete="current-password" required aria-label="Password" />
+          <button type="submit" class="btn gold-btn" aria-label="Log in with email">Log in</button>
+        </form>
+        <button type="button" class="btn google-btn" aria-label="Continue with Google">Continue with Google</button>
+        <button type="button" class="btn gold-btn" aria-label="Go to sign up" data-target="#panel-signup">Create account</button>
+        <button type="button" class="btn gold-btn" aria-label="Forgot password" data-target="#panel-reset">Forgot password?</button>
+        <div id="login-message" class="form-message" role="status" aria-live="polite"></div>
+      </section>
 
-          <!-- Social login remains available -->
-          <button class="login-button" onclick="signInWithGoogle()" aria-label="Sign in with Google">
-            🚀 Sign in with Google
-          </button>
+      <section id="panel-signup" aria-labelledby="signup-heading" hidden>
+        <h2 id="signup-heading" class="visually-hidden">Sign up</h2>
+        <form id="email-signup-form">
+          <input id="signup-email" type="email" autocomplete="email" required aria-label="Email" />
+          <input id="signup-password" type="password" autocomplete="new-password" required minlength="8" aria-label="Password" />
+          <button type="submit" class="btn gold-btn" aria-label="Create account with email">Create account</button>
+        </form>
+        <button type="button" class="btn google-btn" aria-label="Sign up with Google">Sign up with Google</button>
+        <button type="button" class="btn gold-btn" aria-label="Back to login" data-target="#panel-login">Back to login</button>
+        <div id="signup-message" class="form-message" role="status" aria-live="polite"></div>
+      </section>
 
-          <!-- Email/Password Auth Tabs -->
-          <div class="auth-card" role="region" aria-label="Email authentication">
-            <div class="tablist" role="tablist" aria-label="Authentication tabs">
-              <button id="tab-login" role="tab" aria-selected="true" aria-controls="panel-login" class="tab active">Log in</button>
-              <button id="tab-signup" role="tab" aria-selected="false" aria-controls="panel-signup" class="tab">Sign up</button>
-              <button id="tab-reset" role="tab" aria-selected="false" aria-controls="panel-reset" class="tab">Reset password</button>
-            </div>
-
-            <!-- Log in panel -->
-            <div id="panel-login" role="tabpanel" aria-labelledby="tab-login">
-              <form id="email-login-form" aria-describedby="login-message" novalidate>
-                <div class="form-group">
-                  <label for="login-email">Email</label>
-                  <input id="login-email" name="email" type="email" class="form-input" placeholder="you@example.com" autocomplete="email" required aria-required="true" aria-label="Email address" />
-                </div>
-                <div class="form-group">
-                  <label for="login-password">Password</label>
-                  <input id="login-password" name="password" type="password" class="form-input" placeholder="Your password" autocomplete="current-password" required aria-required="true" aria-label="Password" />
-                </div>
-                <div id="login-message" class="form-message" aria-live="polite" aria-atomic="true"></div>
-                <button type="submit" class="btn-primary" aria-label="Log in with email">Log in</button>
-              </form>
-            </div>
-
-            <!-- Sign up panel -->
-            <div id="panel-signup" role="tabpanel" aria-labelledby="tab-signup" hidden>
-              <form id="email-signup-form" aria-describedby="signup-message" novalidate>
-                <div class="form-group">
-                  <label for="signup-email">Email</label>
-                  <input id="signup-email" name="email" type="email" class="form-input" placeholder="you@example.com" autocomplete="email" required aria-required="true" aria-label="Email address" />
-                </div>
-                <div class="form-group">
-                  <label for="signup-password">Password</label>
-                  <input id="signup-password" name="password" type="password" class="form-input" placeholder="Create a password" autocomplete="new-password" required aria-required="true" minlength="6" aria-label="Password" />
-                </div>
-                <div id="signup-message" class="form-message" aria-live="polite" aria-atomic="true"></div>
-                <button type="submit" class="btn-primary" aria-label="Create account">Create account</button>
-              </form>
-            </div>
-
-            <!-- Reset panel -->
-            <div id="panel-reset" role="tabpanel" aria-labelledby="tab-reset" hidden>
-              <form id="password-reset-form" aria-describedby="reset-message" novalidate>
-                <div class="form-group">
-                  <label for="reset-email">Email</label>
-                  <input id="reset-email" name="email" type="email" class="form-input" placeholder="you@example.com" autocomplete="email" required aria-required="true" aria-label="Email address" />
-                </div>
-                <div id="reset-message" class="form-message" aria-live="polite" aria-atomic="true"></div>
-                <button type="submit" class="btn-primary" aria-label="Send reset email">Send reset link</button>
-              </form>
-            </div>
-          </div>
-
-          <div class="login-features" aria-hidden="true">Real-time sync • Secure • Free</div>
-        </div>
-      </div>
-
-      <!-- Main App container remains as before; initially hidden by app logic -->
-      <div id="main-app" style="display:none" hidden></div>
+      <section id="panel-reset" aria-labelledby="reset-heading" hidden>
+        <h2 id="reset-heading" class="visually-hidden">Password reset</h2>
+        <form id="password-reset-form">
+          <input id="reset-email" type="email" autocomplete="email" required aria-label="Email" />
+          <button type="submit" class="btn gold-btn" aria-label="Send password reset email">Send reset email</button>
+        </form>
+        <button type="button" class="btn gold-btn" aria-label="Back to login" data-target="#panel-login">Back to login</button>
+        <div id="reset-message" class="form-message" role="status" aria-live="polite"></div>
+      </section>
     </div>
 
-    <!-- Scripts -->
-    <script type="module" src="js/app.js"></script>
-    <script type="module" src="js/countries-data.js"></script>
-    <script type="module" src="js/onboarding.js"></script>
-
-    <!-- Inline minimal controller to wire UI to existing window methods without introducing new logic -->
     <script>
-      (function () {
-        const $ = (s) => document.querySelector(s);
-        const tabs = [
-          { tab: '#tab-login', panel: '#panel-login' },
-          { tab: '#tab-signup', panel: '#panel-signup' },
-          { tab: '#tab-reset', panel: '#panel-reset' }
-        ];
-        function showPanel(id) {
-          tabs.forEach(({ tab, panel }) => {
-            const t = $(tab); const p = $(panel);
-            const active = panel === id;
-            t.setAttribute('aria-selected', active ? 'true' : 'false');
-            t.classList.toggle('active', active);
-            if (active) { p.removeAttribute('hidden'); } else { p.setAttribute('hidden', ''); }
-          });
+      const $ = (s, root = document) => root.querySelector(s);
+      const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
+      const showPanel = (sel) => {
+        $$('#panel-login, #panel-signup, #panel-reset').forEach(p => p.hidden = true);
+        const p = $(sel);
+        if (p) p.hidden = false;
+      };
+
+      // Simple panel toggles
+      $$('[data-target]').forEach(btn => {
+        const panel = btn.getAttribute('data-target');
+        btn.addEventListener('click', () => showPanel(panel));
+      });
+
+      // Login
+      $('#email-login-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = $('#login-email').value.trim();
+        const password = $('#login-password').value;
+        const msg = $('#login-message');
+        msg.textContent = '';
+        msg.className = 'form-message';
+        try {
+          msg.textContent = 'Signing in…';
+          await window.signInWithEmail(email, password);
+          msg.textContent = 'Success! Redirecting…';
+        } catch (err) {
+          msg.textContent = err?.message || 'Login failed. Please try again.';
         }
-        tabs.forEach(({ tab, panel }) => {
-          $(tab).addEventListener('click', () => showPanel(panel));
-        });
+      });
 
-        // Login
-        $('#email-login-form')?.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const email = $('#login-email').value.trim();
-          const password = $('#login-password').value;
-          const msg = $('#login-message');
-          msg.textContent = '';
-          msg.className = 'form-message';
-          try {
-            msg.textContent = 'Signing in…';
-            await window.signInWithEmail(email, password);
-            msg.textContent = 'Success! Redirecting…';
-          } catch (err) {
-            msg.textContent = err?.message || 'Login failed. Please try again.';
-          }
-        });
+      // Sign up
+      $('#email-signup-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = $('#signup-email').value.trim();
+        const password = $('#signup-password').value;
+        const msg = $('#signup-message');
+        msg.textContent = '';
+        try {
+          msg.textContent = 'Creating account…';
+          await window.signUpWithEmail(email, password);
+          msg.textContent = 'Account created! You can now log in.';
+          showPanel('#panel-login');
+        } catch (err) {
+          msg.textContent = err?.message || 'Sign up failed. Please try again.';
+        }
+      });
 
-        // Sign up
-        $('#email-signup-form')?.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const email = $('#signup-email').value.trim();
-          const password = $('#signup-password').value;
-          const msg = $('#signup-message');
-          msg.textContent = '';
-          try {
-            msg.textContent = 'Creating account…';
-            await window.signUpWithEmail(email, password);
-            msg.textContent = 'Account created! You can now log in.';
-            showPanel('#panel-login');
-          } catch (err) {
-            msg.textContent = err?.message || 'Sign up failed. Please try again.';
-          }
-        });
-
-        // Reset
-        $('#password-reset-form')?.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const email = $('#reset-email').value.trim();
-          const msg = $('#reset-message');
-          msg.textContent = '';
-          try {
-            msg.textContent = 'Sending reset email…';
-            await window.resetPassword(email);
-            msg.textContent = 'Password reset email sent. Check your inbox.';
-          } catch (err) {
-            msg.textContent = err?.message || 'Failed to send reset email.';
-          }
-        });
-      })();
+      // Reset
+      $('#password-reset-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = $('#reset-email').value.trim();
+        const msg = $('#reset-message');
+        msg.textContent = '';
+        try {
+          msg.textContent = 'Sending reset email…';
+          await window.resetPassword(email);
+          msg.textContent = 'Password reset email sent. Check your inbox.';
+        } catch (err) {
+          msg.textContent = err?.message || 'Failed to send reset email.';
+        }
+      });
     </script>
   </body>
 </html>
