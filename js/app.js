@@ -160,9 +160,54 @@ async function loadUserPreferences(userId) {
                 console.log('User preferences loaded:', userData.preferences);
             }
         }
+
+        // Run the UPI migration logic once.
+        await migrateUPIData(userId);
+
     } catch (error) {
         console.error('Error loading user preferences:', error);
     }
+}
+
+// One-time migration of UPI data from localStorage to Firestore
+async function migrateUPIData(userId) {
+    const migrationMarker = `upiMigration_${userId}_completed`;
+
+    // Only run migration if it hasn't been completed before for this user.
+    if (localStorage.getItem(migrationMarker)) {
+        return;
+    }
+
+    console.log('Starting UPI data migration check...');
+
+    let migrationPerformed = false;
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('upi_')) {
+            const upiId = localStorage.getItem(key);
+            const creditorName = key.substring(4); // Extracts name from "upi_CreditorName"
+
+            if (upiId && creditorName) {
+                try {
+                    const friendUPIRef = doc(db, 'users', userId, 'friendPaymentMethods', creditorName);
+                    await setDoc(friendUPIRef, { upiId: upiId });
+                    console.log(`Migrated UPI for ${creditorName}.`);
+                    localStorage.removeItem(key); // Clean up migrated data
+                    migrationPerformed = true;
+                } catch (error) {
+                    console.error(`Failed to migrate UPI for ${creditorName}:`, error);
+                }
+            }
+        }
+    }
+
+    if (migrationPerformed) {
+        showNotification('Your saved UPI details have been securely migrated.', 'success');
+    }
+
+    // Mark migration as complete for this user to prevent re-running.
+    localStorage.setItem(migrationMarker, 'true');
+    console.log('UPI data migration check complete.');
 }
 
 // Apply user preferences to the app
@@ -292,39 +337,67 @@ window.resetPassword = async function(email) {
 
 import { startFriendsListener } from './friends.js';
 
-// Update loadUserData function
-function loadUserData(user) {
-    // Show loading indicator
-    const recentExpenses = safeGet('recent-expenses');
-    if (recentExpenses) {
-        const loadingEl = document.createElement('div');
-        loadingEl.id = 'expense-loading';
-        loadingEl.innerHTML = '💫 Loading your data...';
-        loadingEl.style.cssText = 'text-align: center; padding: 20px; color: #666;';
-        recentExpenses.appendChild(loadingEl);
+async function getCachedOlderExpenses(userId) {
+    const cacheKey = `olderExpenses_${userId}`;
+    const cachedData = sessionStorage.getItem(cacheKey);
+
+    if (cachedData) {
+        return JSON.parse(cachedData);
     }
-    
-    // Start listening to expenses
+
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const q = query(
         collection(db, 'expenses'),
-        where('userId', '==', user.uid),
+        where('userId', '==', userId),
+        where('timestamp', '<=', oneWeekAgo),
         orderBy('timestamp', 'desc')
     );
+
+    const snapshot = await getDocs(q);
+    const expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    sessionStorage.setItem(cacheKey, JSON.stringify(expenses));
+    return expenses;
+}
+
+// Update loadUserData function
+async function loadUserData(user) {
+    const recentExpensesEl = safeGet('recent-expenses');
+    if (recentExpensesEl) {
+        recentExpensesEl.innerHTML = '<div id="expense-loading" style="text-align: center; padding: 20px; color: #666;">💫 Loading your data...</div>';
+    }
+
+    // Fetch older, cached expenses first
+    const olderExpenses = await getCachedOlderExpenses(user.uid);
+    AppState.expenses = olderExpenses;
     
-    onSnapshot(q, (snapshot) => {
+    // Listen for recent expenses in real-time
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const recentQuery = query(
+        collection(db, 'expenses'),
+        where('userId', '==', user.uid),
+        where('timestamp', '>', oneWeekAgo),
+        orderBy('timestamp', 'desc')
+    );
+
+    onSnapshot(recentQuery, (snapshot) => {
         safeGet('expense-loading')?.remove();
         
-        AppState.expenses = [];
-        snapshot.forEach((doc) => {
-            AppState.expenses.push({ id: doc.id, ...doc.data() });
-        });
+        const recentExpenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Combine and de-duplicate expenses
+        const allExpenses = [...recentExpenses, ...AppState.expenses.filter(exp => exp.timestamp.toDate() <= oneWeekAgo)];
+        AppState.expenses = allExpenses.sort((a, b) => b.timestamp.toDate() - a.timestamp.toDate());
         
         renderRecentExpenses();
         renderAllExpenses();
         updateBalance();
+    }, error => {
+        console.error("Error fetching recent expenses:", error);
+        showNotification("Could not load recent expenses.", "error");
     });
     
-    // NEW: Start listening to friends
+    // Start listening to friends
     startFriendsListener(user.uid);
 }
 
@@ -375,6 +448,23 @@ document.addEventListener('click', (e) => {
     if (e.target.matches('button, .btn, .action-card, .nav-item')) {
         createRippleEffect(e.target, e);
     }
+});
+
+// Global error handlers
+window.addEventListener('error', (event) => {
+    console.error('🚨 Uncaught error:', {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        error: event.error
+    });
+    showNotification('An unexpected error occurred. Please refresh the page.', 'error');
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('🚨 Unhandled promise rejection:', event.reason);
+    showNotification('An error occurred. Please try again.', 'error');
 });
 
 // OPTIONAL: Export any necessary functions if referenced outside

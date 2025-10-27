@@ -261,11 +261,11 @@
         </div>
 
         <!-- PWA Install Prompt -->
-        <div id="pwa-prompt" class="pwa-prompt hidden">
+        <div id="pwa-prompt" class="pwa-prompt hidden" role="alertdialog" aria-labelledby="pwa-title">
             <div class="pwa-content">
-                <div class="pwa-icon">📱</div>
+                <div class="pwa-icon" aria-hidden="true">📱</div>
                 <div class="pwa-text">
-                    <h3>Install monEZ</h3>
+                    <h3 id="pwa-title">Install monEZ</h3>
                     <p>Get the full app experience on your home screen</p>
                 </div>
                 <div class="pwa-actions">
@@ -280,38 +280,38 @@
             <!-- App Header -->
             <header class="app-header">
                 <div class="header-left">
-                    <div class="logo">mon<span class="accent">EZ</span></div>
+                    <div class="logo" aria-label="monEZ Home">mon<span class="accent">EZ</span></div>
                     <div class="balance-summary">
                         <div class="balance-label">Your balance</div>
-                        <div class="balance-amount" id="balance-hero">₹1,160</div>
+                        <div class="balance-amount" id="balance-hero" aria-live="polite">₹1,160</div>
                     </div>
                 </div>
                 <div class="header-right">
-                    <button class="icon-btn" onclick="showNotifications()" aria-label="Notifications">
-                        <span class="icon">🔔</span>
-                        <span class="badge">3</span>
+                    <button class="icon-btn" onclick="showNotifications()" aria-label="Notifications, 3 unread">
+                        <span class="icon" aria-hidden="true">🔔</span>
+                        <span class="badge" aria-hidden="true">3</span>
                     </button>
                     <button class="icon-btn" onclick="showProfile()" aria-label="Profile">
-                        <div class="avatar">Y</div>
+                        <div class="avatar" aria-hidden="true">Y</div>
                     </button>
                 </div>
             </header>
 
             <!-- Views Container -->
-            <main class="main-content">
+            <main class="main-content" role="main">
                 <!-- Home View -->
-                <div id="home-view" class="view active">
+                <div id="home-view" class="view active" role="tabpanel">
                     <!-- Quick Stats -->
                     <div class="quick-stats">
-                        <div class="stat-card positive">
-                            <div class="stat-icon">💚</div>
+                        <div class="stat-card positive" role="button" tabindex="0" aria-label="You are owed ₹1,320">
+                            <div class="stat-icon" aria-hidden="true">💚</div>
                             <div class="stat-content">
                                 <div class="stat-label">You're owed</div>
                                 <div class="stat-value">₹1,320</div>
                             </div>
                         </div>
-                        <div class="stat-card negative">
-                            <div class="stat-icon">💸</div>
+                        <div class="stat-card negative" role="button" tabindex="0" aria-label="You owe ₹865">
+                            <div class="stat-icon" aria-hidden="true">💸</div>
                             <div class="stat-content">
                                 <div class="stat-label">You owe</div>
                                 <div class="stat-value">₹865</div>
@@ -322,38 +322,38 @@
                     <!-- Quick Actions -->
                     <div class="quick-actions">
                         <button class="action-card primary" onclick="showAddExpense()">
-                            <div class="action-icon">➕</div>
+                            <div class="action-icon" aria-hidden="true">➕</div>
                             <div class="action-label">Add Expense</div>
                         </button>
                         <button class="action-card" onclick="showSplitBill()">
-                            <div class="action-icon">🧮</div>
+                            <div class="action-icon" aria-hidden="true">🧮</div>
                             <div class="action-label">Split Bill</div>
                         </button>
                         <button class="action-card" onclick="showSettle()">
-                            <div class="action-icon">💳</div>
+                            <div class="action-icon" aria-hidden="true">💳</div>
                             <div class="action-label">Settle Up</div>
                         </button>
                         <button class="action-card premium" onclick="showPremiumFeatures()">
-                            <div class="action-icon">✨</div>
+                            <div class="action-icon" aria-hidden="true">✨</div>
                             <div class="action-label">AI Insights</div>
                             <div class="premium-badge">PRO</div>
                         </button>
                     </div>
 
                     <!-- Recent Activity -->
-                    <section class="activity-section">
+                    <section class="activity-section" aria-labelledby="recent-activity-heading">
                         <div class="section-header">
-                            <h3>Recent Activity</h3>
+                            <h3 id="recent-activity-heading">Recent Activity</h3>
                             <button class="view-all" onclick="showExpenses()">View all</button>
                         </div>
-                        <div id="recent-expenses" class="activity-list"></div>
+                        <div id="recent-expenses" class="activity-list" aria-live="polite"></div>
                     </section>
 
                     <!-- Groups Preview -->
-                    <section class="groups-section">
+                    <section class="groups-section" aria-labelledby="groups-preview-heading">
                         <div class="section-header">
-                            <h3>Your Groups</h3>
-                            <div class="group-limit">2/3 groups</div>
+                            <h3 id="groups-preview-heading">Your Groups</h3>
+                            <div class="group-limit" aria-label="2 out of 3 groups used">2/3 groups</div>
                             <button class="view-all" onclick="showGroups()">View all</button>
                         </div>
                         <div class="groups-preview" id="groups-preview"></div>
@@ -363,70 +363,53 @@
                 <!-- Add Expense View -->
                 <div id="add-expense-view" class="view">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home"><span aria-hidden="true">←</span></button>
                         <h2>Add Expense</h2>
-                        <button class="voice-btn" onclick="startVoiceInput()" aria-label="Voice Input">🎤</button>
+                        <button class="voice-btn" onclick="startVoiceInput()" aria-label="Voice Input"><span aria-hidden="true">🎤</span></button>
                     </div>
             
-                    <form id="expense-form" class="expense-form">
-                        <div id="form-error-msg" aria-live="polite" style="display: none; color: #EF4444; font-size: 14px; padding: 8px 0;"></div>
+                    <form id="expense-form" class="expense-form" aria-labelledby="add-expense-heading">
+                        <div id="form-error-msg" role="alert" aria-live="assertive" style="display: none; color: #EF4444; font-size: 14px; padding: 8px 0;"></div>
                         
                         <div class="form-group">
                             <label class="form-label" for="amount">Amount</label>
                             <div class="amount-input-container">
-                                <span class="currency-symbol">₹</span>
-                                <input 
-                                    type="number" 
-                                    id="amount" 
-                                    class="form-input amount-field" 
-                                    placeholder="0.00" 
-                                    step="0.01" 
-                                    aria-label="Amount in rupees" 
-                                    required>
-                                <button 
-                                    type="button" 
-                                    class="ai-suggest-btn" 
-                                    onclick="aiSuggestAmount()" 
-                                    title="AI Suggestion"
-                                    aria-label="AI Suggest Amount">
-                                    <span class="ai-icon">🤖</span>
+                                <span class="currency-symbol" aria-hidden="true">₹</span>
+                                <input type="number" id="amount" class="form-input amount-field" placeholder="0.00" step="0.01" aria-label="Amount in rupees" required>
+                                <button type="button" class="ai-suggest-btn" onclick="aiSuggestAmount()" title="AI Suggestion" aria-label="AI Suggest Amount">
+                                    <span class="ai-icon" aria-hidden="true">🤖</span>
                                 </button>
                             </div>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label" for="description">Description</label>
-                            <input 
-                                type="text" 
-                                id="description" 
-                                class="form-input" 
-                                placeholder="What was this for?" 
-                                aria-label="Expense description" 
-                                required>
+                            <input type="text" id="description" class="form-input" placeholder="What was this for?" aria-label="Expense description" required>
                         </div>
                         
-                        <div class="form-group">
-                            <label class="form-label">Category</label>
+                        <div class="form-group" role="group" aria-labelledby="category-label">
+                            <label class="form-label" id="category-label">Category</label>
                             <div class="category-selector">
-                                <button type="button" class="category-btn" data-category="🍽️" aria-label="Food category">🍽️ Food</button>
-                                <button type="button" class="category-btn" data-category="🚗" aria-label="Transport category">🚗 Transport</button>
-                                <button type="button" class="category-btn" data-category="🎬" aria-label="Entertainment category">🎬 Entertainment</button>
-                                <button type="button" class="category-btn" data-category="🛍️" aria-label="Shopping category">🛍️ Shopping</button>
-                                <button type="button" class="category-btn" data-category="💡" aria-label="Bills category">💡 Bills</button>
-                                <button type="button" class="category-btn" data-category="✈️" aria-label="Travel category">✈️ Travel</button>
+                                <button type="button" class="category-btn" data-category="🍽️" aria-label="Food category"><span aria-hidden="true">🍽️</span> Food</button>
+                                <button type="button" class="category-btn" data-category="🚗" aria-label="Transport category"><span aria-hidden="true">🚗</span> Transport</button>
+                                <button type="button" class="category-btn" data-category="🎬" aria-label="Entertainment category"><span aria-hidden="true">🎬</span> Entertainment</button>
+                                <button type="button" class="category-btn" data-category="🛍️" aria-label="Shopping category"><span aria-hidden="true">🛍️</span> Shopping</button>
+                                <button type="button" class="category-btn" data-category="💡" aria-label="Bills category"><span aria-hidden="true">💡</span> Bills</button>
+                                <button type="button" class="category-btn" data-category="✈️" aria-label="Travel category"><span aria-hidden="true">✈️</span> Travel</button>
                             </div>
                         </div>
                         
-                        <div class="form-group">
-                            <label class="form-label">Split with</label>
+                        <div class="form-group" aria-labelledby="split-with-label">
+                            <label class="form-label" id="split-with-label">Split with</label>
                             <div class="people-selector" id="people-selector"></div>
                         </div>
                         
-                        <div class="split-options">
+                        <div class="split-options" role="group" aria-labelledby="split-type-label">
                             <div class="split-type">
-                                <button type="button" class="split-btn active" data-type="equal" aria-label="Equal split">Equal Split</button>
-                                <button type="button" class="split-btn" data-type="percentage" aria-label="Split by percentage">By Percentage</button>
-                                <button type="button" class="split-btn premium" data-type="custom" onclick="showPremiumModal()" aria-label="Custom split - Premium feature">Custom Split <span class="pro-tag">PRO</span></button>
+                                <label id="split-type-label" class="sr-only">Split Type</label>
+                                <button type="button" class="split-btn active" data-type="equal" aria-pressed="true">Equal Split</button>
+                                <button type="button" class="split-btn" data-type="percentage" aria-pressed="false">By Percentage</button>
+                                <button type="button" class="split-btn premium" data-type="custom" onclick="showPremiumModal()">Custom Split <span class="pro-tag">PRO</span></button>
                             </div>
                         </div>
                         
@@ -434,62 +417,62 @@
                             <button type="button" class="btn-secondary" onclick="showHome()">Cancel</button>
                             <button type="submit" class="btn-primary">
                                 <span class="btn-text">Save Expense</span>
-                                <span class="btn-icon">💾</span>
+                                <span class="btn-icon" aria-hidden="true">💾</span>
                             </button>
                         </div>
                     </form>
                 </div>
 
                 <!-- Expenses View -->
-                <div id="expenses-view" class="view">
+                <div id="expenses-view" class="view" role="tabpanel">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home"><span aria-hidden="true">←</span></button>
                         <h2>All Expenses</h2>
-                        <button class="filter-btn" onclick="showFilters()" aria-label="Filter expenses">🔍</button>
+                        <button class="filter-btn" onclick="showFilters()" aria-label="Filter expenses"><span aria-hidden="true">🔍</span></button>
                     </div>
                     
                     <div class="expenses-stats">
                         <div class="stat-summary">
                             <div class="stat-item">
-                                <span class="stat-number" id="total-expenses">₹8,450</span>
+                                <span class="stat-number" id="total-expenses" aria-live="polite">₹8,450</span>
                                 <span class="stat-label">Total Spent</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-number" id="this-month">₹3,280</span>
+                                <span class="stat-number" id="this-month" aria-live="polite">₹3,280</span>
                                 <span class="stat-label">This Month</span>
                             </div>
                         </div>
                     </div>
             
-                    <div class="activity-list" id="all-expenses-list"></div>
+                    <div class="activity-list" id="all-expenses-list" aria-live="polite"></div>
                 </div>
 
                 <!-- Balances View -->
-                <div id="balances-view" class="view">
+                <div id="balances-view" class="view" role="tabpanel">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home"><span aria-hidden="true">←</span></button>
                         <h2>Balances</h2>
                         <button class="settle-all-btn" onclick="settleAll()">Settle All</button>
                     </div>
             
-                    <div class="balances-list" id="balances-list"></div>
+                    <div class="balances-list" id="balances-list" aria-live="polite"></div>
                 </div>
 
                 <!-- Groups View -->
-                <div id="groups-view" class="view">
+                <div id="groups-view" class="view" role="tabpanel">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home"><span aria-hidden="true">←</span></button>
                         <h2>Groups</h2>
-                        <button class="create-group-btn" onclick="showCreateGroup()" aria-label="Create new group">+</button>
+                        <button class="create-group-btn" onclick="showCreateGroup()" aria-label="Create new group"><span aria-hidden="true">+</span></button>
                     </div>
                     
                     <div class="groups-grid" id="groups-grid"></div>
                 </div>
 
                 <!-- Premium Features View -->
-                <div id="premium-view" class="view">
+                <div id="premium-view" class="view" role="tabpanel">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home"><span aria-hidden="true">←</span></button>
                         <h2>Premium Features</h2>
                         <div class="premium-status">FREE TIER</div>
                     </div>
@@ -498,37 +481,37 @@
                 </div>
 
                 <!-- Settings View -->
-                <div id="settings-view" class="view">
+                <div id="settings-view" class="view" role="tabpanel">
                     <div class="view-header">
-                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home">←</button>
+                        <button class="back-btn" onclick="showHome()" aria-label="Back to Home"><span aria-hidden="true">←</span></button>
                         <h2>Settings</h2>
                     </div>
                     
                     <div class="settings-sections">
-                        <div class="settings-section">
-                            <h3>Account</h3>
-                            <div class="setting-item" onclick="showProfile()">
-                                <div class="setting-icon">👤</div>
+                        <div class="settings-section" aria-labelledby="account-settings-heading">
+                            <h3 id="account-settings-heading">Account</h3>
+                            <div class="setting-item" role="button" tabindex="0" onclick="showProfile()">
+                                <div class="setting-icon" aria-hidden="true">👤</div>
                                 <div class="setting-content">
                                     <div class="setting-title">Profile</div>
                                     <div class="setting-desc">Manage your account details</div>
                                 </div>
-                                <div class="setting-arrow">›</div>
+                                <div class="setting-arrow" aria-hidden="true">›</div>
                             </div>
-                            <div class="setting-item" onclick="showPaymentMethods()">
-                                <div class="setting-icon">💳</div>
+                            <div class="setting-item" role="button" tabindex="0" onclick="showPaymentMethods()">
+                                <div class="setting-icon" aria-hidden="true">💳</div>
                                 <div class="setting-content">
                                     <div class="setting-title">Payment Methods</div>
                                     <div class="setting-desc">UPI, Cards, Bank accounts</div>
                                 </div>
-                                <div class="setting-arrow">›</div>
+                                <div class="setting-arrow" aria-hidden="true">›</div>
                             </div>
                         </div>
                         
-                        <div class="settings-section">
-                            <h3>App</h3>
+                        <div class="settings-section" aria-labelledby="app-settings-heading">
+                            <h3 id="app-settings-heading">App</h3>
                             <div class="setting-item">
-                                <div class="setting-icon">🔔</div>
+                                <div class="setting-icon" aria-hidden="true">🔔</div>
                                 <div class="setting-content">
                                     <div class="setting-title">Notifications</div>
                                     <div class="setting-desc">Push notifications, reminders</div>
@@ -539,7 +522,7 @@
                                 </label>
                             </div>
                             <div class="setting-item">
-                                <div class="setting-icon">🌙</div>
+                                <div class="setting-icon" aria-hidden="true">🌙</div>
                                 <div class="setting-content">
                                     <div class="setting-title">Dark Mode</div>
                                     <div class="setting-desc">Switch to dark theme</div>
@@ -551,10 +534,10 @@
                             </div>
                         </div>
                         
-                        <div class="settings-section">
-                            <h3>Premium</h3>
-                            <div class="setting-item premium" onclick="showPremiumFeatures()">
-                                <div class="setting-icon">✨</div>
+                        <div class="settings-section" aria-labelledby="premium-settings-heading">
+                            <h3 id="premium-settings-heading">Premium</h3>
+                            <div class="setting-item premium" role="button" tabindex="0" onclick="showPremiumFeatures()">
+                                <div class="setting-icon" aria-hidden="true">✨</div>
                                 <div class="setting-content">
                                     <div class="setting-title">Upgrade to Premium</div>
                                     <div class="setting-desc">Unlock AI features & analytics</div>
@@ -567,44 +550,44 @@
             </main>
 
             <!-- Bottom Navigation -->
-            <nav class="bottom-nav">
-                <button class="nav-item active" data-view="home" onclick="showHome()" aria-label="Home">
-                    <span class="nav-icon">🏠</span>
+            <nav class="bottom-nav" role="navigation" aria-label="Main">
+                <button class="nav-item active" data-view="home" onclick="showHome()" aria-label="Home" aria-current="page">
+                    <span class="nav-icon" aria-hidden="true">🏠</span>
                     <span class="nav-label">Home</span>
                 </button>
                 <button class="nav-item" data-view="expenses" onclick="showExpenses()" aria-label="Expenses">
-                    <span class="nav-icon">📊</span>
+                    <span class="nav-icon" aria-hidden="true">📊</span>
                     <span class="nav-label">Expenses</span>
                 </button>
                 <button class="nav-item" data-view="balances" onclick="showBalances()" aria-label="Balances">
-                    <span class="nav-icon">⚖️</span>
+                    <span class="nav-icon" aria-hidden="true">⚖️</span>
                     <span class="nav-label">Balances</span>
                 </button>
-                <button class="nav-item" data-view="groups" onclick="showGroups()" aria-label="Groups">
-                    <span class="nav-icon">👥</span>
+                <button class="nav-item" data-view="groups" onclick="showGroups()" aria-label="Groups, 2 active">
+                    <span class="nav-icon" aria-hidden="true">👥</span>
                     <span class="nav-label">Groups</span>
-                    <span class="group-count">2</span>
+                    <span class="group-count" aria-hidden="true">2</span>
                 </button>
                 <button class="nav-item" data-view="premium" onclick="showPremiumFeatures()" aria-label="Premium features">
-                    <span class="nav-icon">✨</span>
+                    <span class="nav-icon" aria-hidden="true">✨</span>
                     <span class="nav-label">Premium</span>
-                    <span class="premium-indicator">PRO</span>
+                    <span class="premium-indicator" aria-hidden="true">PRO</span>
                 </button>
             </nav>
         </div>
 
         <!-- Floating Add Button -->
         <button class="fab" onclick="showAddExpense()" aria-label="Add new expense">
-            <span class="fab-icon">+</span>
+            <span class="fab-icon" aria-hidden="true">+</span>
         </button>
 
         <!-- Modals -->
-        <div id="premium-modal" class="modal hidden">
+        <div id="premium-modal" class="modal hidden" role="dialog" aria-labelledby="premium-modal-title" aria-modal="true">
             <div class="modal-overlay" onclick="closePremiumModal()"></div>
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>✨ Premium Features</h3>
-                    <button class="modal-close" onclick="closePremiumModal()" aria-label="Close modal">×</button>
+                    <h3 id="premium-modal-title">✨ Premium Features</h3>
+                    <button class="modal-close" onclick="closePremiumModal()" aria-label="Close modal"><span aria-hidden="true">×</span></button>
                 </div>
                 <div class="premium-features-list"></div>
             </div>

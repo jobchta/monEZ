@@ -1,47 +1,40 @@
-// monEZ - Friends Management System
-
-import { auth, db, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, serverTimestamp } from './firebase.js';
+import { auth, db, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, serverTimestamp } from './firebase.js';
 import { AppState, showNotification } from './utils.js';
 
-// Real-time listener for user's friends
-let friendsUnsubscribe = null;
+let friendsCache = null;
+let cacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-// Start listening to user's friends
-export function startFriendsListener(userId) {
-  if (friendsUnsubscribe) {
-    friendsUnsubscribe(); // Clean up previous listener
-  }
-  
-  const q = query(
-    collection(db, 'friends'),
-    where('userId', '==', userId)
-  );
-  
-  friendsUnsubscribe = onSnapshot(q, (snapshot) => {
-    AppState.friends = [];
-    
-    snapshot.forEach((doc) => {
-      AppState.friends.push({
-        id: doc.id,
-        ...doc.data()
-      });
-    });
-    
-    console.log('Friends loaded:', AppState.friends.length);
-    
-    // Re-render UI if needed
-    if (window.populatePeopleSelector) {
-      window.populatePeopleSelector();
+export async function getFriends(userId, forceRefresh = false) {
+    if (!forceRefresh && friendsCache && Date.now() - cacheTimestamp < CACHE_DURATION) {
+        return friendsCache;
     }
-  });
+
+    const q = query(collection(db, 'friends'), where('userId', '==', userId));
+    const snapshot = await getDocs(q);
+    
+    friendsCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    cacheTimestamp = Date.now();
+    
+    AppState.friends = friendsCache;
+    console.log('Friends loaded:', AppState.friends.length);
+
+    if (window.populatePeopleSelector) {
+        window.populatePeopleSelector();
+    }
+
+    return friendsCache;
 }
 
-// Stop listening
-export function stopFriendsListener() {
-  if (friendsUnsubscribe) {
-    friendsUnsubscribe();
-    friendsUnsubscribe = null;
-  }
+// This is now an alias for getFriends to fit into the existing app structure
+export function startFriendsListener(userId) {
+    getFriends(userId);
+}
+
+// To be called when a friend is added/updated/deleted to invalidate cache
+export function invalidateFriendsCache() {
+    friendsCache = null;
+    cacheTimestamp = null;
 }
 
 // Add a new friend

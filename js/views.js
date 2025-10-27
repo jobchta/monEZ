@@ -1,32 +1,75 @@
-import { safeGet, AppState, showNotification, createRippleEffect, formatCurrency, hideExampleData, checkOnboardingStatus } from './utils.js';
-import { renderRecentExpenses, renderGroupsPreview, renderAllExpenses, renderBalances, renderGroups, renderPremiumFeatures, updateBalance, populatePeopleSelector } from './render.js';
+import { safeGet, AppState, showNotification, createRippleEffect, formatCurrency, hideExampleData } from './utils.js';
+import { renderRecentExpenses, renderAllExpenses, renderBalances, populatePeopleSelector, updateBalance } from './render.js';
 import { auth, db, collection, addDoc, serverTimestamp } from './firebase.js';
 
-// monEZ - View Management Functions
+// --- Modal & Form Creators ---
 
-// Helper to show accessible error messages
-function showFormError(message) {
-    const errorRegion = safeGet('form-error-msg');
-    if (errorRegion) {
-        errorRegion.style.display = 'block';
-        errorRegion.textContent = message;
-    }
-    showNotification(message, 'error');
+export function createFormField({ id, label, type = 'text', placeholder = '' }) {
+    return `
+        <div class="form-field">
+            <label for="${id}">${label}</label>
+            <input type="${type}" id="${id}" placeholder="${placeholder}">
+        </div>
+    `;
 }
 
-function clearFormError() {
-    const errorRegion = safeGet('form-error-msg');
-    if (errorRegion) {
-        errorRegion.style.display = 'none';
-        errorRegion.textContent = '';
+export function createModal({ title, content, actions }) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-labelledby', 'modal-title');
+    modal.setAttribute('aria-modal', 'true');
+
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2 id="modal-title">${title}</h2>
+            <div class="modal-body">${content}</div>
+            <div class="modal-actions">${actions}</div>
+        </div>
+    `;
+
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+
+    // Trap focus inside the modal
+    setTimeout(() => {
+        const content = modal.querySelector('.modal-content');
+        if (content) {
+            trapFocus(content);
+        }
+    }, 100); // Delay to ensure modal is in the DOM
+
+    return modal;
+}
+
+// --- Form Error Handling (Accessible) ---
+
+export function showFormError(message) {
+    const errorContainer = safeGet('form-error');
+    if (errorContainer) {
+        errorContainer.textContent = message;
+        errorContainer.classList.remove('hidden');
+        errorContainer.setAttribute('aria-live', 'assertive'); // Announce error immediately
     }
 }
 
-// Enhanced Navigation Functions
+export function clearFormError() {
+    const errorContainer = safeGet('form-error');
+    if (errorContainer) {
+        errorContainer.textContent = '';
+        errorContainer.classList.add('hidden');
+        errorContainer.removeAttribute('aria-live');
+    }
+}
+
+// --- View Navigation ---
+
 export function showHome() {
     showView('home');
     renderRecentExpenses();
-    renderGroupsPreview();
+    // renderGroupsPreview(); // Assuming this will also be modularized
     updateNavigation('home');
 }
 

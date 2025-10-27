@@ -188,3 +188,32 @@ export function checkOnboardingStatus() {
     AppState.showExample = false;
   }
 }
+
+// Focus trap for modals
+export function trapFocus(element) {
+    const focusableElements = element.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+    element.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') {
+            return;
+        }
+
+        if (e.shiftKey) {
+            if (document.activeElement === firstFocusable) {
+                lastFocusable.focus();
+                e.preventDefault();
+            }
+        } else {
+            if (document.activeElement === lastFocusable) {
+                firstFocusable.focus();
+                e.preventDefault();
+            }
+        }
+    });
+
+    firstFocusable.focus();
+}
