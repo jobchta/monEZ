@@ -1,5 +1,6 @@
 /* monEZ - Main Application Logic (finalized production) */
-import { AppState, createRippleEffect, showNotification, safeGet, checkOnboardingStatus } from './utils.js';
+import { AppState, updateState } from './globals.js';
+import { createRippleEffect, showNotification, safeGet, checkOnboardingStatus } from './utils.js';
 import { auth, db, provider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, updateProfile, onAuthStateChanged, query, collection, where, orderBy, onSnapshot, doc, getDoc, runTransaction } from './firebase.js';
 import { renderRecentExpenses, renderAllExpenses, updateBalance, renderOnboardingPanel, renderInvitePanel, renderSplitBillPanel, renderGroupPanel } from './render.js';
 import { setupExpenseForm, showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal, transitionTo } from './views.js';
@@ -13,7 +14,7 @@ async function ensurePushPermission() {
     if (!('Notification' in window)) return false;
     let perm = Notification.permission;
     if (perm === 'default') perm = await Notification.requestPermission();
-    AppState.push = { ...(AppState.push||{}), enabled: perm === 'granted' };
+    updateState({ push: { ...(AppState.push||{}), enabled: perm === 'granted' } });
     return perm === 'granted';
   } catch { return false; }
 }
@@ -39,7 +40,7 @@ function initApp() {
       if (loginScreen) loginScreen.style.display = 'none';
       if (mainApp) mainApp.style.display = 'flex';
       if (onboardingScreen) onboardingScreen.classList.add('hidden');
-      AppState.currentUser = { uid: user.uid, email: user.email, name: user.displayName };
+      updateState({ currentUser: { uid: user.uid, email: user.email, name: user.displayName } });
       await loadUserPreferences(user.uid);
       await startFriendsListener();
       renderRecentExpenses();
@@ -81,7 +82,7 @@ async function loadUserPreferences(userId) {
 }
 function applyUserPreferences(prefs) {
   if (prefs.darkMode) { document.body.classList.toggle('dark-mode', prefs.darkMode); }
-  if (prefs.currency) { AppState.defaultCurrency = prefs.currency; }
+  if (prefs.currency) { updateState({ defaultCurrency: prefs.currency }); }
 }
 function checkUserOnboarding(userId) {
   return new Promise((resolve) => {
