@@ -190,8 +190,6 @@ class SettlementUI {
     return this.settlements.filter(s => s.status === 'completed');
   }
 }
-
-// Initialize and export
 const upiHandler = new UPISettlement();
 const settlementUI = new SettlementUI(upiHandler);
 
