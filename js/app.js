@@ -57,6 +57,83 @@ function initApp() {
     }
   });
 }
+
+// Load user preferences from Firebase
+async function loadUserPreferences(userId) {
+    try {
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            
+            if (userData.preferences) {
+                // Store in AppState
+                AppState.userPreferences = userData.preferences;
+                
+                // Store in localStorage for quick access
+                localStorage.setItem('userPreferences', JSON.stringify(userData.preferences));
+                
+                // Apply preferences (currency, language, etc.)
+                applyUserPreferences(userData.preferences);
+                
+                console.log('User preferences loaded:', userData.preferences);
+            }
+        }
+
+        // Run the UPI migration logic once.
+        await migrateUPIData(userId);
+
+    } catch (error) {
+        console.error('Error loading user preferences:', error);
+    }
+}
+
+// One-time migration of UPI data from localStorage to Firestore
+async function migrateUPIData(userId) {
+    const migrationMarker = `upiMigration_${userId}_completed`;
+
+    // Only run migration if it hasn't been completed before for this user.
+    if (localStorage.getItem(migrationMarker)) {
+        return;
+    }
+
+    console.log('Starting UPI data migration check...');
+
+    let migrationPerformed = false;
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('upi_')) {
+            const upiId = localStorage.getItem(key);
+            const creditorName = key.substring(4); // Extracts name from "upi_CreditorName"
+
+            if (upiId && creditorName) {
+                try {
+                    const friendUPIRef = doc(db, 'users', userId, 'friendPaymentMethods', creditorName);
+                    await setDoc(friendUPIRef, { upiId: upiId });
+                    console.log(`Migrated UPI for ${creditorName}.`);
+                    localStorage.removeItem(key); // Clean up migrated data
+                    migrationPerformed = true;
+                } catch (error) {
+                    console.error(`Failed to migrate UPI for ${creditorName}:`, error);
+                }
+            }
+        }
+    }
+
+    if (migrationPerformed) {
+        showNotification('Your saved UPI details have been securely migrated.', 'success');
+    }
+
+    // Mark migration as complete for this user to prevent re-running.
+    localStorage.setItem(migrationMarker, 'true');
+    console.log('UPI data migration check complete.');
+}
+
+// Apply user preferences to the app
+function applyUserPreferences(prefs) {
+    // Set default currency
+    if (prefs.currency) {
+        AppState.defaultCurrency = prefs.currency;
 async function checkUserOnboarding(uid) {
   try {
     const userDoc = await getDoc(doc(db, 'users', uid));
@@ -193,6 +270,25 @@ document.addEventListener('click', (e) => {
     createRippleEffect(t, e);
   }
 });
+
+// Global error handlers
+window.addEventListener('error', (event) => {
+    console.error('🚨 Uncaught error:', {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        error: event.error
+    });
+    showNotification('An unexpected error occurred. Please refresh the page.', 'error');
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('🚨 Unhandled promise rejection:', event.reason);
+    showNotification('An error occurred. Please try again.', 'error');
+});
+
+// OPTIONAL: Export any necessary functions if referenced outside
 function hideLoadingScreen() {
   const loadingScreen = safeGet('loading-screen');
   const mainApp = safeGet('main-app');

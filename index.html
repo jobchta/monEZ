@@ -1,155 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#846941" />
-  <meta name="description" content="monEZ - Split expenses, not friendships" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <link rel="icon" href="data:image/svg+xml,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>💰</text></svg>'" />
-  <link rel="manifest" href="manifest.json" />
-  <title>monEZ - Split expenses, not friendships</title>
-  <link rel="stylesheet" href="styles/variables.css" />
-  <link rel="stylesheet" href="styles/main.css" />
-  <link rel="stylesheet" href="styles/components.css" />
-  <link rel="stylesheet" href="styles/onboarding.css" />
-  <link rel="stylesheet" href="styles/auth-modern.css" />
-</head>
-<body>
-  <!-- Onboarding modal container for renderOnboardingPanel -->
-  <div id="onboarding-modal"></div>
-  <div id="onboarding-screen" class="onboarding-screen hidden" aria-hidden="true">
-    <div class="onboarding-content">
-      <div class="logo-large">mon<span class="accent">EZ</span></div>
-      <div class="tagline">Split expenses, not friendships</div>
-      <div class="feature-list">
-        <div class="feature-item">💰 Track shared expenses</div>
-        <div class="feature-item">👥 Manage groups easily</div>
-        <div class="feature-item">📊 See who owes what</div>
-        <div class="feature-item">🔒 Secure and private</div>
-      </div>
-      <button id="get-started-btn" class="btn gold-btn" aria-label="Get started with monEZ">Get Started</button>
-    </div>
-  </div>
-
-  <div class="app">
-    <div id="loading-screen" class="loading-screen" aria-live="polite" aria-busy="true">
-      <div class="loading-content">
-        <div class="logo-large">mon<span class="accent">EZ</span></div>
-        <div class="tagline">Split expenses, not friendships</div>
-        <div class="loading-spinner" role="status" aria-label="Loading"></div>
-        <div class="loading-text">Loading your financial companion...</div>
-      </div>
-    </div>
-
-    <section id="panel-login" aria-labelledby="login-heading">
-      <h2 id="login-heading" class="visually-hidden">Login</h2>
-      <form id="email-login-form">
-        <input id="login-email" type="email" autocomplete="email" required placeholder="Email" aria-label="Email" />
-        <input id="login-password" type="password" autocomplete="current-password" required placeholder="Password" aria-label="Password" />
-        <button type="submit" class="btn gold-btn" aria-label="Log in with email">Log in</button>
-      </form>
-    </section>
-
-    <div id="main-app" class="main-app hidden">
-      <nav id="main-nav" class="main-nav">
-        <div class="nav-brand"><div class="logo">mon<span class="accent">EZ</span></div></div>
-        <div class="nav-menu">
-          <button class="nav-item active" id="dashboard-tab" data-nav="dashboard-view" aria-label="Dashboard">Dashboard</button>
-          <button class="nav-item" id="groups-tab" data-nav="groups-view" aria-label="Groups">Groups</button>
-          <button class="nav-item" id="friends-tab" data-nav="friends-view" aria-label="Friends">Friends</button>
-          <button class="nav-item" id="profile-tab" data-nav="profile-view" aria-label="Profile">Profile</button>
-        </div>
-      </nav>
-
-      <main id="main-content" class="main-content">
-        <section id="dashboard-view" class="view active">
-          Dashboard
-          <div class="dashboard-panel">
-            Recent Expenses
-            <div id="recent-expenses" class="expenses-list"></div>
-          </div>
-          <div class="dashboard-panel">
-            Your Balances
-            <div id="balances-list" class="balances-list"></div>
-          </div>
-          <div class="dashboard-panel">
-            All Expenses
-            <div id="all-expenses-list" class="expenses-list"></div>
-          </div>
-          <div class="dashboard-panel">
-            Invite & Share
-            <div id="invite-panel"></div>
-          </div>
-          <div class="dashboard-panel">
-            Split a bill
-            <div id="split-bill-panel"></div>
-          </div>
-        </section>
-
-        <section id="groups-view" class="view hidden">
-          Groups
-          <button id="create-group-btn" class="btn gold-btn">+ Create Group</button>
-          <div id="groups-list" class="groups-list"></div>
-          <div id="group-panel"></div>
-        </section>
-
-        <section id="friends-view" class="view hidden">
-          Friends
-          <button id="add-friend-btn" class="btn gold-btn">+ Add Friend</button>
-          <div id="friends-list" class="friends-list"></div>
-          <div id="people-selector" class="people-selector hidden"></div>
-        </section>
-
-        <section id="profile-view" class="view hidden">
-          Profile
-          <div class="profile-panel">Premium Features<div id="premium-features" class="premium-features"></div></div>
-          <button id="logout-btn" class="btn outline-btn">Log out</button>
-        </section>
-
-        <section id="group-view" class="view hidden">
-          <div class="group-header">
-            <button id="back-to-groups" class="btn back-btn" aria-label="Back to groups">← Back</button>
-            <h1 id="group-name">Group Name</h1>
-          </div>
-          <div class="group-balance">
-            <div class="balance-label">Your balance</div>
-            <div id="group-your-balance" class="balance-amount">$0.00</div>
-          </div>
-          <div class="group-members">Members<div id="group-members-list" class="members-list"></div></div>
-          <div class="group-expenses">Expenses<button id="add-expense-btn" class="btn gold-btn" aria-label="Add expense">+ Add Expense</button><div id="group-expenses-list" class="expenses-list"></div></div>
-        </section>
-      </main>
-
-      <!-- Modals -->
-      <div id="create-group-modal" class="modal" hidden>
-        <div class="modal-content">
-          <div class="modal-header">Create New Group<button class="modal-close" aria-label="Close modal">×</button></div>
-          <form id="create-group-form">
-            <input id="group-name-input" type="text" required placeholder="Group name" aria-label="Group name" />
-            <textarea id="group-description-input" placeholder="Description (optional)" aria-label="Group description"></textarea>
-            <button type="submit" class="btn gold-btn">Create Group</button>
-          </form>
-        </div>
-      </div>
-
-      <div id="add-expense-modal" class="modal" hidden>
-        <div class="modal-content">
-          <div class="modal-header">Add Expense<button class="modal-close" aria-label="Close modal">×</button></div>
-          <form id="add-expense-form">
-            <input id="expense-description-input" type="text" required placeholder="Description" aria-label="Expense description" />
-            <input id="expense-amount-input" type="number" min="0" step="0.01" required placeholder="Amount" aria-label="Expense amount" />
-            <label><input id="expense-split-evenly" type="checkbox" checked aria-label="Split evenly" />Split evenly</label>
-            <button type="submit" class="btn gold-btn">Add Expense</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script type="module" src="js/firebase.js"></script>
-  <script type="module" src="js/app.js"></script>
-</body>
-</html>
+479
+        <button class="nav-item" data-view="balances" onclick="showBalances()" aria-label="Balances">
+480          <span class="nav-icon" aria-hidden="true">⚖️</span>
+481          <span class="nav-label">Balances</span>
+482        </button>
+483        <button class="nav-item" data-view="groups" onclick="showGroups()" aria-label="Groups, 2 active">
+484          <span class="nav-icon" aria-hidden="true">👥</span>
+485          <span class="nav-label">Groups</span>
+486          <span class="group-count" aria-hidden="true">2</span>
+487        </button>
+488        <button class="nav-item" data-view="premium" onclick="showPremiumFeatures()" aria-label="Premium features">
+489          <span class="nav-icon" aria-hidden="true">✨</span>
+490          <span class="nav-label">Premium</span>
+491          <span class="premium-indicator" aria-hidden="true">PRO</span>
+492        </button>
+493            >
+494      </div>
+495
+496      <!-- Floating Add Button -->
+497      <button class="fab" onclick="showAddExpense()" aria-label="Add new expense">
+498        <span class="fab-icon" aria-hidden="true">+</span>
+499      </button>
+500
+501      <!-- Modals -->
+502      <div id="premium-modal" class="modal hidden" role="dialog" aria-labelledby="premium-modal-title" aria-modal="true">
+503        <div class="modal-overlay" onclick="closePremiumModal()"></div>
+504        <div class="modal-content">
+505          <div class="modal-header">
+506            <h3 id="premium-modal-title">✨ Premium Features</h3>
+507            <button class="modal-close" onclick="closePremiumModal()" aria-label="Close modal"><span aria-hidden="true">×</span></button>
+508          </div>
+509          <div class="premium-features-list"></div>
+510        </div>
+511      </div>
+512    </div>
+513
+514  <script type="module" src="js/firebase.js"></script>
+515  <script type="module" src="js/app.js"></script>
+516
+517    <!-- Add after other script tags -->
+518  <script type="module" src="js/countries-data.js"></script>
+519  <script type="module" src="js/onboarding.js"></script>
+520</body>
+521</html>
+522
