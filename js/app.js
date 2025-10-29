@@ -74,7 +74,6 @@ async function loadUserPreferences(uid) {
     }
   } catch (error) { console.error('Error loading preferences:', error); }
 }
-
 /**
  * Load user expense data using Firestore transactions for ACID compliance.
  * This function wraps expense reads in a runTransaction block to ensure:
@@ -164,7 +163,6 @@ async function loadUserData(user) {
   // Initialize friends listener (independent of transaction)
   startFriendsListener(user.uid);
 }
-
 // PWA
 function setupPWAListeners() {
   window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); AppState.deferredPrompt = e; showPWAPrompt(); });
@@ -174,7 +172,7 @@ function setupPWAListeners() {
 function setupNavTransitions() {
   const nav = document.querySelectorAll('[data-nav]');
   nav.forEach(el => el.addEventListener('click', (e) => {
-    const target = (e.currentTarget as HTMLElement).getAttribute('data-nav');
+    const target = e.currentTarget.getAttribute('data-nav');
     if (!target) return;
     transitionTo?.(target);
   }));
@@ -186,11 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => { initApp(); }, 300);
   } catch (error) {
     console.error('Error during app initialization:', error);
-    showNotification('Failed to initialize app: ' + (error as any).message, 'error');
+    showNotification('Failed to initialize app: ' + error.message, 'error');
   }
 });
 document.addEventListener('click', (e) => {
-  const t = e.target as any;
+  const t = e.target;
   if (t && (t.matches?.('button, .btn, .action-card, .nav-item'))) {
     createRippleEffect(t, e);
   }
