@@ -1,33 +1,9 @@
 // monEZ - Utility Functions
 
-// --- Enhanced App State (NO DUMMY DATA) ---
-export const AppState = {
-  currentView: 'home',
-  expenses: [],          // EMPTY - user will add real data
-  friends: [],           // EMPTY - user will add real data  
-  groups: [],            // EMPTY - user will add real data
-  balance: 0,            // START AT ZERO
-  selectedFriends: new Set(),
-  selectedCategory: '',
-  animations: {
-    enabled: true,
-    duration: 300
-  },
-  pwaPromptShown: false,
-  deferredPrompt: null,
-  showExample: true,      // Controls onboarding guidance
-  
-  // NEW: User preferences from onboarding
-  userPreferences: null,
-  defaultCurrency: 'USD',
-  language: 'en',
-  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  dateFormat: 'MM/DD/YYYY',
-  numberFormat: 'en-US'
-};
+// Import centralized AppState from globals.js
+import { AppState } from './globals.js';
 
 // --- Enhanced Helper Functions ---
-
 // Safe DOM lookup – prevents UI crashes if an ID is wrong or missing
 export function safeGet(id) {
   const el = document.getElementById(id);
@@ -99,7 +75,6 @@ export function animateNumber(element, start, end, duration = 1000) {
     const progress = Math.min(elapsed / duration, 1);
     const easeOutQuart = 1 - Math.pow(1 - progress, 4);
     const current = Math.round(start + range * easeOutQuart);
-
     element.textContent = formatCurrency(current);
 
     if (progress < 1) {
@@ -129,10 +104,11 @@ export function showNotification(message, type = 'success', duration = 3000) {
     font-weight: 500;
     max-width: 300px;
   `;
+
   notification.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px;">
-      <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-      <span>${message}</span>
+      ${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}
+      ${message}
       <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; margin-left: 8px; font-size: 16px;">×</button>
     </div>
   `;
