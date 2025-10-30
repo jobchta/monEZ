@@ -112,12 +112,9 @@ export function transitionTo(viewName) {
         
         targetView.addEventListener('transitionend', onEnterTransitionEnd);
     }
-    }
     
     // View-specific initialization is handled by the view:changed event listener
-}
-
-// --- View Navigation ---
+} // --- View Navigation ---
 
 /**
  * Shows the home view with recent expenses
