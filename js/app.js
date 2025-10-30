@@ -297,6 +297,3 @@ if (document.readyState === 'loading') {
 } else {
     initApp();
 }
-
-// Export for modules
-export { handleSettle, handleRemind };
