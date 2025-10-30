@@ -1,4 +1,5 @@
 // monEZ - Utility Functions
+
 // Import centralized AppState from state.js
 import { AppState } from './state.js';
 
@@ -34,69 +35,65 @@ export function formatCurrency(amount, currency = null) {
       'EUR': '€',
       'GBP': '£',
       'AED': 'د.إ',
-      'SGD': 'S$'
+      'CAD': 'C$'
     };
     const symbol = symbols[userCurrency] || userCurrency;
     return `${symbol}${amount.toFixed(2)}`;
   }
 }
 
-// Calculate user-wise balance summary from expenses
+// Calculate user balances
 export function calculateUserBalances(expenses) {
-    const balanceMap = {};
-
-    expenses.forEach(expense => {
-        const { paidBy, splitAmong, amount } = expense;
-        const splitAmount = amount / (splitAmong?.length || 1);
-
-        // Add to paidBy's credit
-        balanceMap[paidBy] = (balanceMap[paidBy] || 0) + amount;
-
-        // Subtract from each person in splitAmong
-        splitAmong?.forEach(person => {
-            balanceMap[person] = (balanceMap[person] || 0) - splitAmount;
-        });
+  const balances = {};
+  expenses.forEach(expense => {
+    const amountPerPerson = expense.amount / expense.splitWith.length;
+    // Payer gets credited
+    balances[expense.paidBy] = (balances[expense.paidBy] || 0) + expense.amount;
+    // Split members get debited
+    expense.splitWith.forEach(user => {
+      balances[user] = (balances[user] || 0) - amountPerPerson;
     });
-
-    // Convert to array and filter out zero/near-zero balances
-    return Object.entries(balanceMap)
-        .filter(([, balance]) => Math.abs(balance) > 0.01)
-        .map(([name, amount]) => ({ name, amount }));
+  });
+  return balances;
 }
 
-// Create ripple effect on click
-export function createRippleEffect(element, event) {
-    const ripple = document.createElement('span');
-    const rect = element.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = event.clientX - rect.left - size / 2;
-    const y = event.clientY - rect.top - size / 2;
-
-    ripple.style.width = ripple.style.height = `${size}px`;
-    ripple.style.left = `${x}px`;
-    ripple.style.top = `${y}px`;
-    ripple.classList.add('ripple');
-
-    element.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 600);
+// Ripple effect for buttons
+export function createRippleEffect(event) {
+  const button = event.currentTarget;
+  const ripple = document.createElement('span');
+  const rect = button.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const x = event.clientX - rect.left - size / 2;
+  const y = event.clientY - rect.top - size / 2;
+  
+  ripple.style.width = ripple.style.height = `${size}px`;
+  ripple.style.left = `${x}px`;
+  ripple.style.top = `${y}px`;
+  ripple.classList.add('ripple');
+  
+  button.appendChild(ripple);
+  
+  ripple.addEventListener('animationend', () => {
+    ripple.remove();
+  });
 }
 
 // Animate number changes
-export function animateNumber(element, start, end, duration, formatter = null) {
+export function animateNumber(element, targetValue, duration = 500, formatter = null) {
+    const startValue = parseFloat(element.textContent.replace(/[^0-9.-]+/g, '')) || 0;
     const startTime = performance.now();
-
+    
     function update(currentTime) {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        const current = start + (end - start) * easeOutQuad(progress);
-
+        const easedProgress = easeOutQuad(progress);
+        const current = startValue + (targetValue - startValue) * easedProgress;
+        
         element.textContent = formatter ? formatter(current) : Math.round(current);
-
         if (progress < 1) {
             requestAnimationFrame(update);
         }
     }
-
     requestAnimationFrame(update);
 }
 
@@ -109,13 +106,12 @@ export function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
-
     document.body.appendChild(notification);
-
+    
     setTimeout(() => {
         notification.classList.add('show');
     }, 10);
-
+    
     setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 300);
@@ -126,23 +122,8 @@ export function showNotification(message, type = 'info') {
 export function formatDate(date, format = 'short') {
     const d = new Date(date);
     if (isNaN(d)) return 'Invalid Date';
-
     if (format === 'short') {
         return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
     }
     return d.toLocaleDateString('en-IN');
-}
-
-// Validate email
-export function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-// Debounce helper for search/input
-export function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
 }
