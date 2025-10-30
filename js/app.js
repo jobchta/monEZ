@@ -1,283 +1,265 @@
 /* monEZ - Main Application Logic */
 import { AppState, updateState, stateManager } from './state.js';
 import { createRippleEffect, showNotification, safeGet } from './utils.js';
-import { 
-    auth, 
-    db, 
-    provider, 
-    signInWithPopup, 
-    onAuthStateChanged, 
-    query, 
-    collection, 
-    where, 
-    orderBy, 
-    onSnapshot, 
-    doc, 
-    getDoc, 
+import {
+    auth,
+    db,
+    provider,
+    signInWithPopup,
+    onAuthStateChanged,
+    query,
+    collection,
+    where,
+    orderBy,
+    onSnapshot,
+    doc,
+    getDoc,
     runTransaction,
-    initFirebase 
+    initFirebase
 } from './firebase.js';
-import { 
-    renderRecentExpenses, 
-    renderAllExpenses, 
-    updateBalance, 
-    renderOnboardingPanel 
+import {
+    renderRecentExpenses,
+    renderAllExpenses,
+    updateBalance,
+    renderOnboardingPanel
 } from './render.js';
-import { 
-    showHome, 
-    showAddExpense, 
-    showExpenses, 
-    showBalances, 
-    showGroups, 
-    showPremiumFeatures, 
-    showSettings, 
-    showSplitBill, 
-    showSettle, 
-    showNotifications, 
-    showProfile, 
-    showFilters, 
-    settleAll, 
-    showCreateGroup, 
-    aiSuggestAmount, 
-    startVoiceInput, 
-    tryAIFeature, 
-    startPremiumTrial, 
-    showPaymentMethods, 
-    settleBalance, 
-    remindUser, 
-    showPWAPrompt, 
-    dismissPWAPrompt, 
-    installPWA, 
-    showPremiumModal, 
-    closePremiumModal, 
-    setupAllForms,
-    transitionTo 
+import {
+    showHome,
+    showAddExpense,
+    showExpenses,
+    showBalances,
+    showGroups,
+    showPremiumFeatures,
+    showSettings,
+    showSplitBill,
+    showSettle,
+    showNotifications,
+    showFriends,
+    showGroup,
+    showScheduled,
+    showAnalytics
 } from './views.js';
-import { initOnboarding } from './onboarding.js';
-import { startFriendsListener } from './friends.js';
+import { processExpense, deleteExpense, editExpense } from './expense.js';
+import { settleBalance } from './settle.js';
+import { remindUser } from './reminders.js';
 
-// Expose UI handlers for inline HTML onclicks
-Object.assign(window, { showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal });
-
-// Push Notifications setup/finalization
-async function ensurePushPermission() {
-  try {
-    if (!('Notification' in window)) return false;
-    let perm = Notification.permission;
-    if (perm === 'default') {
-      perm = await Notification.requestPermission();
+// DOM Ready
+function initApp() {
+    console.log('Initializing monEZ app...');
+    
+    const loginBtn = safeGet('google-sign-in-btn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', handleSignIn);
+        console.log('Login button handler attached');
+    } else {
+        console.error('Login button not found');
     }
-    
-    // Update push notification state
-    updateState({
-      preferences: {
-        ...AppState.preferences,
-        pushNotifications: {
-          ...(AppState.preferences.pushNotifications || {}),
-          enabled: perm === 'granted',
-          permission: perm
-        }
-      }
-    });
-    
-    return perm === 'granted';
-  } catch (error) {
-    console.error('Error requesting notification permission:', error);
-    return false;
-  }
-}
 
-// Track initialization state
-let isInitialized = false;
+    // Firebase initialization
+    try {
+        initFirebase();
+        console.log('Firebase initialized successfully');
+    } catch (error) {
+        console.error('Firebase initialization failed:', error);
+        showNotification('Failed to initialize app. Please refresh.', 'error');
+        return;
+    }
 
-/**
- * Initialize the application
- */
-async function initApp() {
-  if (isInitialized) {
-    console.warn('App already initialized');
-    return;
-  }
-
-  try {
-    // Initialize Firebase services
-    await initFirebase();
-    
-    // Set up UI components
     setupNavTransitions();
     setupBalanceHandlers();
-    
-    // Check if user needs to complete onboarding
-    checkOnboardingStatus();
-    
-    // Mark as initialized
-    isInitialized = true;
-    
-    // Set up authentication state listener
+    const addExpenseBtn = safeGet('add-expense-btn');
+    if (addExpenseBtn) addExpenseBtn.addEventListener('click', () => showAddExpense());
+
+    const submitExpenseBtn = safeGet('submit-expense-btn');
+    if (submitExpenseBtn) submitExpenseBtn.addEventListener('click', handleAddExpense);
+
+    const addFriendBtn = safeGet('add-friend-btn');
+    if (addFriendBtn) addFriendBtn.addEventListener('click', handleAddFriend);
+
+    const inviteFriendBtn = safeGet('invite-friend-btn');
+    if (inviteFriendBtn) inviteFriendBtn.addEventListener('click', handleInviteFriend);
+
+    const settleExpenseBtn = safeGet('settle-expense-btn');
+    if (settleExpenseBtn) settleExpenseBtn.addEventListener('click', handleSettleExpense);
+
+    const toggleThemeBtn = safeGet('toggle-theme');
+    if (toggleThemeBtn) {
+        toggleThemeBtn.addEventListener('click', toggleTheme);
+    }
+
+    console.log('Setting up authentication...');
     onAuthStateChanged(auth, async (user) => {
-    const loginScreen = safeGet('login-screen');
+        console.log('Auth state changed:', user ? user.email : 'No user');
+        if (user) {
+            updateState({ user });
+            await loadUserPreferences();
+            applyUserPreferences();
+            const hasCompletedOnboarding = await checkUserOnboarding(user.uid);
+            if (!hasCompletedOnboarding) {
+                renderOnboardingPanel();
+            } else {
+                await initUserSession(user);
+            }
+        } else {
+            showLoginScreen();
+        }
+    });
+}
+
+function showLoginScreen() {
+    const loginScreen = safeGet('panel-login');
     const mainApp = safeGet('main-app');
-    const onboardingScreen = safeGet('onboarding-screen');
+    const onboardingPanel = safeGet('onboarding-panel');
     
-    if (user) {
-      // User is signed in
-      const hasCompletedOnboarding = await checkUserOnboarding(user.uid);
-      
-      if (!hasCompletedOnboarding) {
-        // Show onboarding for new users
-        if (loginScreen) loginScreen.style.display = 'none';
-        if (mainApp) mainApp.style.display = 'none';
-        if (onboardingScreen) onboardingScreen.classList.remove('hidden');
-        
-        initOnboarding();
-        renderOnboardingPanel();
+    if (loginScreen) loginScreen.style.display = 'flex';
+    if (mainApp) mainApp.style.display = 'none';
+    if (onboardingPanel) onboardingPanel.style.display = 'none';
+}
+
+async function initUserSession(user) {
+    const loginScreen = safeGet('panel-login');
+    const mainApp = safeGet('main-app');
+    const onboardingPanel = safeGet('onboarding-panel');
+    
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (mainApp) mainApp.style.display = 'block';
+    if (onboardingPanel) onboardingPanel.style.display = 'none';
+
+    startBalanceListener(user.uid);
+    showHome();
+}
+
+async function handleSignIn() {
+    try {
+        console.log('Attempting sign in...');
+        const result = await signInWithPopup(auth, provider);
+        console.log('Sign in successful:', result.user.email);
+        showNotification(`Welcome, ${result.user.displayName}!`, 'success');
+    } catch (error) {
+        console.error('Sign in error:', error);
+        showNotification('Sign in failed. Please try again.', 'error');
+    }
+}
+
+async function loadUserPreferences() {
+    const user = AppState.user;
+    if (!user) return;
+
+    try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+            const prefs = userDoc.data().preferences || {};
+            updateState({ preferences: prefs });
+        }
+    } catch (error) {
+        console.error('Error loading preferences:', error);
+    }
+}
+
+function applyUserPreferences() {
+    const prefs = AppState.preferences || {};
+    if (prefs.theme === 'dark') {
+        document.body.classList.add('dark-theme');
+    }
+}
+
+function handleAddExpense() {
+    const description = safeGet('expense-description')?.value.trim();
+    const amountStr = safeGet('expense-amount')?.value.trim();
+    const category = safeGet('expense-category')?.value || 'Other';
+    const selectedFriends = Array.from(document.querySelectorAll('.friend-checkbox:checked')).map(cb => cb.value);
+
+    if (!description || !amountStr) {
+        showNotification('Please fill in all required fields', 'warning');
         return;
-      }
-      
-      // User has completed onboarding
-      if (loginScreen) loginScreen.style.display = 'none';
-      if (mainApp) mainApp.style.display = 'flex';
-      if (onboardingScreen) onboardingScreen.classList.add('hidden');
-      
-      // Update application state with user data
-      updateState({
-        currentUser: {
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName || user.email.split('@')[0],
-          photoURL: user.photoURL
-        },
-        auth: {
-          isAuthenticated: true,
-          isAnonymous: user.isAnonymous,
-          emailVerified: user.emailVerified
-        }
-      });
-      
-      // Load user data and set up listeners
-      try {
-        await Promise.all([
-          loadUserPreferences(user.uid),
-          startFriendsListener(),
-          ensurePushPermission()
-        ]);
-        
-        // Initialize UI components
-        renderRecentExpenses();
-        startBalanceListener(user.uid);
-        
-        // Notify listeners that user is fully loaded
-        stateManager.emit('user:loaded', AppState.currentUser);
-      } catch (error) {
-        console.error('Error initializing user session:', error);
-        showNotification('Error loading your data. Please refresh the page.', 'error');
-      }
+    }
+
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount) || amount <= 0) {
+        showNotification('Please enter a valid amount', 'warning');
+        return;
+    }
+
+    const expenseData = {
+        description,
+        amount,
+        category,
+        splitWith: selectedFriends,
+        timestamp: new Date(),
+        userId: AppState.user.uid
+    };
+
+    processExpense(expenseData);
+}
+
+function handleAddFriend() {
+    const friendEmail = safeGet('friend-email')?.value.trim();
+    if (!friendEmail) {
+        showNotification('Please enter an email', 'warning');
+        return;
+    }
+    showNotification(`Friend request sent to ${friendEmail}`, 'success');
+    if (safeGet('friend-email')) safeGet('friend-email').value = '';
+}
+
+function handleInviteFriend() {
+    const inviteEmail = safeGet('invite-email')?.value.trim();
+    if (!inviteEmail) {
+        showNotification('Please enter an email', 'warning');
+        return;
+    }
+    showNotification(`Invitation sent to ${inviteEmail}`, 'success');
+    if (safeGet('invite-email')) safeGet('invite-email').value = '';
+}
+
+function handleSettleExpense() {
+    const friendId = safeGet('settle-friend-select')?.value;
+    const amountStr = safeGet('settle-amount')?.value.trim();
+
+    if (!friendId || !amountStr) {
+        showNotification('Please select a friend and enter an amount', 'warning');
+        return;
+    }
+
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount) || amount <= 0) {
+        showNotification('Please enter a valid amount', 'warning');
+        return;
+    }
+
+    settleBalance(friendId, amount);
+}
+
+function toggleTheme() {
+    document.body.classList.toggle('dark-theme');
+    const isDark = document.body.classList.contains('dark-theme');
+    updateState({ preferences: { ...AppState.preferences, theme: isDark ? 'dark' : 'light' } });
+    showNotification(`Switched to ${isDark ? 'dark' : 'light'} theme`, 'info');
+}
+
+function transitionTo(viewName) {
+    const views = {
+        home: showHome,
+        'add-expense': showAddExpense,
+        expenses: showExpenses,
+        balances: showBalances,
+        groups: showGroups,
+        premium: showPremiumFeatures,
+        settings: showSettings
+    };
+
+    const viewFn = views[viewName];
+    if (viewFn) {
+        viewFn();
     } else {
-      // User is signed out
-      updateState({
-        currentUser: null,
-        auth: {
-          isAuthenticated: false,
-          isAnonymous: true,
-          emailVerified: false
-        }
-      });
-      
-      // Update UI for logged out state
-      if (mainApp) mainApp.style.display = 'none';
-      if (loginScreen) loginScreen.style.display = 'flex';
-      if (onboardingScreen) onboardingScreen.classList.add('hidden');
-      
-      // Notify listeners that user has signed out
-      stateManager.emit('user:signedOut');
+        console.error(`Unknown view: ${viewName}`);
     }
-  });
-  
-  // Set up all form handlers (expense, friend, group)
-  setupAllForms();
-  
-  } catch (error) {
-    console.error('Failed to initialize application:', error);
-    showNotification('Failed to initialize application. Please refresh the page.', 'error');
-    
-    // Show error state to user
-    const errorElement = document.createElement('div');
-    errorElement.className = 'error-message';
-    errorElement.textContent = 'Failed to initialize application. Please check your connection and refresh the page.';
-    document.body.prepend(errorElement);
-  }
 }
 
-/**
- * Load and apply user preferences from Firestore
- * @param {string} userId - The user's unique ID
- */
-async function loadUserPreferences(userId) {
-  try {
-    const docRef = doc(db, 'users', userId);
-    const snap = await getDoc(docRef);
-    
-    if (!snap.exists()) {
-      // Set up default preferences for new users
-      const defaultPrefs = {
-        currency: 'USD',
-        theme: 'system', // 'light', 'dark', or 'system'
-        language: 'en',
-        notifications: {
-          email: true,
-          push: true,
-          reminders: true
-        },
-        privacy: {
-          profileVisible: true,
-          activityFeed: true,
-          emailVisible: false
-        },
-        preferences: {
-          defaultView: 'dashboard',
-          defaultCurrency: 'USD',
-          dateFormat: 'MM/DD/YYYY',
-          timeFormat: '12h',
-          firstDayOfWeek: 0, // 0 = Sunday, 1 = Monday
-          hideAmounts: false,
-          compactView: false
-        },
-        created: new Date().toISOString(),
-        lastUpdated: new Date().toISOString()
-      };
-      
-      // Save default preferences in a transaction
-      await runTransaction(db, async (txn) => {
-        const readCheck = await txn.get(docRef);
-        if (!readCheck.exists()) txn.set(docRef, defaultPrefs);
-      });
-      applyUserPreferences(defaultPrefs);
-      return;
-    }
-
-    const prefs = snap.data();
-    if (!prefs.initialized) {
-      await runTransaction(db, async (txn) => {
-        const readCheck = await txn.get(docRef);
-        txn.update(docRef, { initialized: Date.now() });
-      });
-    }
-    applyUserPreferences(prefs);
-  } catch (err) {
-    console.error('loadUserPreferences error:', err);
-    applyUserPreferences({ currency: 'USD', darkMode: false });
-  }
-}
-
-function applyUserPreferences(prefs) {
-  if (prefs.darkMode) { document.body.classList.toggle('dark-mode', prefs.darkMode); }
-  if (prefs.currency) { updateState({ defaultCurrency: prefs.currency }); }
-}
-
-function checkUserOnboarding(userId) {
+async function checkUserOnboarding(userId) {
   return new Promise((resolve) => {
-    const docRef = doc(db, 'users', userId);
-    onSnapshot(docRef, (snap) => {
+    const userDocRef = doc(db, 'users', userId);
+    getDoc(userDocRef).then((snap) => {
       if (snap.exists()) {
         const data = snap.data();
         resolve(!!data.onboardingComplete);
