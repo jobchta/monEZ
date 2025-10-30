@@ -1,5 +1,4 @@
 // Centralized state management for monEZ
-
 // Application State - Single Source of Truth
 export const AppState = {
     // User data
@@ -26,6 +25,34 @@ export const AppState = {
     defaultCurrency: 'USD',
     supportedCurrencies: ['USD', 'EUR', 'INR', 'GBP']
 };
+
+// StateManager for event-driven state changes
+class StateManager {
+    constructor() {
+        this.listeners = {};
+    }
+
+    on(event, callback) {
+        if (!this.listeners[event]) {
+            this.listeners[event] = [];
+        }
+        this.listeners[event].push(callback);
+    }
+
+    emit(event, data) {
+        if (this.listeners[event]) {
+            this.listeners[event].forEach(callback => callback(data));
+        }
+    }
+
+    off(event, callback) {
+        if (this.listeners[event]) {
+            this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+        }
+    }
+}
+
+export const stateManager = new StateManager();
 
 // State update function
 export function updateState(updates) {
@@ -57,7 +84,7 @@ export function resetState() {
     Object.assign(AppState, {
         currentUser: null,
         preferences: {
-            currency: defaultCurrency,
+            currency: 'USD',
             darkMode: false,
             language: 'en',
             notifications: true
@@ -68,24 +95,27 @@ export function resetState() {
         balance: 0,
         selectedFriends: new Set(),
         selectedGroup: null,
-        selectedExpense: null
+        selectedExpense: null,
+        defaultCurrency,
+        supportedCurrencies
     });
 }
 
-// Initialize state management
+// Helper methods for state
+export function getExpenses() {
+    return AppState.expenses || [];
+}
+
+export function getFriends() {
+    return AppState.friends || [];
+}
+
+export function getGroups() {
+    return AppState.groups || [];
+}
+
+// Initialize state
 export function initializeState() {
-    // Add any initialization logic here
-    console.log('State management initialized');
-    
-    // Error handling
-    window.addEventListener('error', (event) => {
-        console.error('Global error:', event.error);
-    });
-    
-    window.addEventListener('unhandledrejection', (event) => {
-        console.error('Unhandled promise rejection:', event.reason);
-    });
+    console.log('State initialized:', AppState);
+    window.stateManager = stateManager;
 }
-
-// Initialize immediately
-initializeState();
