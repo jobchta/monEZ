@@ -1,12 +1,12 @@
 // monEZ - Utility Functions
-
-// Import centralized AppState from globals.js
-import { AppState } from './globals.js';
+// Import centralized AppState from state.js
+import { AppState } from './state.js';
 
 // Expose AppState globally for compatibility
 window.AppState = AppState;
 
 // --- Enhanced Helper Functions ---
+
 // Safe DOM lookup – prevents UI crashes if an ID is wrong or missing
 export function safeGet(id) {
   const el = document.getElementById(id);
@@ -37,162 +37,112 @@ export function formatCurrency(amount, currency = null) {
       'SGD': 'S$'
     };
     const symbol = symbols[userCurrency] || userCurrency;
-    return `${symbol}${amount.toLocaleString()}`;
+    return `${symbol}${amount.toFixed(2)}`;
   }
 }
 
-// Ripple effect for button clicks
+// Calculate user-wise balance summary from expenses
+export function calculateUserBalances(expenses) {
+    const balanceMap = {};
+
+    expenses.forEach(expense => {
+        const { paidBy, splitAmong, amount } = expense;
+        const splitAmount = amount / (splitAmong?.length || 1);
+
+        // Add to paidBy's credit
+        balanceMap[paidBy] = (balanceMap[paidBy] || 0) + amount;
+
+        // Subtract from each person in splitAmong
+        splitAmong?.forEach(person => {
+            balanceMap[person] = (balanceMap[person] || 0) - splitAmount;
+        });
+    });
+
+    // Convert to array and filter out zero/near-zero balances
+    return Object.entries(balanceMap)
+        .filter(([, balance]) => Math.abs(balance) > 0.01)
+        .map(([name, amount]) => ({ name, amount }));
+}
+
+// Create ripple effect on click
 export function createRippleEffect(element, event) {
-  const ripple = document.createElement('div');
-  const rect = element.getBoundingClientRect();
-  const size = Math.max(rect.width, rect.height);
-  const x = event.clientX - rect.left - size / 2;
-  const y = event.clientY - rect.top - size / 2;
+    const ripple = document.createElement('span');
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
 
-  ripple.style.width = ripple.style.height = size + 'px';
-  ripple.style.left = x + 'px';
-  ripple.style.top = y + 'px';
-  ripple.style.position = 'absolute';
-  ripple.style.borderRadius = '50%';
-  ripple.style.background = 'rgba(255,255,255,0.3)';
-  ripple.style.transform = 'scale(0)';
-  ripple.style.animation = 'ripple 0.6s ease-out';
-  ripple.style.pointerEvents = 'none';
+    ripple.style.width = ripple.style.height = `${size}px`;
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    ripple.classList.add('ripple');
 
-  element.style.position = 'relative';
-  element.style.overflow = 'hidden';
-  element.appendChild(ripple);
-
-  setTimeout(() => {
-    ripple.remove();
-  }, 600);
+    element.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
 }
 
-// Animate number transitions for balances
-export function animateNumber(element, start, end, duration = 1000) {
-  const startTime = performance.now();
-  const range = end - start;
+// Animate number changes
+export function animateNumber(element, start, end, duration, formatter = null) {
+    const startTime = performance.now();
 
-  function update(currentTime) {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-    const current = Math.round(start + range * easeOutQuart);
-    element.textContent = formatCurrency(current);
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const current = start + (end - start) * easeOutQuad(progress);
 
-    if (progress < 1) {
-      requestAnimationFrame(update);
+        element.textContent = formatter ? formatter(current) : Math.round(current);
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
     }
-  }
 
-  requestAnimationFrame(update);
+    requestAnimationFrame(update);
 }
 
-// Robust user notifications for all actions/errors
-export function showNotification(message, type = 'success', duration = 3000) {
-  const notification = document.createElement('div');
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'};
-    color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 10000;
-    transform: translateX(400px);
-    transition: transform 0.3s ease;
-    font-size: 14px;
-    font-weight: 500;
-    max-width: 300px;
-  `;
-
-  notification.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 8px;">
-      ${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}
-      ${message}
-      <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; margin-left: 8px; font-size: 16px;">×</button>
-    </div>
-  `;
-
-  document.body.appendChild(notification);
-
-  setTimeout(() => {
-    notification.style.transform = 'translateX(0)';
-  }, 100);
-
-  setTimeout(() => {
-    notification.style.transform = 'translateX(400px)';
-    setTimeout(() => notification.remove(), 300);
-  }, duration);
+function easeOutQuad(t) {
+    return t * (2 - t);
 }
 
-// Calculate user balances from expenses
-export function calculateUserBalances() {
-  const balanceMap = new Map();
+// Show notification
+export function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
 
-  AppState.expenses.forEach(expense => {
-    if (!expense.splitWith) return;
+    document.body.appendChild(notification);
 
-    const totalPeople = expense.splitWith.length + 1;
-    const sharePerPerson = expense.amount / totalPeople;
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
 
-    expense.splitWith.forEach(friendName => {
-      if (expense.paidBy === 'You') {
-        const currentBalance = balanceMap.get(friendName) || 0;
-        balanceMap.set(friendName, currentBalance + sharePerPerson);
-      } else if (expense.paidBy === friendName) {
-        const currentBalance = balanceMap.get(friendName) || 0;
-        balanceMap.set(friendName, currentBalance - sharePerPerson);
-      }
-    });
-  });
-
-  return Array.from(balanceMap.entries())
-    .map(([name, amount]) => ({ name, amount }))
-    .filter(balance => Math.abs(balance.amount) > 0.01);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
-// Hide example/onboarding after user adds first real data
-export function hideExampleData() {
-  AppState.showExample = false;
-  localStorage.setItem('monez.hideExample', '1');
+// Date formatting helper
+export function formatDate(date, format = 'short') {
+    const d = new Date(date);
+    if (isNaN(d)) return 'Invalid Date';
+
+    if (format === 'short') {
+        return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+    }
+    return d.toLocaleDateString('en-IN');
 }
 
-// Check if user has seen expense onboarding
-export function checkOnboardingStatus() {
-  const hideExample = localStorage.getItem('monez.hideExample');
-  if (hideExample === '1') {
-    AppState.showExample = false;
-  }
+// Validate email
+export function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// Focus trap for modals
-export function trapFocus(element) {
-    const focusableElements = element.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    const firstFocusable = focusableElements[0];
-    const lastFocusable = focusableElements[focusableElements.length - 1];
-
-    element.addEventListener('keydown', (e) => {
-        if (e.key !== 'Tab') {
-            return;
-        }
-
-        if (e.shiftKey) {
-            if (document.activeElement === firstFocusable) {
-                lastFocusable.focus();
-                e.preventDefault();
-            }
-        } else {
-            if (document.activeElement === lastFocusable) {
-                firstFocusable.focus();
-                e.preventDefault();
-            }
-        }
-    });
-
-    firstFocusable.focus();
+// Debounce helper for search/input
+export function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
 }
