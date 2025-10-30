@@ -1,4 +1,5 @@
-import { safeGet, AppState, showNotification, createRippleEffect, hideExampleData } from './utils.js';
+import { safeGet, showNotification, createRippleEffect, hideExampleData } from './utils.js';
+import { AppState } from './globals.js';
 import { formatCurrency } from './renderUtils.js';
 import { renderRecentExpenses, renderAllExpenses, renderBalances, populatePeopleSelector, updateBalance } from './render.js';
 import { auth, db, collection, addDoc, serverTimestamp } from './firebase.js';
