@@ -50,12 +50,15 @@ import {
     installPWA, 
     showPremiumModal, 
     closePremiumModal, 
+    setupAllForms,
     transitionTo 
 } from './views.js';
 import { initOnboarding } from './onboarding.js';
 import { startFriendsListener } from './friends.js';
+
 // Expose UI handlers for inline HTML onclicks
 Object.assign(window, { showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal });
+
 // Push Notifications setup/finalization
 async function ensurePushPermission() {
   try {
@@ -83,6 +86,7 @@ async function ensurePushPermission() {
     return false;
   }
 }
+
 // Track initialization state
 let isInitialized = false;
 
@@ -189,8 +193,8 @@ async function initApp() {
     }
   });
   
-  // Set up the expense form
-  setupExpenseForm();
+  // Set up all form handlers (expense, friend, group)
+  setupAllForms();
   
   } catch (error) {
     console.error('Failed to initialize application:', error);
@@ -203,6 +207,7 @@ async function initApp() {
     document.body.prepend(errorElement);
   }
 }
+
 /**
  * Load and apply user preferences from Firestore
  * @param {string} userId - The user's unique ID
@@ -249,6 +254,7 @@ async function loadUserPreferences(userId) {
       applyUserPreferences(defaultPrefs);
       return;
     }
+
     const prefs = snap.data();
     if (!prefs.initialized) {
       await runTransaction(db, async (txn) => {
@@ -262,10 +268,12 @@ async function loadUserPreferences(userId) {
     applyUserPreferences({ currency: 'USD', darkMode: false });
   }
 }
+
 function applyUserPreferences(prefs) {
   if (prefs.darkMode) { document.body.classList.toggle('dark-mode', prefs.darkMode); }
   if (prefs.currency) { updateState({ defaultCurrency: prefs.currency }); }
 }
+
 function checkUserOnboarding(userId) {
   return new Promise((resolve) => {
     const docRef = doc(db, 'users', userId);
@@ -277,6 +285,7 @@ function checkUserOnboarding(userId) {
     }, () => resolve(false));
   });
 }
+
 function setupNavTransitions() {
   const navLinks = document.querySelectorAll('[data-view]');
   navLinks.forEach((link) => {
@@ -304,6 +313,7 @@ function setupBalanceHandlers() {
     }
   });
 }
+
 function startBalanceListener(userId) {
   const q = query(collection(db, 'expenses'), where('userId', '==', userId), orderBy('timestamp', 'desc'));
   onSnapshot(q, (snapshot) => {
@@ -319,6 +329,8 @@ function startBalanceListener(userId) {
     updateBalance(debts);
   });
 }
+
 if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initApp); }
 else { initApp(); }
+
 export { initApp, loadUserPreferences, applyUserPreferences, checkUserOnboarding };
