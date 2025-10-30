@@ -5,8 +5,9 @@ import {
   hideExampleData 
 } from './utils.js';
 
-// Import from state.js instead of globals.js
-import { AppState, stateManager } from './state.js';
+// Import state from state.js and stateManager from globals.js
+import { AppState, updateState } from './state.js';
+import { stateManager } from './globals.js';
 
 import { 
   formatCurrency,
