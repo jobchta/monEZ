@@ -39,9 +39,9 @@ import {
     showScheduled,
     showAnalytics
 } from './views.js';
-import { processExpense, deleteExpense, editExpense } from './expense.js';
-import { settleBalance } from './settle.js';
-import { remindUser } from './reminders.js';
+// import { processExpense, deleteExpense, editExpense } from './expense.js';
+// import { settleBalance } from './settle.js';
+// import { remindUser } from './reminders.js';
 
 // DOM Ready
 function initApp() {
@@ -54,265 +54,249 @@ function initApp() {
     } else {
         console.error('Login button not found');
     }
-
-    // Firebase initialization
-    try {
-        initFirebase();
-        console.log('Firebase initialized successfully');
-    } catch (error) {
-        console.error('Firebase initialization failed:', error);
-        showNotification('Failed to initialize app. Please refresh.', 'error');
-        return;
-    }
-
-    setupNavTransitions();
-    setupBalanceHandlers();
-    const addExpenseBtn = safeGet('add-expense-btn');
-    if (addExpenseBtn) addExpenseBtn.addEventListener('click', () => showAddExpense());
-
-    const submitExpenseBtn = safeGet('submit-expense-btn');
-    if (submitExpenseBtn) submitExpenseBtn.addEventListener('click', handleAddExpense);
-
-    const addFriendBtn = safeGet('add-friend-btn');
-    if (addFriendBtn) addFriendBtn.addEventListener('click', handleAddFriend);
-
-    const inviteFriendBtn = safeGet('invite-friend-btn');
-    if (inviteFriendBtn) inviteFriendBtn.addEventListener('click', handleInviteFriend);
-
-    const settleExpenseBtn = safeGet('settle-expense-btn');
-    if (settleExpenseBtn) settleExpenseBtn.addEventListener('click', handleSettleExpense);
-
-    const toggleThemeBtn = safeGet('toggle-theme');
-    if (toggleThemeBtn) {
-        toggleThemeBtn.addEventListener('click', toggleTheme);
-    }
-
-    console.log('Setting up authentication...');
+    
+    // Initialize app only if user authenticated
+    initFirebase();
+    console.log('Firebase initialized');
+    
+    // Check authentication state
     onAuthStateChanged(auth, async (user) => {
-        console.log('Auth state changed:', user ? user.email : 'No user');
         if (user) {
-            updateState({ user });
-            await loadUserPreferences();
-            applyUserPreferences();
-            const hasCompletedOnboarding = await checkUserOnboarding(user.uid);
-            if (!hasCompletedOnboarding) {
-                renderOnboardingPanel();
-            } else {
-                await initUserSession(user);
-            }
+            console.log('User authenticated:', user.email);
+            updateState({ currentUser: user });
+            await initAuthenticatedUser(user);
         } else {
+            console.log('User not authenticated');
             showLoginScreen();
         }
     });
 }
 
+// Initialize app when logged in
+async function initAuthenticatedUser(user) {
+    console.log('Initializing authenticated user:', user.email);
+    
+    // Hide login screen and show app
+    const loginScreen = document.getElementById('login-screen');
+    const mainApp = document.getElementById('app');
+    
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (mainApp) mainApp.style.display = 'flex';
+    
+    // Set up navigation
+    setupNavigation();
+    
+    // Initialize expense listeners
+    setupExpenseListeners();
+    
+    // Show home view by default
+    showHome();
+    
+    // Load user data and start listeners
+    await loadUserData(user);
+    await loadGroupInvites(user);
+    
+    console.log('App initialization complete');
+}
+
 function showLoginScreen() {
-    const loginScreen = safeGet('panel-login');
-    const mainApp = safeGet('main-app');
-    const onboardingPanel = safeGet('onboarding-panel');
+    const loginScreen = document.getElementById('login-screen');
+    const mainApp = document.getElementById('app');
     
     if (loginScreen) loginScreen.style.display = 'flex';
     if (mainApp) mainApp.style.display = 'none';
-    if (onboardingPanel) onboardingPanel.style.display = 'none';
 }
 
-async function initUserSession(user) {
-    const loginScreen = safeGet('panel-login');
-    const mainApp = safeGet('main-app');
-    const onboardingPanel = safeGet('onboarding-panel');
-    
-    if (loginScreen) loginScreen.style.display = 'none';
-    if (mainApp) mainApp.style.display = 'block';
-    if (onboardingPanel) onboardingPanel.style.display = 'none';
-
-    startBalanceListener(user.uid);
-    showHome();
-}
-
+// Sign in handler
 async function handleSignIn() {
+    console.log('Signing in...');
     try {
-        console.log('Attempting sign in...');
         const result = await signInWithPopup(auth, provider);
-        console.log('Sign in successful:', result.user.email);
-        showNotification(`Welcome, ${result.user.displayName}!`, 'success');
+        const user = result.user;
+        console.log('Sign in successful:', user.email);
+        
+        // Check if user exists in DB, if not create profile
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+            console.log('Creating new user profile');
+            await runTransaction(db, async (transaction) => {
+                transaction.set(userRef, {
+                    email: user.email,
+                    displayName: user.displayName || user.email.split('@')[0],
+                    photoURL: user.photoURL || '',
+                    createdAt: new Date().toISOString(),
+                    totalExpenses: 0,
+                    totalBalance: 0
+                });
+            });
+        }
+        
+        showNotification('Welcome to monEZ!', 'success');
     } catch (error) {
         console.error('Sign in error:', error);
-        showNotification('Sign in failed. Please try again.', 'error');
+        showNotification('Failed to sign in. Please try again.', 'error');
     }
 }
 
-async function loadUserPreferences() {
-    const user = AppState.user;
-    if (!user) return;
+// Setup navigation
+function setupNavigation() {
+    const navItems = {
+        'nav-home': showHome,
+        'nav-add-expense': showAddExpense,
+        'nav-expenses': showExpenses,
+        'nav-balances': showBalances,
+        'nav-groups': showGroups,
+        'nav-friends': showFriends,
+        'nav-split-bill': showSplitBill,
+        'nav-settle': showSettle,
+        'nav-notifications': showNotifications,
+        'nav-scheduled': showScheduled,
+        'nav-analytics': showAnalytics,
+        'nav-premium': showPremiumFeatures,
+        'nav-settings': showSettings
+    };
+    
+    Object.entries(navItems).forEach(([id, handler]) => {
+        const navItem = document.getElementById(id);
+        if (navItem) {
+            navItem.addEventListener('click', (e) => {
+                e.preventDefault();
+                handler();
+                // Update active state
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                navItem.classList.add('active');
+            });
+        }
+    });
+}
 
+// Setup expense form listeners
+function setupExpenseListeners() {
+    const expenseForm = document.getElementById('expense-form');
+    if (expenseForm) {
+        expenseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(expenseForm);
+            const expenseData = {
+                description: formData.get('description'),
+                amount: parseFloat(formData.get('amount')),
+                category: formData.get('category'),
+                paidBy: AppState.currentUser.uid,
+                splitWith: formData.getAll('split-with'),
+                date: new Date().toISOString(),
+                groupId: formData.get('group-id') || null
+            };
+            
+            // Call processExpense if available
+            if (typeof processExpense === 'function') {
+                await processExpense(expenseData);
+            } else {
+                console.warn('processExpense function not available');
+                showNotification('Expense processing is currently unavailable', 'error');
+            }
+        });
+    }
+}
+
+// Load user data from Firebase
+async function loadUserData(user) {
+    console.log('Loading user data for:', user.uid);
+    
+    // Listen to user's expenses
+    const expensesQuery = query(
+        collection(db, 'expenses'),
+        where('participants', 'array-contains', user.uid),
+        orderBy('date', 'desc')
+    );
+    
+    onSnapshot(expensesQuery, (snapshot) => {
+        const expenses = [];
+        snapshot.forEach((doc) => {
+            expenses.push({ id: doc.id, ...doc.data() });
+        });
+        updateState({ expenses });
+        renderRecentExpenses(expenses);
+        updateBalance();
+    });
+    
+    // Listen to balances
+    const balancesQuery = query(
+        collection(db, 'balances'),
+        where('userId', '==', user.uid)
+    );
+    
+    onSnapshot(balancesQuery, (snapshot) => {
+        const balances = {};
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            balances[data.friendId] = data.amount;
+        });
+        updateState({ balances });
+    });
+}
+
+// Load group invites
+async function loadGroupInvites(user) {
+    const invitesQuery = query(
+        collection(db, 'groupInvites'),
+        where('inviteeId', '==', user.uid),
+        where('status', '==', 'pending')
+    );
+    
+    onSnapshot(invitesQuery, (snapshot) => {
+        const invites = [];
+        snapshot.forEach((doc) => {
+            invites.push({ id: doc.id, ...doc.data() });
+        });
+        updateState({ groupInvites: invites });
+        
+        // Show notification if there are new invites
+        if (invites.length > 0) {
+            showNotification(`You have ${invites.length} pending group invite(s)`, 'info');
+        }
+    });
+}
+
+// Settle balance handler
+window.handleSettle = async (friendId, amount) => {
     try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-            const prefs = userDoc.data().preferences || {};
-            updateState({ preferences: prefs });
+        // Call settleBalance if available
+        if (typeof settleBalance === 'function') {
+            await settleBalance(friendId, amount);
+        } else {
+            console.warn('settleBalance function not available');
+            showNotification('Settlement feature is currently unavailable', 'error');
         }
     } catch (error) {
-        console.error('Error loading preferences:', error);
+        console.error('Error settling balance:', error);
+        showNotification('Failed to settle balance', 'error');
     }
-}
+};
 
-function applyUserPreferences() {
-    const prefs = AppState.preferences || {};
-    if (prefs.theme === 'dark') {
-        document.body.classList.add('dark-theme');
+// Remind user handler
+window.handleRemind = async (friend) => {
+    try {
+        // Call remindUser if available
+        if (typeof remindUser === 'function') {
+            await remindUser(friend);
+        } else {
+            console.warn('remindUser function not available');
+            showNotification('Reminder feature is currently unavailable', 'error');
+        }
+    } catch (error) {
+        console.error('Error sending reminder:', error);
+        showNotification('Failed to send reminder', 'error');
     }
+};
+
+// Initialize on DOM load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
 }
 
-function handleAddExpense() {
-    const description = safeGet('expense-description')?.value.trim();
-    const amountStr = safeGet('expense-amount')?.value.trim();
-    const category = safeGet('expense-category')?.value || 'Other';
-    const selectedFriends = Array.from(document.querySelectorAll('.friend-checkbox:checked')).map(cb => cb.value);
-
-    if (!description || !amountStr) {
-        showNotification('Please fill in all required fields', 'warning');
-        return;
-    }
-
-    const amount = parseFloat(amountStr);
-    if (isNaN(amount) || amount <= 0) {
-        showNotification('Please enter a valid amount', 'warning');
-        return;
-    }
-
-    const expenseData = {
-        description,
-        amount,
-        category,
-        splitWith: selectedFriends,
-        timestamp: new Date(),
-        userId: AppState.user.uid
-    };
-
-    processExpense(expenseData);
-}
-
-function handleAddFriend() {
-    const friendEmail = safeGet('friend-email')?.value.trim();
-    if (!friendEmail) {
-        showNotification('Please enter an email', 'warning');
-        return;
-    }
-    showNotification(`Friend request sent to ${friendEmail}`, 'success');
-    if (safeGet('friend-email')) safeGet('friend-email').value = '';
-}
-
-function handleInviteFriend() {
-    const inviteEmail = safeGet('invite-email')?.value.trim();
-    if (!inviteEmail) {
-        showNotification('Please enter an email', 'warning');
-        return;
-    }
-    showNotification(`Invitation sent to ${inviteEmail}`, 'success');
-    if (safeGet('invite-email')) safeGet('invite-email').value = '';
-}
-
-function handleSettleExpense() {
-    const friendId = safeGet('settle-friend-select')?.value;
-    const amountStr = safeGet('settle-amount')?.value.trim();
-
-    if (!friendId || !amountStr) {
-        showNotification('Please select a friend and enter an amount', 'warning');
-        return;
-    }
-
-    const amount = parseFloat(amountStr);
-    if (isNaN(amount) || amount <= 0) {
-        showNotification('Please enter a valid amount', 'warning');
-        return;
-    }
-
-    settleBalance(friendId, amount);
-}
-
-function toggleTheme() {
-    document.body.classList.toggle('dark-theme');
-    const isDark = document.body.classList.contains('dark-theme');
-    updateState({ preferences: { ...AppState.preferences, theme: isDark ? 'dark' : 'light' } });
-    showNotification(`Switched to ${isDark ? 'dark' : 'light'} theme`, 'info');
-}
-
-function transitionTo(viewName) {
-    const views = {
-        home: showHome,
-        'add-expense': showAddExpense,
-        expenses: showExpenses,
-        balances: showBalances,
-        groups: showGroups,
-        premium: showPremiumFeatures,
-        settings: showSettings
-    };
-
-    const viewFn = views[viewName];
-    if (viewFn) {
-        viewFn();
-    } else {
-        console.error(`Unknown view: ${viewName}`);
-    }
-}
-
-async function checkUserOnboarding(userId) {
-  return new Promise((resolve) => {
-    const userDocRef = doc(db, 'users', userId);
-    getDoc(userDocRef).then((snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        resolve(!!data.onboardingComplete);
-      } else resolve(false);
-    }, () => resolve(false));
-  });
-}
-
-function setupNavTransitions() {
-  const navLinks = document.querySelectorAll('[data-view]');
-  navLinks.forEach((link) => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const targetView = e.target.closest('[data-view]').dataset.view;
-      transitionTo(targetView);
-    });
-  });
-}
-
-// Setup balance button handlers to replace inline onclick
-function setupBalanceHandlers() {
-  document.addEventListener('click', (e) => {
-    if (e.target.matches('.settle-btn-small')) {
-      const action = e.target.dataset.action;
-      const friend = e.target.dataset.friend;
-      const amount = parseFloat(e.target.dataset.amount);
-      
-      if (action === 'pay') {
-        settleBalance(friend, amount);
-      } else if (action === 'remind') {
-        remindUser(friend);
-      }
-    }
-  });
-}
-
-function startBalanceListener(userId) {
-  const q = query(collection(db, 'expenses'), where('userId', '==', userId), orderBy('timestamp', 'desc'));
-  onSnapshot(q, (snapshot) => {
-    const debts = {};
-    snapshot.forEach((doc) => {
-      const exp = doc.data();
-      if (exp.splitWith) {
-        exp.splitWith.forEach((person) => {
-          debts[person] = (debts[person] || 0) + (exp.amount / (exp.splitWith.length + 1));
-        });
-      }
-    });
-    updateBalance(debts);
-  });
-}
-
-if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initApp); }
-else { initApp(); }
-
-export { initApp, loadUserPreferences, applyUserPreferences, checkUserOnboarding };
+// Export for modules
+export { handleSettle, handleRemind };
