@@ -1,7 +1,6 @@
 import { AppState } from './globals.js';
 import { safeGet, createRippleEffect, animateNumber, calculateUserBalances, showNotification } from './utils.js';
-import { createElement, formatCurrency, formatDate } from './renderUtils.js';
-import { addFriend } from './friends.js';
+import { createElement, formatCurrency } from './renderUtils.js';
 // --- Component Creators ---
 export function createExpenseCard(expense, index = 0) {
     const item = createElement('div', 'activity-item');
@@ -12,7 +11,7 @@ export function createExpenseCard(expense, index = 0) {
       <div class="activity-icon" style="background: ${statusColor};">${expense.category || '💰'}</div>
       <div class="activity-content">
         <div class="activity-title">${expense.description}</div>
-        <div class="activity-meta">${formatDate(expense.timestamp)} • ${expense.location || 'Unknown'} ${statusIcon}</div>
+        <div class="activity-meta">${expense.date || 'Recent'} • ${expense.location || 'Unknown'} ${statusIcon}</div>
       </div>
       <div class="activity-amount">${formatCurrency(expense.amount)}</div>
     `;
@@ -36,7 +35,7 @@ export function createBalanceRow(balance, index = 0) {
       </div>
       <div class="balance-amount-container">
         <div class="balance-amount ${statusClass}">${formatCurrency(Math.abs(balance.amount))}</div>
-        <button class="settle-btn-small" onclick="${isPositive ? 'remindUser' : 'settleBalance'}('${balance.name}', ${Math.abs(balance.amount)})">
+        <button class="settle-btn-small" data-action="${isPositive ? 'remind' : 'pay'}" data-friend="${balance.name}" data-amount="${Math.abs(balance.amount)}">
           ${isPositive ? 'Remind' : 'Pay Now'}
         </button>
       </div>
@@ -160,4 +159,122 @@ export function updateBalance() {
     } else {
         balanceElement.textContent = formatCurrency(Math.abs(balance));
     }
+}
+
+export function renderGroups() {
+    const container = safeGet('groups-list');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (AppState.groups.length === 0) {
+        renderEmptyState(container, {
+            icon: '👥',
+            title: 'No groups yet',
+            message: 'Create a group to organize expenses with friends.'
+        });
+        return;
+    }
+    
+    AppState.groups.forEach((group, index) => {
+        const card = createElement('div', 'group-card');
+        card.innerHTML = `
+            <div class="group-header">
+                <span class="group-icon">${group.icon}</span>
+                <span class="group-name">${group.name}</span>
+            </div>
+            <div class="group-members">${group.members} members</div>
+            <div class="group-balance" style="color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
+                ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+export function renderGroupsPreview() {
+    const container = safeGet('groups-preview');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (AppState.groups.length === 0) {
+        renderEmptyState(container, {
+            icon: '👥',
+            title: 'No groups yet',
+            message: 'Create your first group to get started.'
+        });
+        return;
+    }
+    
+    AppState.groups.forEach((group, index) => {
+        const card = createElement('div', 'group-card');
+        card.innerHTML = `
+            <div class="group-header">
+                <span class="group-icon">${group.icon}</span>
+                <span class="group-name">${group.name}</span>
+            </div>
+            <div class="group-members">${group.members} members</div>
+            <div class="group-balance" style="color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
+                ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+export function renderPremiumFeatures() {
+    const container = safeGet('premium-features');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div style="padding: 20px;">
+            <div style="background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🚀</div>
+                <h3 style="margin: 0 0 8px 0; font-size: 24px;">Premium Features</h3>
+                <p style="margin: 0 0 20px 0; opacity: 0.9;">Unlock the full potential of monEZ</p>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px;">
+                    <span style="font-size: 20px; text-decoration: line-through; opacity: 0.7;">₹299</span>
+                    <span style="font-size: 32px; font-weight: bold; color: #F59E0B;">₹119/month</span>
+                    <span style="background: #F59E0B; color: #1E293B; padding: 4px 8px; border-radius: 20px; font-size: 12px; font-weight: bold;">60% OFF</span>
+                </div>
+                <button onclick="startPremiumTrial()" style="background: white; color: #8B5CF6; border: none; border-radius: 8px; padding: 12px 24px; font-size: 16px; font-weight: 600; cursor: pointer;">Start Free Trial</button>
+            </div>
+        </div>
+    `;
+}
+
+export function renderOnboardingPanel() {
+    const container = safeGet('onboarding-modal');
+    if (!container) return;
+    // This is handled by the onboarding.js module
+    return;
+}
+
+export function renderInvitePanel() {
+    const container = safeGet('invite-panel');
+    if (!container) return;
+    container.innerHTML = `
+        <div class="invite-content">
+            <div class="invite-title">Invite Friends</div>
+            <div class="invite-description">Share monEZ with your friends to split expenses easily</div>
+            <button class="btn-primary" onclick="shareApp()">Share App</button>
+        </div>
+    `;
+}
+
+export function renderSplitBillPanel() {
+    const container = safeGet('split-bill-panel');
+    if (!container) return;
+    container.innerHTML = `
+        <div class="split-bill-content">
+            <div class="split-bill-title">Split a Bill</div>
+            <button class="btn-primary" onclick="showAddExpense()">Add New Expense</button>
+        </div>
+    `;
+}
+
+export function renderGroupPanel() {
+    const container = safeGet('group-panel');
+    if (!container) return;
+    // This is handled by the group view system
+    return;
 }

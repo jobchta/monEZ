@@ -1,10 +1,10 @@
-/* monEZ - Main Application Logic (finalized production) */
+/* monEZ - Main Application Logic (fixed) */
 import { AppState, updateState } from './globals.js';
-import { createRippleEffect, showNotification, safeGet, checkOnboardingStatus } from './utils.js';
-import { auth, db, provider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, updateProfile, onAuthStateChanged, query, collection, where, orderBy, onSnapshot, doc, getDoc, runTransaction } from './firebase.js';
-import { renderRecentExpenses, renderAllExpenses, updateBalance, renderOnboardingPanel, renderInvitePanel, renderSplitBillPanel, renderGroupPanel } from './render.js';
-import { setupExpenseForm, showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal, transitionTo } from './views.js';
-import { initOnboarding, checkOnboardingStatus as checkOnboardingComplete } from './onboarding.js';
+import { createRippleEffect, showNotification, safeGet } from './utils.js';
+import { auth, db, provider, signInWithPopup, onAuthStateChanged, query, collection, where, orderBy, onSnapshot, doc, getDoc, runTransaction } from './firebase.js';
+import { renderRecentExpenses, renderAllExpenses, updateBalance, renderOnboardingPanel } from './render.js';
+import { showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal, transitionTo } from './views.js';
+import { initOnboarding } from './onboarding.js';
 import { startFriendsListener } from './friends.js';
 // Expose UI handlers for inline HTML onclicks
 Object.assign(window, { showHome, showAddExpense, showExpenses, showBalances, showGroups, showPremiumFeatures, showSettings, showSplitBill, showSettle, showNotifications, showProfile, showFilters, settleAll, showCreateGroup, aiSuggestAmount, startVoiceInput, tryAIFeature, startPremiumTrial, showPaymentMethods, settleBalance, remindUser, showPWAPrompt, dismissPWAPrompt, installPWA, showPremiumModal, closePremiumModal });
@@ -21,6 +21,7 @@ async function ensurePushPermission() {
 function initApp() {
   // Initial routing/nav setup
   setupNavTransitions();
+  setupBalanceHandlers();
   checkOnboardingStatus();
   // Auth state
   onAuthStateChanged(auth, async (user) => {
@@ -103,6 +104,23 @@ function setupNavTransitions() {
       const targetView = e.target.closest('[data-view]').dataset.view;
       transitionTo(targetView);
     });
+  });
+}
+
+// Setup balance button handlers to replace inline onclick
+function setupBalanceHandlers() {
+  document.addEventListener('click', (e) => {
+    if (e.target.matches('.settle-btn-small')) {
+      const action = e.target.dataset.action;
+      const friend = e.target.dataset.friend;
+      const amount = parseFloat(e.target.dataset.amount);
+      
+      if (action === 'pay') {
+        settleBalance(friend, amount);
+      } else if (action === 'remind') {
+        remindUser(friend);
+      }
+    }
   });
 }
 function startBalanceListener(userId) {

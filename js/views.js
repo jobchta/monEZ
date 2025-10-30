@@ -1,76 +1,55 @@
-import { safeGet, AppState, showNotification, createRippleEffect, formatCurrency, hideExampleData } from './utils.js';
+import { safeGet, AppState, showNotification, createRippleEffect, hideExampleData } from './utils.js';
+import { formatCurrency } from './renderUtils.js';
 import { renderRecentExpenses, renderAllExpenses, renderBalances, populatePeopleSelector, updateBalance } from './render.js';
 import { auth, db, collection, addDoc, serverTimestamp } from './firebase.js';
 
-// --- Modal & Form Creators ---
-
-export function createFormField({ id, label, type = 'text', placeholder = '' }) {
-    return `
-        <div class="form-field">
-            <label for="${id}">${label}</label>
-            <input type="${type}" id="${id}" placeholder="${placeholder}">
-        </div>
-    `;
-}
-
-export function createModal({ title, content, actions }) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-labelledby', 'modal-title');
-    modal.setAttribute('aria-modal', 'true');
-
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h2 id="modal-title">${title}</h2>
-            <div class="modal-body">${content}</div>
-            <div class="modal-actions">${actions}</div>
-        </div>
-    `;
-
-    // Close on overlay click
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.remove();
-    });
-
-    // Trap focus inside the modal
+// --- Navigation Transition Function ---
+export function transitionTo(viewName) {
+    const viewId = viewName + '-view';
+    const targetView = safeGet(viewId);
+    const currentView = document.querySelector('.view.active');
+    
+    if (!targetView) {
+        console.warn(`View not found: ${viewId}`);
+        return;
+    }
+    
+    // Hide current view
+    if (currentView) {
+        currentView.classList.remove('active');
+    }
+    
+    // Show target view
     setTimeout(() => {
-        const content = modal.querySelector('.modal-content');
-        if (content) {
-            trapFocus(content);
+        targetView.classList.add('active');
+        AppState.currentView = viewName;
+        updateNavigation(viewName);
+        
+        // Trigger view-specific rendering
+        switch (viewName) {
+            case 'home':
+                renderRecentExpenses();
+                break;
+            case 'expenses':
+                renderAllExpenses();
+                break;
+            case 'balances':
+                renderBalances();
+                break;
+            case 'groups':
+                showGroups();
+                break;
+            case 'premium':
+                showPremiumFeatures();
+                break;
         }
-    }, 100); // Delay to ensure modal is in the DOM
-
-    return modal;
-}
-
-// --- Form Error Handling (Accessible) ---
-
-export function showFormError(message) {
-    const errorContainer = safeGet('form-error');
-    if (errorContainer) {
-        errorContainer.textContent = message;
-        errorContainer.classList.remove('hidden');
-        errorContainer.setAttribute('aria-live', 'assertive'); // Announce error immediately
-    }
-}
-
-export function clearFormError() {
-    const errorContainer = safeGet('form-error');
-    if (errorContainer) {
-        errorContainer.textContent = '';
-        errorContainer.classList.add('hidden');
-        errorContainer.removeAttribute('aria-live');
-    }
+    }, AppState.animations.enabled ? 100 : 0);
 }
 
 // --- View Navigation ---
 
 export function showHome() {
-    showView('home');
-    renderRecentExpenses();
-    // renderGroupsPreview(); // Assuming this will also be modularized
-    updateNavigation('home');
+    transitionTo('home');
 }
 
 export function showAddExpense() {
@@ -83,27 +62,19 @@ export function showAddExpense() {
 }
 
 export function showExpenses() {
-    showView('expenses');
-    renderAllExpenses();
-    updateNavigation('expenses');
+    transitionTo('expenses');
 }
 
 export function showBalances() {
-    showView('balances');
-    renderBalances();
-    updateNavigation('balances');
+    transitionTo('balances');
 }
 
 export function showGroups() {
-    showView('groups');
-    renderGroups();
-    updateNavigation('groups');
+    transitionTo('groups');
 }
 
 export function showPremiumFeatures() {
-    showView('premium');
-    renderPremiumFeatures();
-    updateNavigation('premium');
+    transitionTo('premium');
 }
 
 export function showSettings() {

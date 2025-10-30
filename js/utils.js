@@ -3,6 +3,9 @@
 // Import centralized AppState from globals.js
 import { AppState } from './globals.js';
 
+// Expose AppState globally for compatibility
+window.AppState = AppState;
+
 // --- Enhanced Helper Functions ---
 // Safe DOM lookup – prevents UI crashes if an ID is wrong or missing
 export function safeGet(id) {

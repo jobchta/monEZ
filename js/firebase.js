@@ -27,7 +27,8 @@ import {
   orderBy, 
   onSnapshot, 
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  runTransaction
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -70,5 +71,6 @@ export {
   orderBy, 
   onSnapshot, 
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  runTransaction
 };
