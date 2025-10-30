@@ -1,12 +1,53 @@
-import { safeGet, showNotification, createRippleEffect, hideExampleData } from './utils.js';
-import { AppState } from './globals.js';
-import { formatCurrency } from './renderUtils.js';
-import { renderRecentExpenses, renderAllExpenses, renderBalances, populatePeopleSelector, updateBalance } from './render.js';
-import { auth, db, collection, addDoc, serverTimestamp } from './firebase.js';
+import { 
+  safeGet, 
+  showNotification, 
+  createRippleEffect, 
+  hideExampleData 
+} from './utils.js';
+
+// Import from state.js instead of globals.js
+import { AppState, stateManager } from './state.js';
+
+import { 
+  formatCurrency,
+  formatDate 
+} from './renderUtils.js';
+
+import { 
+  renderRecentExpenses, 
+  renderAllExpenses, 
+  renderBalances, 
+  populatePeopleSelector, 
+  updateBalance,
+  updateUIForAuthChange
+} from './render.js';
+
+import { 
+  auth, 
+  db, 
+  collection, 
+  addDoc, 
+  serverTimestamp,
+  onAuthStateChanged
+} from './firebase.js';
 
 // --- Navigation Transition Function ---
+/**
+ * Transitions between views with animation and updates the application state
+ * @param {string} viewName - The name of the view to transition to
+ */
 export function transitionTo(viewName) {
-    const viewId = viewName + '-view';
+    // Update application state with the new view
+    updateState({
+        currentView: viewName,
+        navigation: {
+            ...AppState.navigation,
+            previousView: AppState.currentView,
+            lastTransition: Date.now()
+        }
+    });
+
+    const viewId = `${viewName}-view`;
     const targetView = safeGet(viewId);
     const currentView = document.querySelector('.view.active');
     
@@ -15,91 +56,271 @@ export function transitionTo(viewName) {
         return;
     }
     
-    // Hide current view
-    if (currentView) {
-        currentView.classList.remove('active');
+    // Skip if already on the target view
+    if (currentView && currentView.id === viewId) {
+        return;
     }
     
-    // Show target view
-    setTimeout(() => {
-        targetView.classList.add('active');
-        AppState.currentView = viewName;
-        updateNavigation(viewName);
+    // Emit view change event
+    stateManager.emit('view:changing', {
+        from: currentView ? currentView.id.replace('-view', '') : null,
+        to: viewName
+    });
+    
+    // Hide current view with animation
+    if (currentView) {
+        currentView.classList.add('exiting');
+        currentView.classList.remove('active');
         
-        // Trigger view-specific rendering
-        switch (viewName) {
-            case 'home':
-                renderRecentExpenses();
-                break;
-            case 'expenses':
-                renderAllExpenses();
-                break;
-            case 'balances':
-                renderBalances();
-                break;
-            case 'groups':
-                showGroups();
-                break;
-            case 'premium':
-                showPremiumFeatures();
-                break;
+        // Wait for exit animation to complete
+        const onTransitionEnd = () => {
+            currentView.classList.remove('exiting');
+            currentView.removeEventListener('transitionend', onTransitionEnd);
+            showNewView();
+        };
+        
+        currentView.addEventListener('transitionend', onTransitionEnd);
+    } else {
+        showNewView();
+    }
+    
+    function showNewView() {
+        // Show new view with animation
+        targetView.classList.add('entering');
+        targetView.classList.add('active');
+        
+        // Focus on the first focusable element in the new view
+        const focusable = targetView.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (focusable) {
+            focusable.focus();
         }
-    }, AppState.animations.enabled ? 100 : 0);
+        
+        // Remove entering class after animation completes
+        const onEnterTransitionEnd = () => {
+            targetView.classList.remove('entering');
+            targetView.removeEventListener('transitionend', onEnterTransitionEnd);
+            
+            // Update window title
+            document.title = `${viewName.charAt(0).toUpperCase() + viewName.slice(1)} | monEZ`;
+            
+            // Emit view changed event
+            stateManager.emit('view:changed', {
+                view: viewName,
+                element: targetView
+            });
+        };
+        
+        targetView.addEventListener('transitionend', onEnterTransitionEnd);
+    }
+    }
+    
+    // View-specific initialization is handled by the view:changed event listener
 }
 
 // --- View Navigation ---
 
+/**
+ * Shows the home view with recent expenses
+ */
 export function showHome() {
+    // Update application state
+    updateState({
+        currentView: 'home',
+        navigation: {
+            ...AppState.navigation,
+            previousView: AppState.currentView
+        }
+    });
+    
+    // Trigger transition
     transitionTo('home');
+    
+    // Load recent expenses
+    renderRecentExpenses();
+    
+    // Emit analytics event
+    stateManager.emit('navigation:home');
 }
 
+/**
+ * Shows the add expense form and resets the form state
+ */
 export function showAddExpense() {
+    // Update application state
+    updateState({
+        form: {
+            ...AppState.form,
+            mode: 'add',
+            selectedFriends: new Set(),
+            selectedCategory: '',
+            isSubmitting: false
+        },
+        ui: {
+            ...AppState.ui,
+            showForm: true,
+            formError: null
+        }
+    });
+    
+    // Show the add expense view
     showView('add-expense');
+    
+    // Populate people selector
     populatePeopleSelector();
-    AppState.selectedFriends.clear();
-    AppState.selectedCategory = '';
+    
+    // Reset form fields
     resetForm();
-    clearFormError();
+    
+    // Focus on the first input field
+    const firstInput = document.querySelector('#expense-amount');
+    if (firstInput) {
+        firstInput.focus();
+    }
+    
+    // Emit event for analytics/tracking
+    stateManager.emit('form:opened', { formType: 'add-expense' });
 }
 
+/**
+ * Shows the expenses view with all expenses
+ */
 export function showExpenses() {
+    updateState({
+        currentView: 'expenses',
+        navigation: {
+            ...AppState.navigation,
+            previousView: AppState.currentView
+        }
+    });
     transitionTo('expenses');
+    renderAllExpenses();
+    stateManager.emit('navigation:expenses');
 }
 
+/**
+ * Shows the balances view with all balances
+ */
 export function showBalances() {
+    updateState({
+        currentView: 'balances',
+        navigation: {
+            ...AppState.navigation,
+            previousView: AppState.currentView
+        }
+    });
     transitionTo('balances');
+    renderBalances();
+    stateManager.emit('navigation:balances');
 }
 
+/**
+ * Shows the groups view
+ */
 export function showGroups() {
+    updateState({
+        currentView: 'groups',
+        navigation: {
+            ...AppState.navigation,
+            previousView: AppState.currentView
+        }
+    });
     transitionTo('groups');
+    stateManager.emit('navigation:groups');
 }
 
+/**
+ * Shows the premium features view
+ */
 export function showPremiumFeatures() {
+    updateState({
+        currentView: 'premium',
+        navigation: {
+            ...AppState.navigation,
+            previousView: AppState.currentView
+        }
+    });
     transitionTo('premium');
+    stateManager.emit('navigation:premium');
 }
 
+/**
+ * Shows the settings view
+ */
 export function showSettings() {
-    showView('settings');
-    updateNavigation('settings');
+    updateState({
+        currentView: 'settings',
+        navigation: {
+            ...AppState.navigation,
+            previousView: AppState.currentView
+        }
+    });
+    transitionTo('settings');
+    stateManager.emit('navigation:settings');
 }
 
-// Additional functions
+/**
+ * Shows the split bill form
+ */
 export function showSplitBill() {
-    showAddExpense();
-    showNotification('💡 Pro tip: Use voice input for faster entry!', 'info');
+    updateState({
+        currentView: 'split-bill',
+        form: {
+            ...AppState.form,
+            mode: 'split-bill',
+            selectedFriends: new Set()
+        }
+    });
+    
+    showView('split-bill');
+    populatePeopleSelector();
+    stateManager.emit('form:opened', { formType: 'split-bill' });
 }
 
+/**
+ * Shows the settle up view
+ */
 export function showSettle() {
-    showBalances();
-    showNotification('💳 Select a balance to settle up', 'info');
+    updateState({
+        currentView: 'settle',
+        navigation: {
+            ...AppState.navigation,
+            previousView: AppState.currentView
+        }
+    });
+    
+    showView('settle');
+    renderBalances();
+    stateManager.emit('navigation:settle');
 }
 
+/**
+ * Shows the notifications view
+ */
 export function showNotifications() {
-    showNotification('🔔 3 new reminders: Default 1 owes ₹185, Movie night expense added, Premium features available!', 'info', 5000);
+    updateState({
+        currentView: 'notifications',
+        navigation: {
+            ...AppState.navigation,
+            previousView: AppState.currentView
+        }
+    });
+    transitionTo('notifications');
+    stateManager.emit('navigation:notifications');
 }
 
+/**
+ * Shows the user profile view
+ */
 export function showProfile() {
-    showNotification('👤 Profile: Premium member since Oct 2024', 'info');
+    updateState({
+        currentView: 'profile',
+        navigation: {
+            ...AppState.navigation,
+            previousView: AppState.currentView
+        }
+    });
+    transitionTo('profile');
+    stateManager.emit('navigation:profile');
 }
 
 export function showFilters() {
