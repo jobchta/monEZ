@@ -222,14 +222,30 @@ export function initializeState() {
     stateManager.emit('stateInitialized', {});
 }
 
+// Export all necessary functions and state
+export {
+    AppState,
+    stateManager,
+    updateState,
+    getState,
+    resetState,
+    addExpense,
+    removeExpense,
+    addFriend,
+    removeFriend,
+    updateBalance,
+    logError,
+    getDebugInfo,
+    initializeState
+};
+
 // Export for debugging in console
 if (typeof window !== 'undefined') {
     window.monEZDebug = {
         AppState,
-        CONFIG,
         stateManager,
-        getDebugInfo,
         updateState,
-        getState
+        getState,
+        resetState
     };
 }
