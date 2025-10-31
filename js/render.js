@@ -5,95 +5,206 @@ import { createElement, formatCurrency } from './renderUtils.js';
 // --- Component Creators ---
 
 export function createExpenseCard(expense, index = 0) {
-    const item = createElement('div', 'activity-item');
-    item.style.animationDelay = `${index * 100}ms`;
-
-    const statusColor = expense.status === 'settled' ? '#10B981' : '#F59E0B';
-    const statusIcon = expense.status === 'settled' ? '✅' : '⏳';
-
-    item.innerHTML = `
-      <div class="activity-icon" style="background: ${statusColor};">${expense.category || '💰'}</div>
-      <div class="activity-content">
-        <div class="activity-title">${expense.description}</div>
-        <div class="activity-meta">${expense.date || 'Recent'} • ${expense.location || 'Unknown'} ${statusIcon}</div>
-      </div>
-      <div class="activity-amount">${formatCurrency(expense.amount)}</div>
-    `;
-
-    item.addEventListener('click', (e) => {
-      createRippleEffect(item, e);
-      showNotification(`💰 ${expense.description} - ${formatCurrency(expense.amount)}`, 'info');
-    });
-
-    return item;
+    try {
+        const item = createElement('div', 'activity-item');
+        item.style.animationDelay = `${index * 100}ms`;
+        
+        const statusColor = expense.status === 'settled' ? '#10B981' : '#F59E0B';
+        const statusIcon = expense.status === 'settled' ? '✅' : '⏳';
+        
+        // XSS FIX: Use textContent instead of innerHTML for user data
+        const icon = createElement('div', 'activity-icon');
+        icon.style.background = statusColor;
+        icon.textContent = expense.category || '💰';
+        
+        const content = createElement('div', 'activity-content');
+        
+        const title = createElement('div', 'activity-title');
+        title.textContent = expense.description; // ✅ SAFE - No XSS
+        
+        const meta = createElement('div', 'activity-meta');
+        meta.textContent = `${expense.date || 'Recent'} • ${expense.location || 'Unknown'} ${statusIcon}`;
+        
+        content.appendChild(title);
+        content.appendChild(meta);
+        
+        const amountDiv = createElement('div', 'activity-amount');
+        amountDiv.textContent = formatCurrency(expense.amount);
+        
+        item.appendChild(icon);
+        item.appendChild(content);
+        item.appendChild(amountDiv);
+        
+        item.addEventListener('click', (e) => {
+            createRippleEffect(item, e);
+            showNotification(`💰 ${expense.description} - ${formatCurrency(expense.amount)}`, 'info');
+        });
+        
+        return item;
+    } catch (error) {
+        console.error('Failed to create expense card:', error);
+        const errorDiv = createElement('div', 'expense-card-error');
+        errorDiv.textContent = 'Failed to load expense';
+        return errorDiv;
+    }
 }
+
+
+
 
 export function createBalanceRow(balance, index = 0) {
-    const item = createElement('div', 'balance-item');
-    item.style.animationDelay = `${index * 100}ms`;
-
-    const isPositive = balance.amount > 0;
-    const statusText = isPositive ? 'owes you' : 'you owe';
-    const statusClass = isPositive ? 'positive' : 'negative';
-
-    item.innerHTML = `
-      <div class="balance-avatar">${balance.name.charAt(0).toUpperCase()}</div>
-      <div class="balance-content">
-        <div class="balance-name">${balance.name}</div>
-        <div class="balance-status">${statusText}</div>
-      </div>
-      <div class="balance-amount-container">
-        <div class="balance-amount ${statusClass}">${formatCurrency(Math.abs(balance.amount))}</div>
-      </div>
-    `;
-
-    item.addEventListener('click', (e) => {
-      createRippleEffect(item, e);
-      showNotification(`Balance with ${balance.name}: ${formatCurrency(Math.abs(balance.amount))}`, 'info');
-    });
-
-    return item;
+    try {
+        const item = createElement('div', 'balance-item');
+        item.style.animationDelay = `${index * 100}ms`;
+        
+        const isPositive = balance.amount > 0;
+        const statusText = isPositive ? 'owes you' : 'you owe';
+        const statusClass = isPositive ? 'positive' : 'negative';
+        
+        const avatar = createElement('div', 'balance-avatar');
+        avatar.textContent = balance.name.charAt(0).toUpperCase();
+        
+        const content = createElement('div', 'balance-content');
+        
+        const name = createElement('div', 'balance-name');
+        name.textContent = balance.name; // ✅ SAFE
+        
+        const status = createElement('div', 'balance-status');
+        status.textContent = statusText;
+        
+        content.appendChild(name);
+        content.appendChild(status);
+        
+        const amountContainer = createElement('div', 'balance-amount-container');
+        
+        const amountDiv = createElement('div', `balance-amount ${statusClass}`);
+        amountDiv.textContent = formatCurrency(Math.abs(balance.amount));
+        
+        const btn = createElement('button', 'settle-btn-small');
+        btn.dataset.action = isPositive ? 'remind' : 'pay';
+        btn.dataset.friend = balance.name;
+        btn.dataset.amount = Math.abs(balance.amount);
+        btn.textContent = isPositive ? 'Remind' : 'Pay Now';
+        
+        amountContainer.appendChild(amountDiv);
+        amountContainer.appendChild(btn);
+        
+        item.appendChild(avatar);
+        item.appendChild(content);
+        item.appendChild(amountContainer);
+        
+        return item;
+    } catch (error) {
+        console.error('Failed to create balance row:', error);
+        const errorDiv = createElement('div', 'balance-row-error');
+        errorDiv.textContent = 'Failed to load balance';
+        return errorDiv;
+    }
 }
+
 
 // --- Rendering Functions ---
 
-export function renderExpenses() {
-    const container = safeGet('activity-container');
-    if (!container) return;
 
-    container.innerHTML = '';
-
-    const expenses = AppState.getExpenses();
-
-    if (expenses.length === 0) {
-      container.innerHTML = '<div class="empty-state">💰 No expenses yet</div>';
-      return;
+// Replace ALL render functions with error boundaries:
+export function renderRecentExpenses() {
+    try {
+        const container = safeGet('recent-expenses');
+        if (!container) {
+            console.error('Recent expenses container not found');
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        if (!AppState.expenses || AppState.expenses.length === 0) {
+            renderEmptyState(container, {
+                icon: '💎',
+                title: 'Start tracking expenses!',
+                message: 'Add your first expense to see it appear here.'
+            });
+            return;
+        }
+        
+        AppState.expenses.slice(0, 3).forEach((expense, index) => {
+            try {
+                container.appendChild(createExpenseCard(expense, index));
+            } catch (err) {
+                console.error('Failed to render expense:', expense.id, err);
+            }
+        });
+    } catch (error) {
+        console.error('renderRecentExpenses failed:', error);
+        showNotification('Failed to load expenses', 'error');
     }
+}
 
-    expenses.forEach((expense, index) => {
-      const card = createExpenseCard(expense, index);
-      container.appendChild(card);
-    });
+export function renderAllExpenses() {
+    try {
+        const container = safeGet('all-expenses-list');
+        if (!container) {
+            console.error('All expenses container not found');
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        if (!AppState.expenses || AppState.expenses.length === 0) {
+            renderEmptyState(container, {
+                icon: '📊',
+                title: 'Your expense history will appear here',
+                message: 'Add expenses to track and manage your spending.',
+                actionText: '➕ Add First Expense',
+                onAction: () => window.showAddExpense && window.showAddExpense()
+            });
+            return;
+        }
+        
+        AppState.expenses.forEach((expense, index) => {
+            try {
+                container.appendChild(createExpenseCard(expense, index));
+            } catch (err) {
+                console.error('Failed to render expense:', expense.id, err);
+            }
+        });
+    } catch (error) {
+        console.error('renderAllExpenses failed:', error);
+        showNotification('Failed to load expenses', 'error');
+    }
 }
 
 export function renderBalances() {
-    const container = safeGet('balances-container');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const expenses = AppState.getExpenses();
-    const balances = calculateUserBalances(expenses);
-
-    if (balances.length === 0) {
-      container.innerHTML = '<div class="empty-state">👥 No balances yet</div>';
-      return;
+    try {
+        const container = safeGet('balances-list');
+        if (!container) {
+            console.error('Balances container not found');
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        const balances = calculateUserBalances(AppState.expenses || []);
+        
+        if (balances.length === 0) {
+            renderEmptyState(container, {
+                icon: '⚖️',
+                title: 'All settled up!',
+                message: 'No outstanding balances. Split an expense to see balances here.'
+            });
+            return;
+        }
+        
+        balances.forEach((balance, index) => {
+            try {
+                container.appendChild(createBalanceRow(balance, index));
+            } catch (err) {
+                console.error('Failed to render balance:', balance.name, err);
+            }
+        });
+    } catch (error) {
+        console.error('renderBalances failed:', error);
+        showNotification('Failed to load balances', 'error');
     }
-
-    balances.forEach((balance, index) => {
-      const row = createBalanceRow(balance, index);
-      container.appendChild(row);
-    });
 }
 
 export function updateDashboardStats() {
