@@ -8,13 +8,1407 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>💰</text></svg>'">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>💰</text></svg>">
     <title>monEZ - Split expenses, not friendships</title>
-    <!-- ENSURE ALL CSS FILES ARE LOADED -->
-    <link rel="stylesheet" href="styles/variables.css">
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/auth-modern.css">
-    <!-- You may add design-system.css, theme.css if those are restored later! -->
+    <style>
+/* monEZ Luxury Banking Design System */
+:root {
+  /* Luxury Banking Colors */
+  --background: #FAFAFA;
+  --surface: #FFFFFF;
+  --primary-text: #232325;
+  --secondary-text: #828288;
+  --borders: #ECECEC;
+  --gold-accent: #846941;
+  --steel-blue: #3B6270;
+  --success: #32775E;
+  --error: #C44A44;
+  --glass: rgba(255,255,255,0.95);
+  
+  /* Luxury Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  
+  /* Sophisticated Typography */
+  --font-family: 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --letter-spacing: -0.01em;
+  
+  /* Luxury Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  
+  /* Subtle Shadows */
+  --shadow-sm: 0 2px 8px rgba(150,150,150,0.06);
+  --shadow-md: 0 4px 12px rgba(150,150,150,0.08);
+  --shadow-lg: 0 8px 24px rgba(150,150,150,0.10);
+  --shadow-floating: 0 12px 40px rgba(132,105,65,0.15);
+}
+
+/* Luxury Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--primary-text);
+  background: var(--background);
+  letter-spacing: var(--letter-spacing);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Luxury App Container */
+.app {
+  max-width: 400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--background);
+  position: relative;
+  box-shadow: 0 0 40px rgba(0,0,0,0.08);
+}
+
+/* Luxury Loading Screen */
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--gold-accent) 0%, var(--steel-blue) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: white;
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.logo-large {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-sm);
+  letter-spacing: var(--letter-spacing);
+}
+
+.accent {
+  color: #F59E0B;
+}
+
+.tagline {
+  font-size: var(--text-lg);
+  opacity: 0.9;
+  margin-bottom: var(--space-xl);
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto var(--space-md);
+}
+
+.loading-text {
+  font-size: var(--text-sm);
+  opacity: 0.8;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* PWA Prompt */
+.pwa-prompt {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid var(--borders);
+  padding: var(--space-md);
+  z-index: 1000;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  box-shadow: var(--shadow-lg);
+}
+
+.pwa-prompt:not(.hidden) {
+  transform: translateY(0);
+}
+
+.pwa-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.pwa-icon {
+  font-size: var(--text-2xl);
+}
+
+.pwa-text {
+  flex: 1;
+}
+
+.pwa-text h3 {
+  margin: 0 0 var(--space-xs) 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.pwa-text p {
+  margin: 0;
+  color: var(--secondary-text);
+  font-size: var(--text-sm);
+}
+
+.pwa-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+/* Luxury App Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-md);
+  background: var(--surface);
+  border-bottom: 0.5px solid var(--borders);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.logo {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--primary-text);
+}
+
+.balance-summary {
+  display: flex;
+  flex-direction: column;
+}
+
+.balance-label {
+  font-size: var(--text-xs);
+  color: var(--secondary-text);
+  margin-bottom: var(--space-xs);
+}
+
+.balance-amount {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--gold-accent);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.icon {
+  font-size: var(--text-lg);
+}
+
+.badge {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  background: var(--error);
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  min-width: 16px;
+  text-align: center;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--gold-accent);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--space-md) 100px;
+}
+
+/* View Management */
+.view {
+  display: none;
+  padding-top: var(--space-md);
+  animation: fadeIn 0.3s ease;
+}
+
+.view.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* View Header */
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+}
+
+.view-header h2 {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--primary-text);
+}
+
+.back-btn, .voice-btn, .filter-btn, .settle-all-btn, .create-group-btn {
+  background: var(--surface);
+  border: 1px solid var(--borders);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  cursor: pointer;
+  font-size: var(--text-base);
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover, .voice-btn:hover, .filter-btn:hover {
+  background: var(--gold-accent);
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Luxury Quick Stats */
+.quick-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  transition: all 0.25s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card.positive {
+  border-left: 3px solid var(--success);
+}
+
+.stat-card.negative {
+  border-left: 3px solid var(--error);
+}
+
+.stat-icon {
+  font-size: var(--text-xl);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: var(--text-xs);
+  color: var(--secondary-text);
+  margin-bottom: var(--space-xs);
+}
+
+.stat-value {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--primary-text);
+}
+
+/* Luxury Quick Actions */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+}
+
+.action-card {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  position: relative;
+  min-height: 100px;
+  justify-content: center;
+}
+
+.action-card:hover {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: var(--shadow-md);
+}
+
+.action-card:active {
+  transform: scale(0.98);
+}
+
+.action-card.primary {
+  background: var(--gold-accent);
+  color: white;
+  border-color: var(--gold-accent);
+}
+
+.action-card.premium {
+  background: var(--steel-blue);
+  color: white;
+  border-color: var(--steel-blue);
+}
+
+.action-icon {
+  font-size: var(--text-xl);
+}
+
+.action-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-align: center;
+}
+
+.premium-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #B8860B;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  font-weight: var(--weight-semibold);
+}
+
+/* Section Headers */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.section-header h3 {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--primary-text);
+}
+
+.view-all {
+  background: none;
+  border: none;
+  color: var(--gold-accent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.group-limit {
+  font-size: var(--text-xs);
+  color: var(--secondary-text);
+  background: var(--surface);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  border: 0.5px solid var(--borders);
+}
+
+/* Luxury Activity List */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.activity-item {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.activity-item:hover {
+  background: var(--glass);
+  transform: translateY(-1px) scale(0.98);
+}
+
+.activity-icon {
+  font-size: var(--text-xl);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--gold-accent) 0%, #A67C52 100%);
+  color: white;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-xs);
+  color: var(--primary-text);
+}
+
+.activity-meta {
+  font-size: var(--text-sm);
+  color: var(--secondary-text);
+}
+
+.activity-amount {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--primary-text);
+  text-align: right;
+}
+
+/* Luxury Groups Preview */
+.groups-preview {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  padding-bottom: var(--space-sm);
+}
+
+.group-card {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  min-width: 220px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.group-card:hover {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: var(--shadow-md);
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.group-icon {
+  font-size: var(--text-xl);
+}
+
+.group-name {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--primary-text);
+}
+
+.group-members {
+  font-size: var(--text-xs);
+  color: var(--secondary-text);
+  margin-bottom: var(--space-sm);
+}
+
+.group-balance {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--gold-accent);
+}
+
+/* Luxury Bottom Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 400px;
+  margin: 0 auto;
+  background: var(--surface);
+  border-top: 0.5px solid var(--borders);
+  display: flex;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-md) var(--space-xs);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: var(--secondary-text);
+  position: relative;
+}
+
+.nav-item.active {
+  color: var(--gold-accent);
+}
+
+.nav-item:hover {
+  background: rgba(132,105,65,0.08);
+}
+
+.nav-icon {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-xs);
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: var(--weight-medium);
+}
+
+.group-count, .premium-indicator {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-sm);
+  background: var(--gold-accent);
+  color: white;
+  font-size: 8px;
+  padding: 2px 4px;
+  border-radius: var(--radius-full);
+  min-width: 14px;
+  text-align: center;
+}
+
+.premium-indicator {
+  background: var(--steel-blue);
+}
+
+/* Luxury Floating Add Button */
+.fab {
+  position: fixed;
+  bottom: 100px;
+  right: var(--space-md);
+  width: 56px;
+  height: 56px;
+  background: var(--gold-accent);
+  border: none;
+  border-radius: var(--radius-full);
+  color: white;
+  font-size: var(--text-xl);
+  cursor: pointer;
+  box-shadow: var(--shadow-floating);
+  transition: all 0.25s ease;
+  z-index: 1000;
+}
+
+.fab:hover {
+  transform: scale(0.98) translateY(-1px);
+  box-shadow: 0 8px 25px rgba(132,105,65,0.4);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+.fab-icon {
+  font-weight: var(--weight-semibold);
+}
+
+/* Luxury Form Styles */
+.expense-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.form-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--primary-text);
+}
+
+.amount-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: var(--space-md);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--secondary-text);
+  z-index: 1;
+}
+
+.form-input {
+  width: 100%;
+  padding: var(--space-md);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  background: var(--surface);
+  transition: all 0.25s ease;
+  font-family: var(--font-family);
+}
+
+.amount-field {
+  padding-left: var(--space-xl);
+  padding-right: 50px;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--gold-accent);
+  box-shadow: 0 0 0 3px rgba(132,105,65,0.15);
+}
+
+.ai-suggest-btn {
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--gold-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: white;
+}
+
+.ai-suggest-btn:hover {
+  background: #73553A;
+  transform: translateY(-50%) scale(0.98);
+}
+
+.ai-icon {
+  font-size: var(--text-sm);
+}
+
+/* Luxury Category Selector */
+.category-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.category-btn {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  transition: all 0.25s ease;
+  font-weight: var(--weight-medium);
+}
+
+.category-btn:hover, .category-btn.active {
+  background: var(--gold-accent);
+  color: white;
+  border-color: var(--gold-accent);
+}
+
+/* Luxury People Selector */
+.people-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.person-card {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.person-card:hover {
+  background: var(--glass);
+  transform: translateY(-1px) scale(0.98);
+}
+
+.person-card.selected {
+  background: var(--gold-accent);
+  color: white;
+  border-color: var(--gold-accent);
+}
+
+.person-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--gold-accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.person-card.selected .person-avatar {
+  background: white;
+  color: var(--gold-accent);
+}
+
+.person-name {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-align: center;
+}
+
+/* Luxury Split Options */
+.split-options {
+  margin-top: var(--space-lg);
+}
+
+.split-type {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.split-btn {
+  flex: 1;
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.split-btn:hover, .split-btn.active {
+  background: var(--gold-accent);
+  color: white;
+  border-color: var(--gold-accent);
+}
+
+.split-btn.premium {
+  background: var(--steel-blue);
+  color: white;
+  border-color: var(--steel-blue);
+}
+
+.pro-tag {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #B8860B;
+  color: white;
+  font-size: 8px;
+  padding: 2px 4px;
+  border-radius: var(--radius-full);
+  font-weight: var(--weight-semibold);
+}
+
+/* Luxury Form Actions */
+.form-actions {
+  display: flex;
+  gap: var(--space-lg);
+  margin-top: var(--space-2xl);
+}
+
+.btn-primary, .btn-secondary {
+  flex: 1;
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  min-height: 52px;
+}
+
+.btn-primary {
+  background: var(--gold-accent);
+  color: white;
+  border: none;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover {
+  transform: scale(0.98) translateY(-1px);
+  box-shadow: var(--shadow-lg);
+  background: #73553A;
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--primary-text);
+  border: 0.5px solid var(--borders);
+}
+
+.btn-secondary:hover {
+  background: var(--glass);
+  transform: scale(0.98);
+}
+
+.btn-icon {
+  font-size: var(--text-sm);
+}
+
+/* Luxury Expenses Stats */
+.expenses-stats {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+}
+
+.stat-summary {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--gold-accent);
+  margin-bottom: var(--space-xs);
+}
+
+/* Luxury Balance Summary */
+.balance-summary-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+}
+
+.summary-card {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  text-align: center;
+}
+
+.summary-card.positive {
+  border-left: 3px solid var(--success);
+}
+
+.summary-card.negative {
+  border-left: 3px solid var(--error);
+}
+
+.summary-amount {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-xs);
+}
+
+.summary-card.positive .summary-amount {
+  color: var(--success);
+}
+
+.summary-card.negative .summary-amount {
+  color: var(--error);
+}
+
+.summary-label {
+  font-size: var(--text-sm);
+  color: var(--secondary-text);
+}
+
+/* Luxury Balances List */
+.balances-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.balance-item {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  transition: all 0.25s ease;
+}
+
+.balance-item:hover {
+  background: var(--glass);
+  transform: translateY(-1px) scale(0.98);
+}
+
+.balance-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--gold-accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+
+.balance-content {
+  flex: 1;
+}
+
+.balance-name {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-xs);
+  color: var(--primary-text);
+}
+
+.balance-status {
+  font-size: var(--text-sm);
+  color: var(--secondary-text);
+}
+
+.balance-amount-container {
+  text-align: right;
+}
+
+.balance-amount.positive {
+  color: var(--success);
+}
+
+.balance-amount.negative {
+  color: var(--error);
+}
+
+.settle-btn-small {
+  background: var(--gold-accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.settle-btn-small:hover {
+  background: #73553A;
+  transform: scale(0.98);
+}
+
+/* Groups Grid */
+.groups-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+.group-card-full {
+  background: var(--surface);
+  border: 1px solid var(--borders);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.group-card-full:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Premium Features */
+.premium-hero {
+  background: linear-gradient(135deg, var(--gold-accent), #7C3AED);
+  color: white;
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+.hero-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-md);
+}
+
+.premium-hero h3 {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-sm);
+}
+
+.premium-hero p {
+  font-size: var(--text-base);
+  opacity: 0.9;
+  margin-bottom: var(--space-lg);
+}
+
+.pricing-highlight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.price-original {
+  font-size: var(--text-lg);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.price-offer {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  color: #F59E0B;
+}
+
+.discount-badge {
+  background: #F59E0B;
+  color: var(--primary-text);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+/* Settings */
+.settings-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.settings-section {
+  background: var(--surface);
+  border: 1px solid var(--borders);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.settings-section h3 {
+  background: var(--glass);
+  padding: var(--space-md);
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--primary-text);
+  border-bottom: 1px solid var(--borders);
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid var(--borders);
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-item:hover {
+  background: var(--glass);
+}
+
+.setting-item.premium {
+  background: linear-gradient(135deg, var(--gold-accent), #7C3AED);
+  color: white;
+}
+
+.setting-icon {
+  font-size: var(--text-xl);
+}
+
+.setting-content {
+  flex: 1;
+}
+
+.setting-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  margin-bottom: var(--space-xs);
+}
+
+.setting-desc {
+  font-size: var(--text-sm);
+  color: var(--secondary-text);
+}
+
+.setting-item.premium .setting-desc {
+  color: rgba(255,255,255,0.8);
+}
+
+.setting-arrow {
+  font-size: var(--text-lg);
+  color: var(--secondary-text);
+}
+
+.upgrade-badge {
+  background: #F59E0B;
+  color: var(--primary-text);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--borders);
+  transition: 0.3s;
+  border-radius: var(--radius-full);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--gold-accent);
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Modals */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  transition: all 0.3s ease;
+}
+
+.modal.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--borders);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: var(--text-2xl);
+  cursor: pointer;
+  color: var(--secondary-text);
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.modal-close:hover {
+  background: var(--glass);
+}
+
+/* Utility Classes */
+.hidden {
+  display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .app {
+    max-width: 100%;
+    box-shadow: none;
+  }
+  
+  .quick-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .people-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .category-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+    </style>
 </head>
 <body>
     <div class="app">
@@ -27,6 +1421,7 @@
                 <div class="loading-text">Loading your financial companion...</div>
             </div>
         </div>
+
         <!-- PWA Install Prompt -->
         <div id="pwa-prompt" class="pwa-prompt hidden">
             <div class="pwa-content">
@@ -41,33 +1436,1198 @@
                 </div>
             </div>
         </div>
+
         <!-- Main App -->
         <div id="main-app" style="display: none;">
-            <!-- App Header and all remaining markup is unchanged -->
-            <!-- ... (rest of HTML, preserve) ... -->
+            <!-- App Header -->
+            <header class="app-header">
+                <div class="header-left">
+                    <div class="logo">mon<span class="accent">EZ</span></div>
+                    <div class="balance-summary">
+                        <div class="balance-label">Your balance</div>
+                        <div class="balance-amount" id="balance-hero">₹2,450</div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="icon-btn" onclick="showNotifications()">
+                        <span class="icon">🔔</span>
+                        <span class="badge">3</span>
+                    </button>
+                    <button class="icon-btn" onclick="showProfile()">
+                        <div class="avatar">Y</div>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Views Container -->
+            <main class="main-content">
+                <!-- Home View -->
+                <div id="home-view" class="view active">
+                    <!-- Quick Stats -->
+                    <div class="quick-stats">
+                        <div class="stat-card positive">
+                            <div class="stat-icon">💚</div>
+                            <div class="stat-content">
+                                <div class="stat-label">You're owed</div>
+                                <div class="stat-value">₹1,320</div>
+                            </div>
+                        </div>
+                        <div class="stat-card negative">
+                            <div class="stat-icon">💸</div>
+                            <div class="stat-content">
+                                <div class="stat-label">You owe</div>
+                                <div class="stat-value">₹865</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <button class="action-card primary" onclick="showAddExpense()">
+                            <div class="action-icon">➕</div>
+                            <div class="action-label">Add Expense</div>
+                        </button>
+                        <button class="action-card" onclick="showSplitBill()">
+                            <div class="action-icon">🧮</div>
+                            <div class="action-label">Split Bill</div>
+                        </button>
+                        <button class="action-card" onclick="showSettle()">
+                            <div class="action-icon">💳</div>
+                            <div class="action-label">Settle Up</div>
+                        </button>
+                        <button class="action-card premium" onclick="showPremiumFeatures()">
+                            <div class="action-icon">✨</div>
+                            <div class="action-label">AI Insights</div>
+                            <div class="premium-badge">PRO</div>
+                        </button>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <section class="activity-section">
+                        <div class="section-header">
+                            <h3>Recent Activity</h3>
+                            <button class="view-all" onclick="showExpenses()">View all</button>
+                        </div>
+                        <div id="recent-expenses" class="activity-list">
+                            <!-- Dynamic content -->
+                        </div>
+                    </section>
+
+                    <!-- Groups Preview -->
+                    <section class="groups-section">
+                        <div class="section-header">
+                            <h3>Your Groups</h3>
+                            <div class="group-limit">2/3 groups</div>
+                            <button class="view-all" onclick="showGroups()">View all</button>
+                        </div>
+                        <div class="groups-preview" id="groups-preview">
+                            <!-- Dynamic content -->
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Add Expense View -->
+                <div id="add-expense-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>Add Expense</h2>
+                        <button class="voice-btn" onclick="startVoiceInput()">🎤</button>
+                    </div>
+
+                    <form id="expense-form" class="expense-form">
+                        <div class="form-group">
+                            <label class="form-label">Amount</label>
+                            <div class="amount-input-container">
+                                <span class="currency-symbol">₹</span>
+                                <input type="number" id="amount" class="form-input amount-field" placeholder="0.00" step="0.01" required>
+                                <button type="button" class="ai-suggest-btn" onclick="aiSuggestAmount()" title="AI Suggestion">
+                                    <span class="ai-icon">🤖</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <div class="input-container">
+                                <input type="text" id="description" class="form-input" placeholder="What was this for?" required>
+                                <div class="smart-suggestions" id="smart-suggestions">
+                                    <!-- AI suggestions appear here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <div class="category-selector">
+                                <button type="button" class="category-btn" data-category="🍽️">🍽️ Food</button>
+                                <button type="button" class="category-btn" data-category="🚗">🚗 Transport</button>
+                                <button type="button" class="category-btn" data-category="🎬">🎬 Entertainment</button>
+                                <button type="button" class="category-btn" data-category="🛍️">🛍️ Shopping</button>
+                                <button type="button" class="category-btn" data-category="💡">💡 Bills</button>
+                                <button type="button" class="category-btn" data-category="✈️">✈️ Travel</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Split with</label>
+                            <div class="people-selector" id="people-selector">
+                                <!-- People cards will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <div class="split-options">
+                            <div class="split-type">
+                                <button type="button" class="split-btn active" data-type="equal">Equal Split</button>
+                                <button type="button" class="split-btn" data-type="percentage">By Percentage</button>
+                                <button type="button" class="split-btn premium" data-type="custom" onclick="showPremiumModal()">Custom Split <span class="pro-tag">PRO</span></button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="showHome()">Cancel</button>
+                            <button type="submit" class="btn-primary">
+                                <span class="btn-text">Save Expense</span>
+                                <span class="btn-icon">💾</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Expenses View -->
+                <div id="expenses-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>All Expenses</h2>
+                        <button class="filter-btn" onclick="showFilters()">🔍</button>
+                    </div>
+                    
+                    <div class="expenses-stats">
+                        <div class="stat-summary">
+                            <div class="stat-item">
+                                <span class="stat-number" id="total-expenses">₹8,450</span>
+                                <span class="stat-label">Total Spent</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="this-month">₹3,280</span>
+                                <span class="stat-label">This Month</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="expenses-list" id="all-expenses-list">
+                        <!-- All expenses will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Balances View -->
+                <div id="balances-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>Balances</h2>
+                        <button class="settle-all-btn" onclick="settleAll()">Settle All</button>
+                    </div>
+
+                    <div class="balance-summary-cards">
+                        <div class="summary-card positive">
+                            <div class="summary-amount">₹1,320</div>
+                            <div class="summary-label">You're owed</div>
+                        </div>
+                        <div class="summary-card negative">
+                            <div class="summary-amount">₹865</div>
+                            <div class="summary-label">You owe</div>
+                        </div>
+                    </div>
+
+                    <div class="balances-list" id="balances-list">
+                        <!-- Balances will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Groups View -->
+                <div id="groups-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>Groups</h2>
+                        <button class="create-group-btn" onclick="showCreateGroup()">+</button>
+                    </div>
+                    
+                    <div class="groups-grid" id="groups-grid">
+                        <!-- Groups will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Premium Features View -->
+                <div id="premium-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>Premium Features</h2>
+                    </div>
+                    
+                    <div class="premium-hero">
+                        <div class="hero-icon">✨</div>
+                        <h3>Unlock Premium Features</h3>
+                        <p>Get AI-powered insights, unlimited groups, and advanced analytics</p>
+                        <div class="pricing-highlight">
+                            <span class="price-original">₹299</span>
+                            <span class="price-offer">₹119/month</span>
+                            <span class="discount-badge">60% OFF</span>
+                        </div>
+                    </div>
+                    
+                    <div class="premium-features" id="premium-features">
+                        <!-- Premium features list -->
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="settings-view" class="view">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="showHome()">←</button>
+                        <h2>Settings</h2>
+                    </div>
+                    
+                    <div class="settings-sections">
+                        <div class="settings-section">
+                            <h3>Account</h3>
+                            <div class="setting-item" onclick="showProfile()">
+                                <div class="setting-icon">👤</div>
+                                <div class="setting-content">
+                                    <div class="setting-title">Profile</div>
+                                    <div class="setting-desc">Manage your account details</div>
+                                </div>
+                                <div class="setting-arrow">›</div>
+                            </div>
+                            <div class="setting-item" onclick="showPaymentMethods()">
+                                <div class="setting-icon">💳</div>
+                                <div class="setting-content">
+                                    <div class="setting-title">Payment Methods</div>
+                                    <div class="setting-desc">UPI, Cards, Bank accounts</div>
+                                </div>
+                                <div class="setting-arrow">›</div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>App</h3>
+                            <div class="setting-item">
+                                <div class="setting-icon">🔔</div>
+                                <div class="setting-content">
+                                    <div class="setting-title">Notifications</div>
+                                    <div class="setting-desc">Push notifications, reminders</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-icon">🌙</div>
+                                <div class="setting-content">
+                                    <div class="setting-title">Dark Mode</div>
+                                    <div class="setting-desc">Switch to dark theme</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>Premium</h3>
+                            <div class="setting-item premium" onclick="showPremiumFeatures()">
+                                <div class="setting-icon">✨</div>
+                                <div class="setting-content">
+                                    <div class="setting-title">Upgrade to Premium</div>
+                                    <div class="setting-desc">Unlock AI features & analytics</div>
+                                </div>
+                                <div class="upgrade-badge">UPGRADE</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Bottom Navigation -->
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-view="home" onclick="showHome()">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">Home</span>
+                </button>
+                <button class="nav-item" data-view="expenses" onclick="showExpenses()">
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-label">Expenses</span>
+                </button>
+                <button class="nav-item" data-view="balances" onclick="showBalances()">
+                    <span class="nav-icon">⚖️</span>
+                    <span class="nav-label">Balances</span>
+                </button>
+                <button class="nav-item" data-view="groups" onclick="showGroups()">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-label">Groups</span>
+                    <span class="group-count">2</span>
+                </button>
+                <button class="nav-item" data-view="premium" onclick="showPremiumFeatures()">
+                    <span class="nav-icon">✨</span>
+                    <span class="nav-label">Premium</span>
+                </button>
+            </nav>
         </div>
+
+        <!-- Floating Add Button -->
         <button class="fab" onclick="showAddExpense()">
             <span class="fab-icon">+</span>
         </button>
+
+        <!-- Modals -->
+        <div id="premium-modal" class="modal hidden">
+            <div class="modal-overlay" onclick="closePremiumModal()"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>✨ Premium Features</h3>
+                    <button class="modal-close" onclick="closePremiumModal()">×</button>
+                </div>
+                <div class="premium-features-list">
+                    <!-- Premium features content -->
+                </div>
+            </div>
+        </div>
     </div>
-    <!-- ENSURE JS FILES LOAD INIT -->
-    <script src="js/utils.js" type="module"></script>
-    <script src="js/state.js" type="module"></script>
-    <script src="js/renderUtils.js" type="module"></script>
-    <script src="js/render.js" type="module"></script>
-    <!-- Basic initialization to reveal main app -->
-    <script type="module">
-      window.addEventListener('DOMContentLoaded', () => {
-        // Attempt to show main app after JS loads
-        setTimeout(() => {
-          const mainApp = document.getElementById('main-app');
-          const loadingScreen = document.getElementById('loading-screen');
-          if(mainApp && loadingScreen) {
-            mainApp.style.display = 'block';
-            loadingScreen.style.display = 'none';
-          }
-        }, 450);
+
+    <script>
+    // monEZ - Premium Expense Splitting App
+    
+    // Enhanced App State
+    const AppState = {
+      currentView: 'home',
+      expenses: [],
+      friends: [
+        { name: 'Raj Kumar', avatar: 'R', color: '#10B981' },
+        { name: 'Priya Singh', avatar: 'P', color: '#F59E0B' },
+        { name: 'Amit Sharma', avatar: 'A', color: '#8B5CF6' },
+        { name: 'Sarah Johnson', avatar: 'S', color: '#EF4444' },
+        { name: 'Mike Chen', avatar: 'M', color: '#06B6D4' }
+      ],
+      groups: [
+        {
+          id: 1,
+          name: 'College Friends',
+          icon: '🎓',
+          members: 4,
+          balance: -420,
+          color: '#10B981'
+        },
+        {
+          id: 2,
+          name: 'Family Trip',
+          icon: '✈️',
+          members: 5,
+          balance: 150,
+          color: '#F59E0B'
+        }
+      ],
+      balance: 2450,
+      selectedFriends: new Set(),
+      selectedCategory: '',
+      animations: {
+        enabled: true,
+        duration: 300
+      },
+      pwaPromptShown: false,
+      deferredPrompt: null
+    };
+    
+    // Premium Sample Data
+    const premiumExpenses = [
+      {
+        id: 1,
+        description: 'Gourmet Dinner at Olive Garden',
+        amount: 2850,
+        date: 'Today, 8:30 PM',
+        paidBy: 'You',
+        splitWith: ['Raj Kumar', 'Priya Singh'],
+        category: '🍽️',
+        location: 'Connaught Place, Delhi',
+        status: 'pending'
+      },
+      {
+        id: 2,
+        description: 'Premium Uber Ride',
+        amount: 680,
+        date: 'Today, 6:15 PM', 
+        paidBy: 'Raj Kumar',
+        splitWith: ['You'],
+        category: '🚗',
+        location: 'Airport → Hotel',
+        status: 'settled'
+      },
+      {
+        id: 3,
+        description: 'IMAX Movie Experience',
+        amount: 1200,
+        date: 'Yesterday, 9:30 PM',
+        paidBy: 'Priya Singh',
+        splitWith: ['You', 'Amit Sharma'],
+        category: '🎬',
+        location: 'PVR Director\'s Cut',
+        status: 'settled'
+      }
+    ];
+
+    // Helper Functions
+    function $(id) {
+      return document.getElementById(id);
+    }
+    
+    function formatCurrency(amount) {
+      return `₹${amount.toLocaleString('en-IN')}`;
+    }
+    
+    function createRippleEffect(element, event) {
+      const ripple = document.createElement('div');
+      const rect = element.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = event.clientX - rect.left - size / 2;
+      const y = event.clientY - rect.top - size / 2;
+      
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      ripple.style.position = 'absolute';
+      ripple.style.borderRadius = '50%';
+      ripple.style.background = 'rgba(255,255,255,0.3)';
+      ripple.style.transform = 'scale(0)';
+      ripple.style.animation = 'ripple 0.6s ease-out';
+      ripple.style.pointerEvents = 'none';
+      
+      element.style.position = 'relative';
+      element.style.overflow = 'hidden';
+      element.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    }
+    
+    function showNotification(message, type = 'success', duration = 3000) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 10000;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        font-size: 14px;
+        font-weight: 500;
+        max-width: 300px;
+      `;
+      notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+          <span>${message}</span>
+          <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; margin-left: 8px; font-size: 16px;">×</button>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+      }, 100);
+      
+      setTimeout(() => {
+        notification.style.transform = 'translateX(400px)';
+        setTimeout(() => notification.remove(), 300);
+      }, duration);
+    }
+
+    // Navigation Functions
+    function showHome() {
+      showView('home');
+      renderRecentExpenses();
+      renderGroupsPreview();
+      updateNavigation('home');
+    }
+    
+    function showAddExpense() {
+      showView('add-expense');
+      populatePeopleSelector();
+      AppState.selectedFriends.clear();
+      AppState.selectedCategory = '';
+      resetForm();
+    }
+    
+    function showExpenses() {
+      showView('expenses');
+      renderAllExpenses();
+      updateNavigation('expenses');
+    }
+    
+    function showBalances() {
+      showView('balances');
+      renderBalances();
+      updateNavigation('balances');
+    }
+    
+    function showGroups() {
+      showView('groups');
+      renderGroups();
+      updateNavigation('groups');
+    }
+    
+    function showPremiumFeatures() {
+      showView('premium');
+      renderPremiumFeatures();
+      updateNavigation('premium');
+    }
+    
+    function showSettings() {
+      showView('settings');
+      updateNavigation('settings');
+    }
+    
+    function showSplitBill() {
+      showAddExpense();
+      showNotification('💡 Pro tip: Use voice input for faster entry!', 'info');
+    }
+    
+    function showSettle() {
+      showBalances();
+      showNotification('💳 Select a balance to settle up', 'info');
+    }
+    
+    function showNotifications() {
+      showNotification('🔔 3 new reminders: Raj owes ₹185, Movie night expense added, Premium features available!', 'info', 5000);
+    }
+    
+    function showProfile() {
+      showNotification('👤 Profile: Premium member since Oct 2024', 'info');
+    }
+    
+    function showFilters() {
+      showNotification('🔍 Filters: All categories, All friends, Last 30 days', 'info');
+    }
+    
+    function settleAll() {
+      showNotification('💳 Settling all balances... Payment links sent!', 'success');
+    }
+    
+    function showCreateGroup() {
+      if (AppState.groups.length >= 3) {
+        showPremiumModal();
+      } else {
+        showNotification('➕ Create Group: Coming soon!', 'info');
+      }
+    }
+
+    function showView(viewId) {
+      document.querySelectorAll('.view').forEach(view => {
+        view.classList.remove('active');
       });
+      
+      const targetView = $(viewId + '-view');
+      if (targetView) {
+        setTimeout(() => {
+          targetView.classList.add('active');
+          AppState.currentView = viewId;
+        }, AppState.animations.enabled ? 50 : 0);
+      }
+    }
+    
+    function updateNavigation(activeView) {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      const navMap = {
+        'home': 0,
+        'expenses': 1,
+        'balances': 2,
+        'groups': 3,
+        'premium': 4
+      };
+      
+      const navItems = document.querySelectorAll('.nav-item');
+      if (navItems[navMap[activeView]]) {
+        navItems[navMap[activeView]].classList.add('active');
+      }
+    }
+
+    // Render Functions
+    function renderRecentExpenses() {
+      const container = $('recent-expenses');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      if (AppState.expenses.length === 0) {
+        AppState.expenses = [...premiumExpenses];
+      }
+      
+      if (AppState.expenses.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: #64748B;">
+            <div style="font-size: 48px; margin-bottom: 16px;">💎</div>
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">No expenses yet</div>
+            <div style="font-size: 14px;">Start splitting bills with style</div>
+          </div>
+        `;
+        return;
+      }
+      
+      AppState.expenses.slice(0, 3).forEach((expense, index) => {
+        const item = document.createElement('div');
+        item.className = 'activity-item';
+        item.style.animationDelay = `${index * 100}ms`;
+        
+        const statusColor = expense.status === 'settled' ? '#10B981' : '#F59E0B';
+        const statusIcon = expense.status === 'settled' ? '✅' : '⏳';
+        
+        item.innerHTML = `
+          <div class="activity-icon" style="background: ${statusColor};">
+            ${expense.category || '💰'}
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">${expense.description}</div>
+            <div class="activity-meta">
+              ${expense.date} • ${expense.location || 'Unknown location'} ${statusIcon}
+            </div>
+          </div>
+          <div class="activity-amount">${formatCurrency(expense.amount)}</div>
+        `;
+        
+        item.addEventListener('click', (e) => {
+          createRippleEffect(item, e);
+          showNotification(`💰 ${expense.description} - ${formatCurrency(expense.amount)}`, 'info');
+        });
+        
+        container.appendChild(item);
+      });
+    }
+
+    function renderAllExpenses() {
+      const container = $('all-expenses-list');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      if (AppState.expenses.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #64748B;">No expenses yet</div>';
+        return;
+      }
+      
+      AppState.expenses.forEach(expense => {
+        const item = document.createElement('div');
+        item.className = 'activity-item';
+        
+        item.innerHTML = `
+          <div class="activity-icon">
+            ${expense.category || '💰'}
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">${expense.description}</div>
+            <div class="activity-meta">${expense.date}</div>
+          </div>
+          <div class="activity-amount">${formatCurrency(expense.amount)}</div>
+        `;
+        
+        container.appendChild(item);
+      });
+    }
+
+    function renderBalances() {
+      const container = $('balances-list');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      const balances = calculateUserBalances();
+      
+      if (balances.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 60px 20px; color: #64748B;">
+            <div style="font-size: 48px; margin-bottom: 16px;">⚖️</div>
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">All settled up!</div>
+            <div style="font-size: 14px;">No outstanding balances</div>
+          </div>
+        `;
+        return;
+      }
+      
+      balances.forEach((balance, index) => {
+        const item = document.createElement('div');
+        item.className = 'balance-item';
+        item.style.animationDelay = `${index * 100}ms`;
+        
+        const isPositive = balance.amount > 0;
+        const statusText = isPositive ? 'owes you' : 'you owe';
+        const statusClass = isPositive ? 'positive' : 'negative';
+        const avatar = balance.name.charAt(0).toUpperCase();
+        
+        item.innerHTML = `
+          <div class="balance-avatar">
+            ${avatar}
+          </div>
+          <div class="balance-content">
+            <div class="balance-name">${balance.name}</div>
+            <div class="balance-status">${statusText}</div>
+          </div>
+          <div class="balance-amount-container">
+            <div class="balance-amount ${statusClass}">
+              ${formatCurrency(Math.abs(balance.amount))}
+            </div>
+            ${!isPositive ? 
+              `<button class="settle-btn-small" onclick="settleBalance('${balance.name}', ${Math.abs(balance.amount)})">Pay Now</button>` : 
+              `<button class="settle-btn-small" onclick="remindUser('${balance.name}')">Remind</button>`
+            }
+          </div>
+        `;
+        
+        container.appendChild(item);
+      });
+    }
+    
+    function calculateUserBalances() {
+      const balanceMap = new Map();
+      
+      AppState.expenses.forEach(expense => {
+        if (!expense.splitWith) return;
+        
+        const totalPeople = expense.splitWith.length + 1;
+        const sharePerPerson = expense.amount / totalPeople;
+        
+        expense.splitWith.forEach(friendName => {
+          if (expense.paidBy === 'You') {
+            const currentBalance = balanceMap.get(friendName) || 0;
+            balanceMap.set(friendName, currentBalance + sharePerPerson);
+          } else if (expense.paidBy === friendName) {
+            const currentBalance = balanceMap.get(friendName) || 0;
+            balanceMap.set(friendName, currentBalance - sharePerPerson);
+          }
+        });
+      });
+      
+      return Array.from(balanceMap.entries())
+        .map(([name, amount]) => ({ name, amount }))
+        .filter(balance => Math.abs(balance.amount) > 0.01);
+    }
+    
+    function settleBalance(friendName, amount) {
+      showNotification(`💳 Payment of ${formatCurrency(amount)} to ${friendName} initiated!`, 'success');
+      
+      setTimeout(() => {
+        showNotification(`✅ Payment successful! Balance with ${friendName} cleared.`, 'success');
+        renderBalances();
+      }, 2000);
+    }
+    
+    function remindUser(friendName) {
+      showNotification(`🔔 Reminder sent to ${friendName}`, 'info');
+    }
+
+    function populatePeopleSelector() {
+      const container = $('people-selector');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      AppState.friends.forEach(friend => {
+        const card = document.createElement('div');
+        card.className = 'person-card';
+        card.dataset.friendName = friend.name;
+        
+        card.innerHTML = `
+          <div class="person-avatar" style="background: ${friend.color}">
+            ${friend.avatar}
+          </div>
+          <div class="person-name">${friend.name.split(' ')[0]}</div>
+        `;
+        
+        card.addEventListener('click', (e) => {
+          const isSelected = card.classList.contains('selected');
+          
+          if (isSelected) {
+            card.classList.remove('selected');
+            AppState.selectedFriends.delete(friend.name);
+          } else {
+            card.classList.add('selected');
+            AppState.selectedFriends.add(friend.name);
+          }
+          
+          createRippleEffect(card, e);
+        });
+        
+        container.appendChild(card);
+      });
+    }
+    
+    function renderGroupsPreview() {
+      const container = $('groups-preview');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      AppState.groups.forEach(group => {
+        const card = document.createElement('div');
+        card.className = 'group-card';
+        
+        card.innerHTML = `
+          <div class="group-header">
+            <span class="group-icon">${group.icon}</span>
+            <span class="group-name">${group.name}</span>
+          </div>
+          <div class="group-members">${group.members} members</div>
+          <div class="group-balance" style="color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
+            ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
+          </div>
+        `;
+        
+        card.addEventListener('click', (e) => {
+          createRippleEffect(card, e);
+          showNotification(`👥 ${group.name}: ${group.members} members`, 'info');
+        });
+        
+        container.appendChild(card);
+      });
+    }
+    
+    function renderGroups() {
+      const container = $('groups-grid');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      AppState.groups.forEach(group => {
+        const card = document.createElement('div');
+        card.className = 'group-card-full';
+        
+        card.innerHTML = `
+          <div class="group-header">
+            <span class="group-icon" style="font-size: 32px;">${group.icon}</span>
+            <div>
+              <div class="group-name" style="font-size: 18px; font-weight: 600; margin-bottom: 4px;">${group.name}</div>
+              <div class="group-members" style="font-size: 14px; color: #64748B;">${group.members} members</div>
+            </div>
+          </div>
+          <div style="margin-top: 16px; text-align: right;">
+            <div style="font-size: 12px; color: #64748B; margin-bottom: 4px;">Your balance</div>
+            <div class="group-balance" style="font-size: 20px; font-weight: 700; color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
+              ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+    }
+    
+    function renderPremiumFeatures() {
+      const container = $('premium-features');
+      if (!container) return;
+      
+      container.innerHTML = `
+        <div style="padding: 20px; display: grid; gap: 16px;">
+          <div onclick="tryAIFeature('receipt')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 24px;">📸</span>
+              <div>
+                <div style="font-weight: 600; margin-bottom: 4px;">AI Receipt Scanning</div>
+                <div style="font-size: 14px; color: #64748B;">Scan receipts with 98.5% accuracy</div>
+              </div>
+            </div>
+          </div>
+          
+          <div onclick="tryAIFeature('voice')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 24px;">🎤</span>
+              <div>
+                <div style="font-weight: 600; margin-bottom: 4px;">Voice Commands</div>
+                <div style="font-size: 14px; color: #64748B;">Add expenses in 22 languages</div>
+              </div>
+            </div>
+          </div>
+          
+          <div onclick="tryAIFeature('analytics')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 24px;">📊</span>
+              <div>
+                <div style="font-weight: 600; margin-bottom: 4px;">Advanced Analytics</div>
+                <div style="font-size: 14px; color: #64748B;">AI-powered spending insights</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Form Handling
+    function setupExpenseForm() {
+      const form = $('expense-form');
+      if (!form) return;
+      
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          AppState.selectedCategory = btn.dataset.category;
+          createRippleEffect(btn, e);
+        });
+      });
+      
+      document.querySelectorAll('.split-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (btn.classList.contains('premium')) {
+            showPremiumModal();
+            return;
+          }
+          document.querySelectorAll('.split-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          createRippleEffect(btn, e);
+        });
+      });
+      
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const amount = parseFloat($('amount').value);
+        const description = $('description').value.trim();
+        const selectedFriends = Array.from(AppState.selectedFriends);
+        
+        if (!amount || amount <= 0) {
+          showNotification('Please enter a valid amount', 'error');
+          $('amount').focus();
+          return;
+        }
+        
+        if (!description) {
+          showNotification('Please enter a description', 'error');
+          $('description').focus();
+          return;
+        }
+        
+        if (selectedFriends.length === 0) {
+          showNotification('Please select at least one friend', 'error');
+          return;
+        }
+        
+        const expense = {
+          id: Date.now(),
+          description,
+          amount,
+          date: 'Today, ' + new Date().toLocaleTimeString('en-IN', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+          }),
+          paidBy: 'You',
+          splitWith: selectedFriends,
+          category: AppState.selectedCategory || '💰',
+          location: 'Current Location',
+          status: 'pending'
+        };
+        
+        AppState.expenses.unshift(expense);
+        
+        const submitBtn = form.querySelector('.btn-primary');
+        const originalContent = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="btn-text">✅ Saved!</span>';
+        submitBtn.style.background = '#10B981';
+        
+        setTimeout(() => {
+          resetForm();
+          submitBtn.innerHTML = originalContent;
+          submitBtn.style.background = '';
+          showNotification('Expense added successfully! 🎉', 'success');
+          showHome();
+        }, 1000);
+      });
+    }
+    
+    function resetForm() {
+      const form = $('expense-form');
+      if (form) {
+        form.reset();
+      }
+      
+      AppState.selectedFriends.clear();
+      AppState.selectedCategory = '';
+      
+      document.querySelectorAll('.person-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      document.querySelectorAll('.split-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      const equalSplitBtn = document.querySelector('.split-btn[data-type="equal"]');
+      if (equalSplitBtn) {
+        equalSplitBtn.classList.add('active');
+      }
+    }
+
+    // AI and Premium Features
+    function aiSuggestAmount() {
+      const amounts = [250, 350, 500, 750, 1200, 1500];
+      const suggestedAmount = amounts[Math.floor(Math.random() * amounts.length)];
+      $('amount').value = suggestedAmount;
+      showNotification(`🤖 AI suggested: ${formatCurrency(suggestedAmount)}`, 'info');
+    }
+    
+    function startVoiceInput() {
+      showNotification('🎤 Voice input: "Add 500 rupee dinner split with Raj"', 'info', 4000);
+      setTimeout(() => {
+        $('amount').value = '500';
+        $('description').value = 'Dinner at restaurant';
+        AppState.selectedCategory = '🍽️';
+        document.querySelector('.category-btn[data-category="🍽️"]')?.classList.add('active');
+        showNotification('✅ Voice input processed!', 'success');
+      }, 2000);
+    }
+    
+    function tryAIFeature(type) {
+      switch(type) {
+        case 'receipt':
+          showNotification('📸 AI Receipt Scan: Upload a receipt and watch AI extract details!', 'info', 5000);
+          break;
+        case 'voice':
+          showNotification('🎤 Voice Commands: "Split 500 rupee dinner with Raj"', 'info', 5000);
+          break;
+        case 'analytics':
+          showNotification('📊 AI Analytics: You spend 23% more on weekends', 'info', 5000);
+          break;
+      }
+    }
+
+    // PWA Features
+    function showPWAPrompt() {
+      if (!AppState.pwaPromptShown) {
+        const prompt = $('pwa-prompt');
+        if (prompt) {
+          prompt.classList.remove('hidden');
+          AppState.pwaPromptShown = true;
+        }
+      }
+    }
+    
+    function dismissPWAPrompt() {
+      const prompt = $('pwa-prompt');
+      if (prompt) {
+        prompt.classList.add('hidden');
+      }
+    }
+    
+    function installPWA() {
+      if (AppState.deferredPrompt) {
+        AppState.deferredPrompt.prompt();
+        AppState.deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            showNotification('📱 monEZ installed successfully!', 'success', 4000);
+          }
+          AppState.deferredPrompt = null;
+        });
+      } else {
+        showNotification('📱 monEZ can be installed from your browser menu!', 'info', 4000);
+      }
+      dismissPWAPrompt();
+    }
+    
+    function showPremiumModal() {
+      showNotification('✨ Premium features - only ₹119/month', 'info', 4000);
+    }
+    
+    function closePremiumModal() {
+      const modal = $('premium-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function showPaymentMethods() {
+      showNotification('💳 Payment Methods: UPI, Cards, Bank accounts', 'info');
+    }
+
+    // App Initialization
+    function initApp() {
+      AppState.expenses = [...premiumExpenses];
+      
+      setupExpenseForm();
+      renderRecentExpenses();
+      renderGroupsPreview();
+      
+      setTimeout(() => {
+        showPWAPrompt();
+      }, 3000);
+      
+      setupPWAListeners();
+      
+      setTimeout(() => {
+        showNotification('Welcome to monEZ! 💎', 'success', 4000);
+      }, 1000);
+    }
+    
+    function setupPWAListeners() {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        AppState.deferredPrompt = e;
+        showPWAPrompt();
+      });
+      
+      window.addEventListener('appinstalled', () => {
+        showNotification('🎉 monEZ installed!', 'success');
+        AppState.deferredPrompt = null;
+        dismissPWAPrompt();
+      });
+    }
+
+    function hideLoadingScreen() {
+      const loadingScreen = $('loading-screen');
+      const mainApp = $('main-app');
+      
+      if (loadingScreen && mainApp) {
+        setTimeout(() => {
+          loadingScreen.style.opacity = '0';
+          setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            mainApp.style.display = 'flex';
+            mainApp.style.flexDirection = 'column';
+            mainApp.style.minHeight = '100vh';
+          }, 300);
+        }, 2000);
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      hideLoadingScreen();
+      
+      setTimeout(() => {
+        initApp();
+      }, 2300);
+    });
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('monEZ: Service Worker registered'))
+        .catch(() => console.log('monEZ: Service Worker registration failed'));
+    }
+
+    // Add ripple animation
+    const style = document.createElement('style');
+    style.textContent = '@keyframes ripple { to { transform: scale(2); opacity: 0; } }';
+    document.head.appendChild(style);
+    
+    console.log('💎 monEZ loaded successfully!');
     </script>
 </body>
 </html>
