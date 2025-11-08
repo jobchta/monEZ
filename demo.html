@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#846941">
+    <meta name="description" content="monEZ - Demo Mode">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>💰</text></svg>">
+    <title>monEZ - Demo Mode</title>
+    <style>
+/* monEZ Luxury Banking Design System */
+:root {
+  --background: #FAFAFA;
+  --surface: #FFFFFF;
+  --primary-text: #232325;
+  --secondary-text: #828288;
+  --borders: #ECECEC;
+  --gold-accent: #846941;
+  --steel-blue: #3B6270;
+  --success: #32775E;
+  --error: #C44A44;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --font-family: 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+  --weight-semibold: 600;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--primary-text);
+  background: var(--background);
+  overflow-x: hidden;
+}
+
+.app {
+  max-width: 400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--background);
+  position: relative;
+  box-shadow: 0 0 40px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-banner {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  padding: var(--space-md);
+  text-align: center;
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-md);
+  background: var(--surface);
+  border-bottom: 0.5px solid var(--borders);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+}
+
+.accent { color: #F59E0B; }
+
+.header-right {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--gold-accent);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: var(--weight-semibold);
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--space-md) 100px;
+}
+
+.view {
+  display: none;
+  padding-top: var(--space-md);
+  animation: fadeIn 0.3s ease;
+}
+
+.view.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+}
+
+.view-header h2 {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+}
+
+.back-btn {
+  background: var(--surface);
+  border: 1px solid var(--borders);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  cursor: pointer;
+  font-size: var(--text-base);
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  background: var(--gold-accent);
+  color: white;
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(150,150,150,0.06);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(150,150,150,0.08);
+}
+
+.stat-card.positive {
+  border-left: 3px solid var(--success);
+}
+
+.stat-card.negative {
+  border-left: 3px solid var(--error);
+}
+
+.stat-icon {
+  font-size: var(--text-xl);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--secondary-text);
+  margin-bottom: var(--space-xs);
+}
+
+.stat-value {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+}
+
+.action-card {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 100px;
+  justify-content: center;
+}
+
+.action-card:hover {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 4px 12px rgba(150,150,150,0.08);
+}
+
+.action-card.primary {
+  background: var(--gold-accent);
+  color: white;
+  border-color: var(--gold-accent);
+}
+
+.action-card.premium {
+  background: var(--steel-blue);
+  color: white;
+  border-color: var(--steel-blue);
+}
+
+.action-icon {
+  font-size: var(--text-xl);
+}
+
+.action-label {
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.premium-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #B8860B;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  font-weight: var(--weight-semibold);
+}
+
+.action-card {
+  position: relative;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.section-header h3 {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.activity-item {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.activity-item:hover {
+  background: rgba(255,255,255,0.95);
+  transform: translateY(-1px) scale(0.98);
+}
+
+.activity-icon {
+  font-size: var(--text-xl);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--gold-accent) 0%, #A67C52 100%);
+  color: white;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-xs);
+}
+
+.activity-meta {
+  font-size: 13px;
+  color: var(--secondary-text);
+}
+
+.activity-amount {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  text-align: right;
+}
+
+.balance-summary-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+}
+
+.summary-card {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  text-align: center;
+}
+
+.summary-card.positive {
+  border-left: 3px solid var(--success);
+}
+
+.summary-card.negative {
+  border-left: 3px solid var(--error);
+}
+
+.summary-amount {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-xs);
+}
+
+.summary-card.positive .summary-amount {
+  color: var(--success);
+}
+
+.summary-card.negative .summary-amount {
+  color: var(--error);
+}
+
+.summary-label {
+  font-size: 13px;
+  color: var(--secondary-text);
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 400px;
+  margin: 0 auto;
+  background: var(--surface);
+  border-top: 0.5px solid var(--borders);
+  display: flex;
+  z-index: 100;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-md) var(--space-xs);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: var(--secondary-text);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.nav-item.active {
+  color: var(--gold-accent);
+}
+
+.nav-item:hover {
+  background: rgba(132,105,65,0.08);
+}
+
+.nav-icon {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-xs);
+}
+
+.fab {
+  position: fixed;
+  bottom: 100px;
+  right: var(--space-md);
+  width: 56px;
+  height: 56px;
+  background: var(--gold-accent);
+  border: none;
+  border-radius: var(--radius-full);
+  color: white;
+  font-size: var(--text-xl);
+  cursor: pointer;
+  box-shadow: 0 12px 40px rgba(132,105,65,0.15);
+  transition: all 0.25s ease;
+  z-index: 1000;
+}
+
+.fab:hover {
+  transform: scale(0.98) translateY(-1px);
+  box-shadow: 0 8px 25px rgba(132,105,65,0.4);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+}
+
+.form-input {
+  width: 100%;
+  padding: var(--space-md);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  background: var(--surface);
+  font-family: var(--font-family);
+  transition: all 0.25s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--gold-accent);
+  box-shadow: 0 0 0 3px rgba(132,105,65,0.15);
+}
+
+.category-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.category-btn {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.25s ease;
+  font-weight: 500;
+}
+
+.category-btn:hover, .category-btn.active {
+  background: var(--gold-accent);
+  color: white;
+  border-color: var(--gold-accent);
+}
+
+.people-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.person-card {
+  background: var(--surface);
+  border: 0.5px solid var(--borders);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.person-card:hover {
+  background: rgba(255,255,255,0.95);
+  transform: translateY(-1px) scale(0.98);
+}
+
+.person-card.selected {
+  background: var(--gold-accent);
+  color: white;
+  border-color: var(--gold-accent);
+}
+
+.person-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--gold-accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+}
+
+.person-card.selected .person-avatar {
+  background: white;
+  color: var(--gold-accent);
+}
+
+.person-name {
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  text-align: center;
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--space-lg);
+  margin-top: var(--space-2xl);
+}
+
+.btn-primary, .btn-secondary {
+  flex: 1;
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  min-height: 52px;
+}
+
+.btn-primary {
+  background: var(--gold-accent);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(150,150,150,0.08);
+}
+
+.btn-primary:hover {
+  transform: scale(0.98) translateY(-1px);
+  box-shadow: 0 8px 24px rgba(150,150,150,0.10);
+  background: #73553A;
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--primary-text);
+  border: 0.5px solid var(--borders);
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.95);
+  transform: scale(0.98);
+}
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="demo-banner">⚠️ DEMO MODE - Test All Features (No Login Required)</div>
+
+        <header class="app-header">
+            <div class="logo">mon<span class="accent">EZ</span></div>
+            <div class="header-right">
+                <button class="avatar" onclick="alert('Demo User - No actual account')">D</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- HOME VIEW -->
+            <div id="home-view" class="view active">
+                <div class="quick-stats">
+                    <div class="stat-card positive">
+                        <div class="stat-icon">💚</div>
+                        <div class="stat-content">
+                            <div class="stat-label">You're owed</div>
+                            <div class="stat-value">₹1,320</div>
+                        </div>
+                    </div>
+                    <div class="stat-card negative">
+                        <div class="stat-icon">💸</div>
+                        <div class="stat-content">
+                            <div class="stat-label">You owe</div>
+                            <div class="stat-value">₹865</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="action-card primary" onclick="showView('add-expense')">➕ Add Expense</button>
+                    <button class="action-card" onclick="alert('Coming Soon')">🧮 Split Bill</button>
+                    <button class="action-card" onclick="showView('balances')">💳 Settle Up</button>
+                    <button class="action-card premium">✨ AI Insights<div class="premium-badge">PRO</div></button>
+                </div>
+
+                <section style="margin-top: var(--space-2xl);">
+                    <div class="section-header">
+                        <h3>Recent Activity</h3>
+                    </div>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon">🍽️</div>
+                            <div class="activity-content">
+                                <div class="activity-title">Gourmet Dinner</div>
+                                <div class="activity-meta">Today, 8:30 PM • Delhi ⏳</div>
+                            </div>
+                            <div class="activity-amount">₹2,850</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">🚗</div>
+                            <div class="activity-content">
+                                <div class="activity-title">Premium Uber Ride</div>
+                                <div class="activity-meta">Today, 6:15 PM • Airport ✅</div>
+                            </div>
+                            <div class="activity-amount">₹680</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ADD EXPENSE VIEW -->
+            <div id="add-expense-view" class="view">
+                <div class="view-header">
+                    <button class="back-btn" onclick="showView('home')">←</button>
+                    <h2>Add Expense</h2>
+                </div>
+
+                <form id="expense-form">
+                    <div class="form-group">
+                        <label class="form-label">Amount</label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 16px; top: 12px; font-size: 18px; color: #828288;">₹</span>
+                            <input type="number" id="amount" class="form-input" placeholder="0.00" step="0.01" style="padding-left: 40px;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" id="description" class="form-input" placeholder="What was this for?">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <div class="category-selector">
+                            <button type="button" class="category-btn" data-cat="🍽️">🍽️ Food</button>
+                            <button type="button" class="category-btn" data-cat="🚗">🚗 Transport</button>
+                            <button type="button" class="category-btn" data-cat="🎬">🎬 Entertainment</button>
+                            <button type="button" class="category-btn" data-cat="🛍️">🛍️ Shopping</button>
+                            <button type="button" class="category-btn" data-cat="💡">💡 Bills</button>
+                            <button type="button" class="category-btn" data-cat="✈️">✈️ Travel</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Split with</label>
+                        <div class="people-selector">
+                            <div class="person-card" data-name="Raj Kumar">
+                                <div class="person-avatar" style="background: #10B981;">R</div>
+                                <div class="person-name">Raj</div>
+                            </div>
+                            <div class="person-card" data-name="Priya Singh">
+                                <div class="person-avatar" style="background: #F59E0B;">P</div>
+                                <div class="person-name">Priya</div>
+                            </div>
+                            <div class="person-card" data-name="Amit Sharma">
+                                <div class="person-avatar" style="background: #8B5CF6;">A</div>
+                                <div class="person-name">Amit</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="showView('home')">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Expense 💾</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- BALANCES VIEW -->
+            <div id="balances-view" class="view">
+                <div class="view-header">
+                    <button class="back-btn" onclick="showView('home')">←</button>
+                    <h2>Balances</h2>
+                </div>
+
+                <div class="balance-summary-cards">
+                    <div class="summary-card positive">
+                        <div class="summary-amount">₹1,320</div>
+                        <div class="summary-label">You're owed</div>
+                    </div>
+                    <div class="summary-card negative">
+                        <div class="summary-amount">₹865</div>
+                        <div class="summary-label">You owe</div>
+                    </div>
+                </div>
+
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="person-avatar" style="background: #10B981; width: 48px; height: 48px;">R</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Raj Kumar</div>
+                            <div class="activity-meta">owes you</div>
+                        </div>
+                        <div style="text-align: right; font-weight: 600; color: #32775E;">₹420</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="person-avatar" style="background: #F59E0B; width: 48px; height: 48px;">P</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Priya Singh</div>
+                            <div class="activity-meta">you owe</div>
+                        </div>
+                        <div style="text-align: right; font-weight: 600; color: #C44A44;">₹865</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-view="home" onclick="switchNav(this, 'home-view')">
+                <span class="nav-icon">🏠</span>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" data-view="expenses" onclick="alert('DEMO: Expenses feature')">
+                <span class="nav-icon">📝</span>
+                <span>Expenses</span>
+            </button>
+            <button class="nav-item" data-view="balances" onclick="switchNav(this, 'balances-view')">
+                <span class="nav-icon">⚖️</span>
+                <span>Balances</span>
+            </button>
+            <button class="nav-item" data-view="groups" onclick="alert('DEMO: Groups feature')">
+                <span class="nav-icon">👥</span>
+                <span>Groups</span>
+            </button>
+            <button class="nav-item" data-view="premium" onclick="alert('DEMO: Premium features')">
+                <span class="nav-icon">✨</span>
+                <span>Premium</span>
+            </button>
+        </nav>
+
+        <button class="fab" onclick="showView('add-expense')">+</button>
+    </div>
+
+    <script>
+        // Demo functionality
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId + '-view').classList.add('active');
+        }
+
+        function switchNav(btn, viewId) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            btn.classList.add('active');
+            showView(viewId.replace('-view', ''));
+        }
+
+        // Category selection
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Person selection
+        document.querySelectorAll('.person-card').forEach(card => {
+            card.addEventListener('click', () => {
+                card.classList.toggle('selected');
+            });
+        });
+
+        // Form submission
+        document.getElementById('expense-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const amount = document.getElementById('amount').value;
+            const description = document.getElementById('description').value;
+            if (amount && description) {
+                alert(`✅ DEMO: Expense saved!\nAmount: ₹${amount}\nDescription: ${description}\n\n(In real app, this saves to Firebase)`);
+                showView('home');
+            } else {
+                alert('Please fill all fields');
+            }
+        });
+
+        console.log('🎨 DEMO MODE LOADED - No login required! Test all features freely.');
+    </script>
+</body>
+</html>
