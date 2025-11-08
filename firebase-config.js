@@ -1,20 +1,13 @@
 // firebase-config.js
-// Firebase Configuration
-// Get your config from: https://console.firebase.google.com/
+// Firebase Configuration for monEZ
+// Now LIVE with your credentials
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyDxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  authDomain: "monoez-app.firebaseapp.com",
-  projectId: "monoez-app",
-  storageBucket: "monoez-app.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef1234567890"
+  apiKey: "AIzaSyC4pZOIZikLKjL_eYAW9x3aC4weSz9PP6I",
+  authDomain: "monez-a4619.firebaseapp.com",
+  projectId: "monez-a4619",
+  storageBucket: "monez-a4619.firebasestorage.app",
+  messagingSenderId: "754794079933",
+  appId: "1:754794079933:web:fb794db5e96a94dd9f39d4",
+  measurementId: "G-LTF8XKRR6P"
 };
-
-// IMPORTANT: Replace the above with your actual Firebase config
-// Steps:
-// 1. Go to https://console.firebase.google.com
-// 2. Create new project "monEZ"
-// 3. Enable Email/Password authentication
-// 4. Copy your config from Project Settings
-// 5. Paste here
