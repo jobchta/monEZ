@@ -87,6 +87,8 @@ body {
   background: var(--background);
   position: relative;
   box-shadow: 0 0 40px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
 }
 
 /* Luxury Loading Screen */
@@ -286,6 +288,23 @@ body {
   color: white;
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+  cursor: pointer;
+  position: relative;
+}
+
+.avatar:hover::after {
+  content: 'Logout';
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
 }
 
 /* Main Content */
@@ -1418,7 +1437,7 @@ input:checked + .slider:before {
                 <div class="logo-large">mon<span class="accent">EZ</span></div>
                 <div class="tagline">Split expenses, not friendships</div>
                 <div class="loading-spinner"></div>
-                <div class="loading-text">Loading your financial companion...</div>
+                <div class="loading-text">Authenticating your session...</div>
             </div>
         </div>
 
@@ -1453,8 +1472,8 @@ input:checked + .slider:before {
                         <span class="icon">🔔</span>
                         <span class="badge">3</span>
                     </button>
-                    <button class="icon-btn" onclick="showProfile()">
-                        <div class="avatar">Y</div>
+                    <button class="icon-btn" onclick="logoutUser()" title="Click to logout">
+                        <div class="avatar" id="user-avatar">U</div>
                     </button>
                 </div>
             </header>
@@ -1693,7 +1712,7 @@ input:checked + .slider:before {
                                 <div class="setting-icon">👤</div>
                                 <div class="setting-content">
                                     <div class="setting-title">Profile</div>
-                                    <div class="setting-desc">Manage your account details</div>
+                                    <div class="setting-desc" id="user-email">Manage your account details</div>
                                 </div>
                                 <div class="setting-arrow">›</div>
                             </div>
@@ -1702,6 +1721,14 @@ input:checked + .slider:before {
                                 <div class="setting-content">
                                     <div class="setting-title">Payment Methods</div>
                                     <div class="setting-desc">UPI, Cards, Bank accounts</div>
+                                </div>
+                                <div class="setting-arrow">›</div>
+                            </div>
+                            <div class="setting-item" onclick="logoutUser()">
+                                <div class="setting-icon">🚪</div>
+                                <div class="setting-content">
+                                    <div class="setting-title">Logout</div>
+                                    <div class="setting-desc">Sign out from this device</div>
                                 </div>
                                 <div class="setting-arrow">›</div>
                             </div>
@@ -1767,9 +1794,9 @@ input:checked + .slider:before {
                     <span class="nav-label">Groups</span>
                     <span class="group-count">2</span>
                 </button>
-                <button class="nav-item" data-view="premium" onclick="showPremiumFeatures()">
-                    <span class="nav-icon">✨</span>
-                    <span class="nav-label">Premium</span>
+                <button class="nav-item" data-view="settings" onclick="showSettings()">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">Settings</span>
                 </button>
             </nav>
         </div>
@@ -1794,840 +1821,868 @@ input:checked + .slider:before {
         </div>
     </div>
 
-    <script>
-    // monEZ - Premium Expense Splitting App
-    
-    // Enhanced App State
-    const AppState = {
-      currentView: 'home',
-      expenses: [],
-      friends: [
-        { name: 'Raj Kumar', avatar: 'R', color: '#10B981' },
-        { name: 'Priya Singh', avatar: 'P', color: '#F59E0B' },
-        { name: 'Amit Sharma', avatar: 'A', color: '#8B5CF6' },
-        { name: 'Sarah Johnson', avatar: 'S', color: '#EF4444' },
-        { name: 'Mike Chen', avatar: 'M', color: '#06B6D4' }
-      ],
-      groups: [
-        {
-          id: 1,
-          name: 'College Friends',
-          icon: '🎓',
-          members: 4,
-          balance: -420,
-          color: '#10B981'
-        },
-        {
-          id: 2,
-          name: 'Family Trip',
-          icon: '✈️',
-          members: 5,
-          balance: 150,
-          color: '#F59E0B'
-        }
-      ],
-      balance: 2450,
-      selectedFriends: new Set(),
-      selectedCategory: '',
-      animations: {
-        enabled: true,
-        duration: 300
-      },
-      pwaPromptShown: false,
-      deferredPrompt: null
-    };
-    
-    // Premium Sample Data
-    const premiumExpenses = [
-      {
-        id: 1,
-        description: 'Gourmet Dinner at Olive Garden',
-        amount: 2850,
-        date: 'Today, 8:30 PM',
-        paidBy: 'You',
-        splitWith: ['Raj Kumar', 'Priya Singh'],
-        category: '🍽️',
-        location: 'Connaught Place, Delhi',
-        status: 'pending'
-      },
-      {
-        id: 2,
-        description: 'Premium Uber Ride',
-        amount: 680,
-        date: 'Today, 6:15 PM', 
-        paidBy: 'Raj Kumar',
-        splitWith: ['You'],
-        category: '🚗',
-        location: 'Airport → Hotel',
-        status: 'settled'
-      },
-      {
-        id: 3,
-        description: 'IMAX Movie Experience',
-        amount: 1200,
-        date: 'Yesterday, 9:30 PM',
-        paidBy: 'Priya Singh',
-        splitWith: ['You', 'Amit Sharma'],
-        category: '🎬',
-        location: 'PVR Director\'s Cut',
-        status: 'settled'
-      }
-    ];
+    <script type="module">
+        import { onAuthStateChange, logout } from './js/auth-module.js';
 
-    // Helper Functions
-    function $(id) {
-      return document.getElementById(id);
-    }
-    
-    function formatCurrency(amount) {
-      return `₹${amount.toLocaleString('en-IN')}`;
-    }
-    
-    function createRippleEffect(element, event) {
-      const ripple = document.createElement('div');
-      const rect = element.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      const x = event.clientX - rect.left - size / 2;
-      const y = event.clientY - rect.top - size / 2;
-      
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = x + 'px';
-      ripple.style.top = y + 'px';
-      ripple.style.position = 'absolute';
-      ripple.style.borderRadius = '50%';
-      ripple.style.background = 'rgba(255,255,255,0.3)';
-      ripple.style.transform = 'scale(0)';
-      ripple.style.animation = 'ripple 0.6s ease-out';
-      ripple.style.pointerEvents = 'none';
-      
-      element.style.position = 'relative';
-      element.style.overflow = 'hidden';
-      element.appendChild(ripple);
-      
-      setTimeout(() => {
-        ripple.remove();
-      }, 600);
-    }
-    
-    function showNotification(message, type = 'success', duration = 3000) {
-      const notification = document.createElement('div');
-      notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'};
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        z-index: 10000;
-        transform: translateX(400px);
-        transition: transform 0.3s ease;
-        font-size: 14px;
-        font-weight: 500;
-        max-width: 300px;
-      `;
-      notification.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-          <span>${message}</span>
-          <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; margin-left: 8px; font-size: 16px;">×</button>
-        </div>
-      `;
-      
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-      }, 100);
-      
-      setTimeout(() => {
-        notification.style.transform = 'translateX(400px)';
-        setTimeout(() => notification.remove(), 300);
-      }, duration);
-    }
-
-    // Navigation Functions
-    function showHome() {
-      showView('home');
-      renderRecentExpenses();
-      renderGroupsPreview();
-      updateNavigation('home');
-    }
-    
-    function showAddExpense() {
-      showView('add-expense');
-      populatePeopleSelector();
-      AppState.selectedFriends.clear();
-      AppState.selectedCategory = '';
-      resetForm();
-    }
-    
-    function showExpenses() {
-      showView('expenses');
-      renderAllExpenses();
-      updateNavigation('expenses');
-    }
-    
-    function showBalances() {
-      showView('balances');
-      renderBalances();
-      updateNavigation('balances');
-    }
-    
-    function showGroups() {
-      showView('groups');
-      renderGroups();
-      updateNavigation('groups');
-    }
-    
-    function showPremiumFeatures() {
-      showView('premium');
-      renderPremiumFeatures();
-      updateNavigation('premium');
-    }
-    
-    function showSettings() {
-      showView('settings');
-      updateNavigation('settings');
-    }
-    
-    function showSplitBill() {
-      showAddExpense();
-      showNotification('💡 Pro tip: Use voice input for faster entry!', 'info');
-    }
-    
-    function showSettle() {
-      showBalances();
-      showNotification('💳 Select a balance to settle up', 'info');
-    }
-    
-    function showNotifications() {
-      showNotification('🔔 3 new reminders: Raj owes ₹185, Movie night expense added, Premium features available!', 'info', 5000);
-    }
-    
-    function showProfile() {
-      showNotification('👤 Profile: Premium member since Oct 2024', 'info');
-    }
-    
-    function showFilters() {
-      showNotification('🔍 Filters: All categories, All friends, Last 30 days', 'info');
-    }
-    
-    function settleAll() {
-      showNotification('💳 Settling all balances... Payment links sent!', 'success');
-    }
-    
-    function showCreateGroup() {
-      if (AppState.groups.length >= 3) {
-        showPremiumModal();
-      } else {
-        showNotification('➕ Create Group: Coming soon!', 'info');
-      }
-    }
-
-    function showView(viewId) {
-      document.querySelectorAll('.view').forEach(view => {
-        view.classList.remove('active');
-      });
-      
-      const targetView = $(viewId + '-view');
-      if (targetView) {
-        setTimeout(() => {
-          targetView.classList.add('active');
-          AppState.currentView = viewId;
-        }, AppState.animations.enabled ? 50 : 0);
-      }
-    }
-    
-    function updateNavigation(activeView) {
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      
-      const navMap = {
-        'home': 0,
-        'expenses': 1,
-        'balances': 2,
-        'groups': 3,
-        'premium': 4
-      };
-      
-      const navItems = document.querySelectorAll('.nav-item');
-      if (navItems[navMap[activeView]]) {
-        navItems[navMap[activeView]].classList.add('active');
-      }
-    }
-
-    // Render Functions
-    function renderRecentExpenses() {
-      const container = $('recent-expenses');
-      if (!container) return;
-      
-      container.innerHTML = '';
-      
-      if (AppState.expenses.length === 0) {
-        AppState.expenses = [...premiumExpenses];
-      }
-      
-      if (AppState.expenses.length === 0) {
-        container.innerHTML = `
-          <div style="text-align: center; padding: 40px 20px; color: #64748B;">
-            <div style="font-size: 48px; margin-bottom: 16px;">💎</div>
-            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">No expenses yet</div>
-            <div style="font-size: 14px;">Start splitting bills with style</div>
-          </div>
-        `;
-        return;
-      }
-      
-      AppState.expenses.slice(0, 3).forEach((expense, index) => {
-        const item = document.createElement('div');
-        item.className = 'activity-item';
-        item.style.animationDelay = `${index * 100}ms`;
-        
-        const statusColor = expense.status === 'settled' ? '#10B981' : '#F59E0B';
-        const statusIcon = expense.status === 'settled' ? '✅' : '⏳';
-        
-        item.innerHTML = `
-          <div class="activity-icon" style="background: ${statusColor};">
-            ${expense.category || '💰'}
-          </div>
-          <div class="activity-content">
-            <div class="activity-title">${expense.description}</div>
-            <div class="activity-meta">
-              ${expense.date} • ${expense.location || 'Unknown location'} ${statusIcon}
-            </div>
-          </div>
-          <div class="activity-amount">${formatCurrency(expense.amount)}</div>
-        `;
-        
-        item.addEventListener('click', (e) => {
-          createRippleEffect(item, e);
-          showNotification(`💰 ${expense.description} - ${formatCurrency(expense.amount)}`, 'info');
-        });
-        
-        container.appendChild(item);
-      });
-    }
-
-    function renderAllExpenses() {
-      const container = $('all-expenses-list');
-      if (!container) return;
-      
-      container.innerHTML = '';
-      
-      if (AppState.expenses.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #64748B;">No expenses yet</div>';
-        return;
-      }
-      
-      AppState.expenses.forEach(expense => {
-        const item = document.createElement('div');
-        item.className = 'activity-item';
-        
-        item.innerHTML = `
-          <div class="activity-icon">
-            ${expense.category || '💰'}
-          </div>
-          <div class="activity-content">
-            <div class="activity-title">${expense.description}</div>
-            <div class="activity-meta">${expense.date}</div>
-          </div>
-          <div class="activity-amount">${formatCurrency(expense.amount)}</div>
-        `;
-        
-        container.appendChild(item);
-      });
-    }
-
-    function renderBalances() {
-      const container = $('balances-list');
-      if (!container) return;
-      
-      container.innerHTML = '';
-      
-      const balances = calculateUserBalances();
-      
-      if (balances.length === 0) {
-        container.innerHTML = `
-          <div style="text-align: center; padding: 60px 20px; color: #64748B;">
-            <div style="font-size: 48px; margin-bottom: 16px;">⚖️</div>
-            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">All settled up!</div>
-            <div style="font-size: 14px;">No outstanding balances</div>
-          </div>
-        `;
-        return;
-      }
-      
-      balances.forEach((balance, index) => {
-        const item = document.createElement('div');
-        item.className = 'balance-item';
-        item.style.animationDelay = `${index * 100}ms`;
-        
-        const isPositive = balance.amount > 0;
-        const statusText = isPositive ? 'owes you' : 'you owe';
-        const statusClass = isPositive ? 'positive' : 'negative';
-        const avatar = balance.name.charAt(0).toUpperCase();
-        
-        item.innerHTML = `
-          <div class="balance-avatar">
-            ${avatar}
-          </div>
-          <div class="balance-content">
-            <div class="balance-name">${balance.name}</div>
-            <div class="balance-status">${statusText}</div>
-          </div>
-          <div class="balance-amount-container">
-            <div class="balance-amount ${statusClass}">
-              ${formatCurrency(Math.abs(balance.amount))}
-            </div>
-            ${!isPositive ? 
-              `<button class="settle-btn-small" onclick="settleBalance('${balance.name}', ${Math.abs(balance.amount)})">Pay Now</button>` : 
-              `<button class="settle-btn-small" onclick="remindUser('${balance.name}')">Remind</button>`
-            }
-          </div>
-        `;
-        
-        container.appendChild(item);
-      });
-    }
-    
-    function calculateUserBalances() {
-      const balanceMap = new Map();
-      
-      AppState.expenses.forEach(expense => {
-        if (!expense.splitWith) return;
-        
-        const totalPeople = expense.splitWith.length + 1;
-        const sharePerPerson = expense.amount / totalPeople;
-        
-        expense.splitWith.forEach(friendName => {
-          if (expense.paidBy === 'You') {
-            const currentBalance = balanceMap.get(friendName) || 0;
-            balanceMap.set(friendName, currentBalance + sharePerPerson);
-          } else if (expense.paidBy === friendName) {
-            const currentBalance = balanceMap.get(friendName) || 0;
-            balanceMap.set(friendName, currentBalance - sharePerPerson);
-          }
-        });
-      });
-      
-      return Array.from(balanceMap.entries())
-        .map(([name, amount]) => ({ name, amount }))
-        .filter(balance => Math.abs(balance.amount) > 0.01);
-    }
-    
-    function settleBalance(friendName, amount) {
-      showNotification(`💳 Payment of ${formatCurrency(amount)} to ${friendName} initiated!`, 'success');
-      
-      setTimeout(() => {
-        showNotification(`✅ Payment successful! Balance with ${friendName} cleared.`, 'success');
-        renderBalances();
-      }, 2000);
-    }
-    
-    function remindUser(friendName) {
-      showNotification(`🔔 Reminder sent to ${friendName}`, 'info');
-    }
-
-    function populatePeopleSelector() {
-      const container = $('people-selector');
-      if (!container) return;
-      
-      container.innerHTML = '';
-      
-      AppState.friends.forEach(friend => {
-        const card = document.createElement('div');
-        card.className = 'person-card';
-        card.dataset.friendName = friend.name;
-        
-        card.innerHTML = `
-          <div class="person-avatar" style="background: ${friend.color}">
-            ${friend.avatar}
-          </div>
-          <div class="person-name">${friend.name.split(' ')[0]}</div>
-        `;
-        
-        card.addEventListener('click', (e) => {
-          const isSelected = card.classList.contains('selected');
-          
-          if (isSelected) {
-            card.classList.remove('selected');
-            AppState.selectedFriends.delete(friend.name);
-          } else {
-            card.classList.add('selected');
-            AppState.selectedFriends.add(friend.name);
-          }
-          
-          createRippleEffect(card, e);
-        });
-        
-        container.appendChild(card);
-      });
-    }
-    
-    function renderGroupsPreview() {
-      const container = $('groups-preview');
-      if (!container) return;
-      
-      container.innerHTML = '';
-      
-      AppState.groups.forEach(group => {
-        const card = document.createElement('div');
-        card.className = 'group-card';
-        
-        card.innerHTML = `
-          <div class="group-header">
-            <span class="group-icon">${group.icon}</span>
-            <span class="group-name">${group.name}</span>
-          </div>
-          <div class="group-members">${group.members} members</div>
-          <div class="group-balance" style="color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
-            ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
-          </div>
-        `;
-        
-        card.addEventListener('click', (e) => {
-          createRippleEffect(card, e);
-          showNotification(`👥 ${group.name}: ${group.members} members`, 'info');
-        });
-        
-        container.appendChild(card);
-      });
-    }
-    
-    function renderGroups() {
-      const container = $('groups-grid');
-      if (!container) return;
-      
-      container.innerHTML = '';
-      
-      AppState.groups.forEach(group => {
-        const card = document.createElement('div');
-        card.className = 'group-card-full';
-        
-        card.innerHTML = `
-          <div class="group-header">
-            <span class="group-icon" style="font-size: 32px;">${group.icon}</span>
-            <div>
-              <div class="group-name" style="font-size: 18px; font-weight: 600; margin-bottom: 4px;">${group.name}</div>
-              <div class="group-members" style="font-size: 14px; color: #64748B;">${group.members} members</div>
-            </div>
-          </div>
-          <div style="margin-top: 16px; text-align: right;">
-            <div style="font-size: 12px; color: #64748B; margin-bottom: 4px;">Your balance</div>
-            <div class="group-balance" style="font-size: 20px; font-weight: 700; color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
-              ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
-            </div>
-          </div>
-        `;
-        
-        container.appendChild(card);
-      });
-    }
-    
-    function renderPremiumFeatures() {
-      const container = $('premium-features');
-      if (!container) return;
-      
-      container.innerHTML = `
-        <div style="padding: 20px; display: grid; gap: 16px;">
-          <div onclick="tryAIFeature('receipt')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <span style="font-size: 24px;">📸</span>
-              <div>
-                <div style="font-weight: 600; margin-bottom: 4px;">AI Receipt Scanning</div>
-                <div style="font-size: 14px; color: #64748B;">Scan receipts with 98.5% accuracy</div>
-              </div>
-            </div>
-          </div>
-          
-          <div onclick="tryAIFeature('voice')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <span style="font-size: 24px;">🎤</span>
-              <div>
-                <div style="font-weight: 600; margin-bottom: 4px;">Voice Commands</div>
-                <div style="font-size: 14px; color: #64748B;">Add expenses in 22 languages</div>
-              </div>
-            </div>
-          </div>
-          
-          <div onclick="tryAIFeature('analytics')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <span style="font-size: 24px;">📊</span>
-              <div>
-                <div style="font-weight: 600; margin-bottom: 4px;">Advanced Analytics</div>
-                <div style="font-size: 14px; color: #64748B;">AI-powered spending insights</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    // Form Handling
-    function setupExpenseForm() {
-      const form = $('expense-form');
-      if (!form) return;
-      
-      document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          AppState.selectedCategory = btn.dataset.category;
-          createRippleEffect(btn, e);
-        });
-      });
-      
-      document.querySelectorAll('.split-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          if (btn.classList.contains('premium')) {
-            showPremiumModal();
+        // ============================================
+        // AUTH STATE CHECK
+        // ============================================
+        onAuthStateChange(({ isAuthenticated, user, userData }) => {
+          if (!isAuthenticated) {
+            console.log('🔐 User not authenticated, redirecting to login...');
+            window.location.href = '/auth.html';
             return;
           }
-          document.querySelectorAll('.split-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          createRippleEffect(btn, e);
+          
+          console.log('✅ User authenticated:', user.email);
+          
+          // Update UI with user info
+          const avatar = userData.avatar || user.email.charAt(0).toUpperCase();
+          document.getElementById('user-avatar').textContent = avatar;
+          
+          const userEmail = document.querySelector('.setting-desc');
+          if (userEmail) {
+            userEmail.textContent = user.email;
+          }
+          
+          // Load app
+          hideLoadingScreen();
+          initApp();
         });
-      });
-      
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const amount = parseFloat($('amount').value);
-        const description = $('description').value.trim();
-        const selectedFriends = Array.from(AppState.selectedFriends);
-        
-        if (!amount || amount <= 0) {
-          showNotification('Please enter a valid amount', 'error');
-          $('amount').focus();
-          return;
-        }
-        
-        if (!description) {
-          showNotification('Please enter a description', 'error');
-          $('description').focus();
-          return;
-        }
-        
-        if (selectedFriends.length === 0) {
-          showNotification('Please select at least one friend', 'error');
-          return;
-        }
-        
-        const expense = {
-          id: Date.now(),
-          description,
-          amount,
-          date: 'Today, ' + new Date().toLocaleTimeString('en-IN', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true 
-          }),
-          paidBy: 'You',
-          splitWith: selectedFriends,
-          category: AppState.selectedCategory || '💰',
-          location: 'Current Location',
-          status: 'pending'
+
+        // Logout function
+        window.logoutUser = async function() {
+          if (confirm('Are you sure you want to logout?')) {
+            const result = await logout();
+            if (result.success) {
+              window.location.href = '/auth.html';
+            }
+          }
+        };
+
+        // Enhanced App State
+        const AppState = {
+          currentView: 'home',
+          expenses: [],
+          friends: [
+            { name: 'Raj Kumar', avatar: 'R', color: '#10B981' },
+            { name: 'Priya Singh', avatar: 'P', color: '#F59E0B' },
+            { name: 'Amit Sharma', avatar: 'A', color: '#8B5CF6' },
+            { name: 'Sarah Johnson', avatar: 'S', color: '#EF4444' },
+            { name: 'Mike Chen', avatar: 'M', color: '#06B6D4' }
+          ],
+          groups: [
+            {
+              id: 1,
+              name: 'College Friends',
+              icon: '🎓',
+              members: 4,
+              balance: -420,
+              color: '#10B981'
+            },
+            {
+              id: 2,
+              name: 'Family Trip',
+              icon: '✈️',
+              members: 5,
+              balance: 150,
+              color: '#F59E0B'
+            }
+          ],
+          balance: 2450,
+          selectedFriends: new Set(),
+          selectedCategory: '',
+          animations: {
+            enabled: true,
+            duration: 300
+          },
+          pwaPromptShown: false,
+          deferredPrompt: null
         };
         
-        AppState.expenses.unshift(expense);
-        
-        const submitBtn = form.querySelector('.btn-primary');
-        const originalContent = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="btn-text">✅ Saved!</span>';
-        submitBtn.style.background = '#10B981';
-        
-        setTimeout(() => {
-          resetForm();
-          submitBtn.innerHTML = originalContent;
-          submitBtn.style.background = '';
-          showNotification('Expense added successfully! 🎉', 'success');
-          showHome();
-        }, 1000);
-      });
-    }
-    
-    function resetForm() {
-      const form = $('expense-form');
-      if (form) {
-        form.reset();
-      }
-      
-      AppState.selectedFriends.clear();
-      AppState.selectedCategory = '';
-      
-      document.querySelectorAll('.person-card').forEach(card => {
-        card.classList.remove('selected');
-      });
-      
-      document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      
-      document.querySelectorAll('.split-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      
-      const equalSplitBtn = document.querySelector('.split-btn[data-type="equal"]');
-      if (equalSplitBtn) {
-        equalSplitBtn.classList.add('active');
-      }
-    }
-
-    // AI and Premium Features
-    function aiSuggestAmount() {
-      const amounts = [250, 350, 500, 750, 1200, 1500];
-      const suggestedAmount = amounts[Math.floor(Math.random() * amounts.length)];
-      $('amount').value = suggestedAmount;
-      showNotification(`🤖 AI suggested: ${formatCurrency(suggestedAmount)}`, 'info');
-    }
-    
-    function startVoiceInput() {
-      showNotification('🎤 Voice input: "Add 500 rupee dinner split with Raj"', 'info', 4000);
-      setTimeout(() => {
-        $('amount').value = '500';
-        $('description').value = 'Dinner at restaurant';
-        AppState.selectedCategory = '🍽️';
-        document.querySelector('.category-btn[data-category="🍽️"]')?.classList.add('active');
-        showNotification('✅ Voice input processed!', 'success');
-      }, 2000);
-    }
-    
-    function tryAIFeature(type) {
-      switch(type) {
-        case 'receipt':
-          showNotification('📸 AI Receipt Scan: Upload a receipt and watch AI extract details!', 'info', 5000);
-          break;
-        case 'voice':
-          showNotification('🎤 Voice Commands: "Split 500 rupee dinner with Raj"', 'info', 5000);
-          break;
-        case 'analytics':
-          showNotification('📊 AI Analytics: You spend 23% more on weekends', 'info', 5000);
-          break;
-      }
-    }
-
-    // PWA Features
-    function showPWAPrompt() {
-      if (!AppState.pwaPromptShown) {
-        const prompt = $('pwa-prompt');
-        if (prompt) {
-          prompt.classList.remove('hidden');
-          AppState.pwaPromptShown = true;
-        }
-      }
-    }
-    
-    function dismissPWAPrompt() {
-      const prompt = $('pwa-prompt');
-      if (prompt) {
-        prompt.classList.add('hidden');
-      }
-    }
-    
-    function installPWA() {
-      if (AppState.deferredPrompt) {
-        AppState.deferredPrompt.prompt();
-        AppState.deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            showNotification('📱 monEZ installed successfully!', 'success', 4000);
+        // Premium Sample Data
+        const premiumExpenses = [
+          {
+            id: 1,
+            description: 'Gourmet Dinner at Olive Garden',
+            amount: 2850,
+            date: 'Today, 8:30 PM',
+            paidBy: 'You',
+            splitWith: ['Raj Kumar', 'Priya Singh'],
+            category: '🍽️',
+            location: 'Connaught Place, Delhi',
+            status: 'pending'
+          },
+          {
+            id: 2,
+            description: 'Premium Uber Ride',
+            amount: 680,
+            date: 'Today, 6:15 PM', 
+            paidBy: 'Raj Kumar',
+            splitWith: ['You'],
+            category: '🚗',
+            location: 'Airport → Hotel',
+            status: 'settled'
+          },
+          {
+            id: 3,
+            description: 'IMAX Movie Experience',
+            amount: 1200,
+            date: 'Yesterday, 9:30 PM',
+            paidBy: 'Priya Singh',
+            splitWith: ['You', 'Amit Sharma'],
+            category: '🎬',
+            location: 'PVR Director\'s Cut',
+            status: 'settled'
           }
-          AppState.deferredPrompt = null;
-        });
-      } else {
-        showNotification('📱 monEZ can be installed from your browser menu!', 'info', 4000);
-      }
-      dismissPWAPrompt();
-    }
-    
-    function showPremiumModal() {
-      showNotification('✨ Premium features - only ₹119/month', 'info', 4000);
-    }
-    
-    function closePremiumModal() {
-      const modal = $('premium-modal');
-      if (modal) {
-        modal.classList.add('hidden');
-      }
-    }
+        ];
 
-    function showPaymentMethods() {
-      showNotification('💳 Payment Methods: UPI, Cards, Bank accounts', 'info');
-    }
-
-    // App Initialization
-    function initApp() {
-      AppState.expenses = [...premiumExpenses];
-      
-      setupExpenseForm();
-      renderRecentExpenses();
-      renderGroupsPreview();
-      
-      setTimeout(() => {
-        showPWAPrompt();
-      }, 3000);
-      
-      setupPWAListeners();
-      
-      setTimeout(() => {
-        showNotification('Welcome to monEZ! 💎', 'success', 4000);
-      }, 1000);
-    }
-    
-    function setupPWAListeners() {
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        AppState.deferredPrompt = e;
-        showPWAPrompt();
-      });
-      
-      window.addEventListener('appinstalled', () => {
-        showNotification('🎉 monEZ installed!', 'success');
-        AppState.deferredPrompt = null;
-        dismissPWAPrompt();
-      });
-    }
-
-    function hideLoadingScreen() {
-      const loadingScreen = $('loading-screen');
-      const mainApp = $('main-app');
-      
-      if (loadingScreen && mainApp) {
-        setTimeout(() => {
-          loadingScreen.style.opacity = '0';
+        // Helper Functions
+        function $(id) {
+          return document.getElementById(id);
+        }
+        
+        function formatCurrency(amount) {
+          return `₹${amount.toLocaleString('en-IN')}`;
+        }
+        
+        function createRippleEffect(element, event) {
+          const ripple = document.createElement('div');
+          const rect = element.getBoundingClientRect();
+          const size = Math.max(rect.width, rect.height);
+          const x = event.clientX - rect.left - size / 2;
+          const y = event.clientY - rect.top - size / 2;
+          
+          ripple.style.width = ripple.style.height = size + 'px';
+          ripple.style.left = x + 'px';
+          ripple.style.top = y + 'px';
+          ripple.style.position = 'absolute';
+          ripple.style.borderRadius = '50%';
+          ripple.style.background = 'rgba(255,255,255,0.3)';
+          ripple.style.transform = 'scale(0)';
+          ripple.style.animation = 'ripple 0.6s ease-out';
+          ripple.style.pointerEvents = 'none';
+          
+          element.style.position = 'relative';
+          element.style.overflow = 'hidden';
+          element.appendChild(ripple);
+          
           setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            mainApp.style.display = 'flex';
-            mainApp.style.flexDirection = 'column';
-            mainApp.style.minHeight = '100vh';
-          }, 300);
-        }, 2000);
-      }
-    }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      hideLoadingScreen();
-      
-      setTimeout(() => {
-        initApp();
-      }, 2300);
-    });
+            ripple.remove();
+          }, 600);
+        }
+        
+        function showNotification(message, type = 'success', duration = 3000) {
+          const notification = document.createElement('div');
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            max-width: 300px;
+          `;
+          notification.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+              <span>${message}</span>
+              <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; margin-left: 8px; font-size: 16px;">×</button>
+            </div>
+          `;
+          
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+          }, 100);
+          
+          setTimeout(() => {
+            notification.style.transform = 'translateX(400px)';
+            setTimeout(() => notification.remove(), 300);
+          }, duration);
+        }
 
-    // Service Worker Registration
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then(() => console.log('monEZ: Service Worker registered'))
-        .catch(() => console.log('monEZ: Service Worker registration failed'));
-    }
+        // Navigation Functions
+        function showHome() {
+          showView('home');
+          renderRecentExpenses();
+          renderGroupsPreview();
+          updateNavigation('home');
+        }
+        
+        function showAddExpense() {
+          showView('add-expense');
+          populatePeopleSelector();
+          AppState.selectedFriends.clear();
+          AppState.selectedCategory = '';
+          resetForm();
+        }
+        
+        function showExpenses() {
+          showView('expenses');
+          renderAllExpenses();
+          updateNavigation('expenses');
+        }
+        
+        function showBalances() {
+          showView('balances');
+          renderBalances();
+          updateNavigation('balances');
+        }
+        
+        function showGroups() {
+          showView('groups');
+          renderGroups();
+          updateNavigation('groups');
+        }
+        
+        function showPremiumFeatures() {
+          showView('premium');
+          renderPremiumFeatures();
+          updateNavigation('premium');
+        }
+        
+        function showSettings() {
+          showView('settings');
+          updateNavigation('settings');
+        }
+        
+        function showSplitBill() {
+          showAddExpense();
+          showNotification('💡 Pro tip: Use voice input for faster entry!', 'info');
+        }
+        
+        function showSettle() {
+          showBalances();
+          showNotification('💳 Select a balance to settle up', 'info');
+        }
+        
+        function showNotifications() {
+          showNotification('🔔 3 new reminders: Raj owes ₹185, Movie night expense added, Premium features available!', 'info', 5000);
+        }
+        
+        function showProfile() {
+          showNotification('👤 Profile: Premium member since Oct 2024', 'info');
+        }
+        
+        function showFilters() {
+          showNotification('🔍 Filters: All categories, All friends, Last 30 days', 'info');
+        }
+        
+        function settleAll() {
+          showNotification('💳 Settling all balances... Payment links sent!', 'success');
+        }
+        
+        function showCreateGroup() {
+          if (AppState.groups.length >= 3) {
+            showPremiumModal();
+          } else {
+            showNotification('➕ Create Group: Coming soon!', 'info');
+          }
+        }
 
-    // Add ripple animation
-    const style = document.createElement('style');
-    style.textContent = '@keyframes ripple { to { transform: scale(2); opacity: 0; } }';
-    document.head.appendChild(style);
-    
-    console.log('💎 monEZ loaded successfully!');
+        function showView(viewId) {
+          document.querySelectorAll('.view').forEach(view => {
+            view.classList.remove('active');
+          });
+          
+          const targetView = $(viewId + '-view');
+          if (targetView) {
+            setTimeout(() => {
+              targetView.classList.add('active');
+              AppState.currentView = viewId;
+            }, AppState.animations.enabled ? 50 : 0);
+          }
+        }
+        
+        function updateNavigation(activeView) {
+          document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+          });
+          
+          const navMap = {
+            'home': 0,
+            'expenses': 1,
+            'balances': 2,
+            'groups': 3,
+            'settings': 4
+          };
+          
+          const navItems = document.querySelectorAll('.nav-item');
+          if (navItems[navMap[activeView]]) {
+            navItems[navMap[activeView]].classList.add('active');
+          }
+        }
+
+        // Render Functions
+        function renderRecentExpenses() {
+          const container = $('recent-expenses');
+          if (!container) return;
+          
+          container.innerHTML = '';
+          
+          if (AppState.expenses.length === 0) {
+            AppState.expenses = [...premiumExpenses];
+          }
+          
+          if (AppState.expenses.length === 0) {
+            container.innerHTML = `
+              <div style="text-align: center; padding: 40px 20px; color: #64748B;">
+                <div style="font-size: 48px; margin-bottom: 16px;">💎</div>
+                <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">No expenses yet</div>
+                <div style="font-size: 14px;">Start splitting bills with style</div>
+              </div>
+            `;
+            return;
+          }
+          
+          AppState.expenses.slice(0, 3).forEach((expense, index) => {
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            item.style.animationDelay = `${index * 100}ms`;
+            
+            const statusColor = expense.status === 'settled' ? '#10B981' : '#F59E0B';
+            const statusIcon = expense.status === 'settled' ? '✅' : '⏳';
+            
+            item.innerHTML = `
+              <div class="activity-icon" style="background: ${statusColor};">
+                ${expense.category || '💰'}
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">${expense.description}</div>
+                <div class="activity-meta">
+                  ${expense.date} • ${expense.location || 'Unknown location'} ${statusIcon}
+                </div>
+              </div>
+              <div class="activity-amount">${formatCurrency(expense.amount)}</div>
+            `;
+            
+            item.addEventListener('click', (e) => {
+              createRippleEffect(item, e);
+              showNotification(`💰 ${expense.description} - ${formatCurrency(expense.amount)}`, 'info');
+            });
+            
+            container.appendChild(item);
+          });
+        }
+
+        function renderAllExpenses() {
+          const container = $('all-expenses-list');
+          if (!container) return;
+          
+          container.innerHTML = '';
+          
+          if (AppState.expenses.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #64748B;">No expenses yet</div>';
+            return;
+          }
+          
+          AppState.expenses.forEach(expense => {
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            
+            item.innerHTML = `
+              <div class="activity-icon">
+                ${expense.category || '💰'}
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">${expense.description}</div>
+                <div class="activity-meta">${expense.date}</div>
+              </div>
+              <div class="activity-amount">${formatCurrency(expense.amount)}</div>
+            `;
+            
+            container.appendChild(item);
+          });
+        }
+
+        function renderBalances() {
+          const container = $('balances-list');
+          if (!container) return;
+          
+          container.innerHTML = '';
+          
+          const balances = calculateUserBalances();
+          
+          if (balances.length === 0) {
+            container.innerHTML = `
+              <div style="text-align: center; padding: 60px 20px; color: #64748B;">
+                <div style="font-size: 48px; margin-bottom: 16px;">⚖️</div>
+                <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">All settled up!</div>
+                <div style="font-size: 14px;">No outstanding balances</div>
+              </div>
+            `;
+            return;
+          }
+          
+          balances.forEach((balance, index) => {
+            const item = document.createElement('div');
+            item.className = 'balance-item';
+            item.style.animationDelay = `${index * 100}ms`;
+            
+            const isPositive = balance.amount > 0;
+            const statusText = isPositive ? 'owes you' : 'you owe';
+            const statusClass = isPositive ? 'positive' : 'negative';
+            const avatar = balance.name.charAt(0).toUpperCase();
+            
+            item.innerHTML = `
+              <div class="balance-avatar">
+                ${avatar}
+              </div>
+              <div class="balance-content">
+                <div class="balance-name">${balance.name}</div>
+                <div class="balance-status">${statusText}</div>
+              </div>
+              <div class="balance-amount-container">
+                <div class="balance-amount ${statusClass}">
+                  ${formatCurrency(Math.abs(balance.amount))}
+                </div>
+                ${!isPositive ? 
+                  `<button class="settle-btn-small" onclick="settleBalance('${balance.name}', ${Math.abs(balance.amount)})">Pay Now</button>` : 
+                  `<button class="settle-btn-small" onclick="remindUser('${balance.name}')">Remind</button>`
+                }
+              </div>
+            `;
+            
+            container.appendChild(item);
+          });
+        }
+        
+        function calculateUserBalances() {
+          const balanceMap = new Map();
+          
+          AppState.expenses.forEach(expense => {
+            if (!expense.splitWith) return;
+            
+            const totalPeople = expense.splitWith.length + 1;
+            const sharePerPerson = expense.amount / totalPeople;
+            
+            expense.splitWith.forEach(friendName => {
+              if (expense.paidBy === 'You') {
+                const currentBalance = balanceMap.get(friendName) || 0;
+                balanceMap.set(friendName, currentBalance + sharePerPerson);
+              } else if (expense.paidBy === friendName) {
+                const currentBalance = balanceMap.get(friendName) || 0;
+                balanceMap.set(friendName, currentBalance - sharePerPerson);
+              }
+            });
+          });
+          
+          return Array.from(balanceMap.entries())
+            .map(([name, amount]) => ({ name, amount }))
+            .filter(balance => Math.abs(balance.amount) > 0.01);
+        }
+        
+        function settleBalance(friendName, amount) {
+          showNotification(`💳 Payment of ${formatCurrency(amount)} to ${friendName} initiated!`, 'success');
+          
+          setTimeout(() => {
+            showNotification(`✅ Payment successful! Balance with ${friendName} cleared.`, 'success');
+            renderBalances();
+          }, 2000);
+        }
+        
+        function remindUser(friendName) {
+          showNotification(`🔔 Reminder sent to ${friendName}`, 'info');
+        }
+
+        function populatePeopleSelector() {
+          const container = $('people-selector');
+          if (!container) return;
+          
+          container.innerHTML = '';
+          
+          AppState.friends.forEach(friend => {
+            const card = document.createElement('div');
+            card.className = 'person-card';
+            card.dataset.friendName = friend.name;
+            
+            card.innerHTML = `
+              <div class="person-avatar" style="background: ${friend.color}">
+                ${friend.avatar}
+              </div>
+              <div class="person-name">${friend.name.split(' ')[0]}</div>
+            `;
+            
+            card.addEventListener('click', (e) => {
+              const isSelected = card.classList.contains('selected');
+              
+              if (isSelected) {
+                card.classList.remove('selected');
+                AppState.selectedFriends.delete(friend.name);
+              } else {
+                card.classList.add('selected');
+                AppState.selectedFriends.add(friend.name);
+              }
+              
+              createRippleEffect(card, e);
+            });
+            
+            container.appendChild(card);
+          });
+        }
+        
+        function renderGroupsPreview() {
+          const container = $('groups-preview');
+          if (!container) return;
+          
+          container.innerHTML = '';
+          
+          AppState.groups.forEach(group => {
+            const card = document.createElement('div');
+            card.className = 'group-card';
+            
+            card.innerHTML = `
+              <div class="group-header">
+                <span class="group-icon">${group.icon}</span>
+                <span class="group-name">${group.name}</span>
+              </div>
+              <div class="group-members">${group.members} members</div>
+              <div class="group-balance" style="color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
+                ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
+              </div>
+            `;
+            
+            card.addEventListener('click', (e) => {
+              createRippleEffect(card, e);
+              showNotification(`👥 ${group.name}: ${group.members} members`, 'info');
+            });
+            
+            container.appendChild(card);
+          });
+        }
+        
+        function renderGroups() {
+          const container = $('groups-grid');
+          if (!container) return;
+          
+          container.innerHTML = '';
+          
+          AppState.groups.forEach(group => {
+            const card = document.createElement('div');
+            card.className = 'group-card-full';
+            
+            card.innerHTML = `
+              <div class="group-header">
+                <span class="group-icon" style="font-size: 32px;">${group.icon}</span>
+                <div>
+                  <div class="group-name" style="font-size: 18px; font-weight: 600; margin-bottom: 4px;">${group.name}</div>
+                  <div class="group-members" style="font-size: 14px; color: #64748B;">${group.members} members</div>
+                </div>
+              </div>
+              <div style="margin-top: 16px; text-align: right;">
+                <div style="font-size: 12px; color: #64748B; margin-bottom: 4px;">Your balance</div>
+                <div class="group-balance" style="font-size: 20px; font-weight: 700; color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
+                  ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
+                </div>
+              </div>
+            `;
+            
+            container.appendChild(card);
+          });
+        }
+        
+        function renderPremiumFeatures() {
+          const container = $('premium-features');
+          if (!container) return;
+          
+          container.innerHTML = `
+            <div style="padding: 20px; display: grid; gap: 16px;">
+              <div onclick="tryAIFeature('receipt')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-size: 24px;">📸</span>
+                  <div>
+                    <div style="font-weight: 600; margin-bottom: 4px;">AI Receipt Scanning</div>
+                    <div style="font-size: 14px; color: #64748B;">Scan receipts with 98.5% accuracy</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div onclick="tryAIFeature('voice')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-size: 24px;">🎤</span>
+                  <div>
+                    <div style="font-weight: 600; margin-bottom: 4px;">Voice Commands</div>
+                    <div style="font-size: 14px; color: #64748B;">Add expenses in 22 languages</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div onclick="tryAIFeature('analytics')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-size: 24px;">📊</span>
+                  <div>
+                    <div style="font-weight: 600; margin-bottom: 4px;">Advanced Analytics</div>
+                    <div style="font-size: 14px; color: #64748B;">AI-powered spending insights</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // Form Handling
+        function setupExpenseForm() {
+          const form = $('expense-form');
+          if (!form) return;
+          
+          document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              AppState.selectedCategory = btn.dataset.category;
+              createRippleEffect(btn, e);
+            });
+          });
+          
+          document.querySelectorAll('.split-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              if (btn.classList.contains('premium')) {
+                showPremiumModal();
+                return;
+              }
+              document.querySelectorAll('.split-btn').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              createRippleEffect(btn, e);
+            });
+          });
+          
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const amount = parseFloat($('amount').value);
+            const description = $('description').value.trim();
+            const selectedFriends = Array.from(AppState.selectedFriends);
+            
+            if (!amount || amount <= 0) {
+              showNotification('Please enter a valid amount', 'error');
+              $('amount').focus();
+              return;
+            }
+            
+            if (!description) {
+              showNotification('Please enter a description', 'error');
+              $('description').focus();
+              return;
+            }
+            
+            if (selectedFriends.length === 0) {
+              showNotification('Please select at least one friend', 'error');
+              return;
+            }
+            
+            const expense = {
+              id: Date.now(),
+              description,
+              amount,
+              date: 'Today, ' + new Date().toLocaleTimeString('en-IN', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+              }),
+              paidBy: 'You',
+              splitWith: selectedFriends,
+              category: AppState.selectedCategory || '💰',
+              location: 'Current Location',
+              status: 'pending'
+            };
+            
+            AppState.expenses.unshift(expense);
+            
+            const submitBtn = form.querySelector('.btn-primary');
+            const originalContent = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="btn-text">✅ Saved!</span>';
+            submitBtn.style.background = '#10B981';
+            
+            setTimeout(() => {
+              resetForm();
+              submitBtn.innerHTML = originalContent;
+              submitBtn.style.background = '';
+              showNotification('Expense added successfully! 🎉', 'success');
+              showHome();
+            }, 1000);
+          });
+        }
+        
+        function resetForm() {
+          const form = $('expense-form');
+          if (form) {
+            form.reset();
+          }
+          
+          AppState.selectedFriends.clear();
+          AppState.selectedCategory = '';
+          
+          document.querySelectorAll('.person-card').forEach(card => {
+            card.classList.remove('selected');
+          });
+          
+          document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          
+          document.querySelectorAll('.split-btn').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          
+          const equalSplitBtn = document.querySelector('.split-btn[data-type="equal"]');
+          if (equalSplitBtn) {
+            equalSplitBtn.classList.add('active');
+          }
+        }
+
+        // AI and Premium Features
+        function aiSuggestAmount() {
+          const amounts = [250, 350, 500, 750, 1200, 1500];
+          const suggestedAmount = amounts[Math.floor(Math.random() * amounts.length)];
+          $('amount').value = suggestedAmount;
+          showNotification(`🤖 AI suggested: ${formatCurrency(suggestedAmount)}`, 'info');
+        }
+        
+        function startVoiceInput() {
+          showNotification('🎤 Voice input: "Add 500 rupee dinner split with Raj"', 'info', 4000);
+          setTimeout(() => {
+            $('amount').value = '500';
+            $('description').value = 'Dinner at restaurant';
+            AppState.selectedCategory = '🍽️';
+            document.querySelector('.category-btn[data-category="🍽️"]')?.classList.add('active');
+            showNotification('✅ Voice input processed!', 'success');
+          }, 2000);
+        }
+        
+        function tryAIFeature(type) {
+          switch(type) {
+            case 'receipt':
+              showNotification('📸 AI Receipt Scan: Upload a receipt and watch AI extract details!', 'info', 5000);
+              break;
+            case 'voice':
+              showNotification('🎤 Voice Commands: "Split 500 rupee dinner with Raj"', 'info', 5000);
+              break;
+            case 'analytics':
+              showNotification('📊 AI Analytics: You spend 23% more on weekends', 'info', 5000);
+              break;
+          }
+        }
+
+        // PWA Features
+        function showPWAPrompt() {
+          if (!AppState.pwaPromptShown) {
+            const prompt = $('pwa-prompt');
+            if (prompt) {
+              prompt.classList.remove('hidden');
+              AppState.pwaPromptShown = true;
+            }
+          }
+        }
+        
+        function dismissPWAPrompt() {
+          const prompt = $('pwa-prompt');
+          if (prompt) {
+            prompt.classList.add('hidden');
+          }
+        }
+        
+        function installPWA() {
+          if (AppState.deferredPrompt) {
+            AppState.deferredPrompt.prompt();
+            AppState.deferredPrompt.userChoice.then((choiceResult) => {
+              if (choiceResult.outcome === 'accepted') {
+                showNotification('📱 monEZ installed successfully!', 'success', 4000);
+              }
+              AppState.deferredPrompt = null;
+            });
+          } else {
+            showNotification('📱 monEZ can be installed from your browser menu!', 'info', 4000);
+          }
+          dismissPWAPrompt();
+        }
+        
+        function showPremiumModal() {
+          showNotification('✨ Premium features - only ₹119/month', 'info', 4000);
+        }
+        
+        function closePremiumModal() {
+          const modal = $('premium-modal');
+          if (modal) {
+            modal.classList.add('hidden');
+          }
+        }
+
+        function showPaymentMethods() {
+          showNotification('💳 Payment Methods: UPI, Cards, Bank accounts', 'info');
+        }
+
+        // App Initialization
+        function initApp() {
+          AppState.expenses = [...premiumExpenses];
+          
+          setupExpenseForm();
+          renderRecentExpenses();
+          renderGroupsPreview();
+          
+          setTimeout(() => {
+            showPWAPrompt();
+          }, 3000);
+          
+          setupPWAListeners();
+          
+          setTimeout(() => {
+            showNotification('Welcome to monEZ! 💎', 'success', 4000);
+          }, 1000);
+        }
+        
+        function setupPWAListeners() {
+          window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            AppState.deferredPrompt = e;
+            showPWAPrompt();
+          });
+          
+          window.addEventListener('appinstalled', () => {
+            showNotification('🎉 monEZ installed!', 'success');
+            AppState.deferredPrompt = null;
+            dismissPWAPrompt();
+          });
+        }
+
+        function hideLoadingScreen() {
+          const loadingScreen = $('loading-screen');
+          const mainApp = $('main-app');
+          
+          if (loadingScreen && mainApp) {
+            setTimeout(() => {
+              loadingScreen.style.opacity = '0';
+              setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                mainApp.style.display = 'flex';
+                mainApp.style.flexDirection = 'column';
+                mainApp.style.minHeight = '100vh';
+              }, 300);
+            }, 500);
+          }
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/sw.js')
+            .then(() => console.log('monEZ: Service Worker registered'))
+            .catch(() => console.log('monEZ: Service Worker registration failed'));
+        }
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = '@keyframes ripple { to { transform: scale(2); opacity: 0; } }';
+        document.head.appendChild(style);
+        
+        console.log('💎 monEZ loaded successfully!');
     </script>
 </body>
 </html>
