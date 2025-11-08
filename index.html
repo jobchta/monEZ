@@ -6,47 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="styles/variables.css">
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/components.css">
     <style>
-      .card {
-        background: var(--surface);
-        box-shadow: var(--shadow-md);
-        border-radius: var(--radius-xl);
-        padding: 2rem;
-        margin: 2rem 0;
-        max-width: 350px;
-        text-align: center;
-        font-size: 1.2rem;
-        color: var(--primary-text);
-      }
-      .app {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
-      header { margin-top: 1.5rem; margin-bottom:1.5rem; }
-      .slogan { font-size:1.4rem;margin-bottom:2rem;color:var(--secondary-text); }
-      .loading { animation: pulse 1s linear infinite; font-size: 1.15rem; margin: 2rem 0; }
+      /* Utility Classes */
+      .hidden { display: none !important; }
+      /* Responsive */
+      @media (max-width: 480px) { .app { max-width: 100%; } }
+      body { font-family: 'SF Pro Display', sans-serif; letter-spacing:-0.01em; background: #FAFAFA; }
+      .app { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height:100vh; max-width: 400px; margin:0 auto; }
+      .header { letter-spacing: 0.05em; font-size:2.5rem; font-weight:700; margin:2rem 0 0.25rem; color: #232325; }
+      .slogan { font-size: 1.15rem; color:#828288; margin-bottom:3rem; }
+      .loading { font-size: 1.15rem; color: #846941; animation: pulse 1s linear infinite; margin-bottom:2rem; }
       @keyframes pulse { 0%,100%{ opacity: 1;} 50%{ opacity: 0.45;} }
-      .cards-grid { display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; }
-      @media (max-width:520px){ .cards-grid{ flex-direction:column;align-items:center;}}
-      /* replicate additional sections from sample as needed */
     </style>
   </head>
   <body>
     <div class="app">
-      <header>
-        <h1>monEZ</h1>
-        <div class="slogan">Split expenses, not friendships</div>
-      </header>
-      <section class="cards-grid">
-        <div class="card">💰 Track group balances easily</div>
-        <div class="card">👨‍👩‍👧 Add friends, split bills fast</div>
-        <div class="card">📊 Get instant insights on spending</div>
-        <div class="card">⚡ Settle up with one tap</div>
-        <div class="card">🔒 Safe & private expense tracking</div>
-      </section>
+      <div class="header">mon <span style="color:#846941;font-weight:700;">EZ</span></div>
+      <div class="slogan">Split expenses, not friendships</div>
       <div class="loading">Loading your financial companion...</div>
     </div>
   </body>
