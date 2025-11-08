@@ -1,13 +1,12 @@
 // index-supa.js: Main entry point for monEZ with Supabase backend
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+// Using global supabase from CDN loaded in index.html
 
 // Supabase configuration
 const SUPABASE_URL = 'https://royqgwcrwzqeehrebdrp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveXFnd2Nyd3pxZWVocmViZHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1MDY4MDcsImV4cCI6MjA3ODA4MjgwN30.MU3klD6uC91mXpY2AKXIMzxWIUswEo3F2vXjB4SRcDc';
 
 // Initialize Supabase client
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Global state
 let currentUser = null;
 let expenses = [];
