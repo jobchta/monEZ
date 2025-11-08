@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#846941">
+    <meta name="description" content="monEZ - Authentication">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>💰</text></svg>">
+    <title>monEZ - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+            background: linear-gradient(135deg, #846941 0%, #3B6270 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #232325;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            overflow: hidden;
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, #846941 0%, #3B6270 100%);
+            color: white;
+            padding: 40px 24px;
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .auth-body {
+            padding: 32px 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #232325;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ECECEC;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.25s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #846941;
+            box-shadow: 0 0 0 3px rgba(132, 105, 65, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #828288;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #846941;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            margin-top: 8px;
+        }
+
+        .btn-primary:hover {
+            background: #73553A;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(132, 105, 65, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-divider {
+            text-align: center;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .form-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ECECEC;
+        }
+
+        .form-divider-text {
+            background: white;
+            padding: 0 12px;
+            position: relative;
+            font-size: 13px;
+            color: #828288;
+        }
+
+        .toggle-text {
+            text-align: center;
+            font-size: 14px;
+            color: #828288;
+            margin-top: 20px;
+        }
+
+        .toggle-link {
+            color: #846941;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 2px solid #846941;
+        }
+
+        .toggle-link:hover {
+            opacity: 0.8;
+        }
+
+        .error-message {
+            background: #FEE2E2;
+            color: #DC2626;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #DBEAFE;
+            color: #0284C7;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #login-form { display: block; }
+        #signup-form { display: none; }
+
+        .form-group.name-phone {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-group.name-phone .form-group {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="auth-logo">💰</div>
+            <div class="auth-title">mon<span style="color: #F59E0B;">EZ</span></div>
+            <div class="auth-subtitle">Split expenses, not friendships</div>
+        </div>
+
+        <div class="auth-body">
+            <!-- LOGIN FORM -->
+            <form id="login-form">
+                <div id="login-error" class="error-message"></div>
+                <div id="login-success" class="success-message"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="login-email" class="form-input" placeholder="raj@gmail.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn-primary" id="login-btn">Sign In</button>
+
+                <div class="toggle-text">
+                    Don't have an account? <span class="toggle-link" onclick="toggleForms()">Sign Up</span>
+                </div>
+            </form>
+
+            <!-- SIGNUP FORM -->
+            <form id="signup-form">
+                <div id="signup-error" class="error-message"></div>
+                <div id="signup-success" class="success-message"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="signup-email" class="form-input" placeholder="raj@gmail.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="signup-name" class="form-input" placeholder="Raj Kumar" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Phone (Optional)</label>
+                    <input type="tel" id="signup-phone" class="form-input" placeholder="+91-9876543210">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="signup-password" class="form-input" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" id="signup-confirm-password" class="form-input" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn-primary" id="signup-btn">Create Account</button>
+
+                <div class="toggle-text">
+                    Already have an account? <span class="toggle-link" onclick="toggleForms()">Sign In</span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { login, signup } from './js/auth-module.js';
+
+        // Toggle between login and signup forms
+        window.toggleForms = function() {
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+
+            if (loginForm.style.display === 'none') {
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'block';
+            }
+        };
+
+        // Show error message
+        function showError(formType, message) {
+            const errorEl = document.getElementById(`${formType}-error`);
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+            setTimeout(() => {
+                errorEl.classList.remove('show');
+            }, 4000);
+        }
+
+        // Show success message
+        function showSuccess(formType, message) {
+            const successEl = document.getElementById(`${formType}-success`);
+            successEl.textContent = message;
+            successEl.classList.add('show');
+            setTimeout(() => {
+                successEl.classList.remove('show');
+            }, 4000);
+        }
+
+        // LOGIN FORM SUBMIT
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('login-btn');
+
+            if (!email || !password) {
+                showError('login', 'Please enter email and password');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Signing in...';
+
+            try {
+                const result = await login(email, password);
+
+                if (result.success) {
+                    showSuccess('login', '✅ Login successful! Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 1000);
+                } else {
+                    showError('login', result.error);
+                    btn.disabled = false;
+                    btn.innerHTML = 'Sign In';
+                }
+            } catch (error) {
+                showError('login', 'Login failed. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = 'Sign In';
+            }
+        });
+
+        // SIGNUP FORM SUBMIT
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('signup-email').value.trim();
+            const name = document.getElementById('signup-name').value.trim();
+            const phone = document.getElementById('signup-phone').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+            const btn = document.getElementById('signup-btn');
+
+            if (!email || !name || !password) {
+                showError('signup', 'Email, name, and password are required');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('signup', 'Password must be at least 6 characters');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('signup', 'Passwords do not match');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Creating account...';
+
+            try {
+                const result = await signup(email, password, name, phone);
+
+                if (result.success) {
+                    showSuccess('signup', '✅ Account created! Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 1000);
+                } else {
+                    showError('signup', result.error);
+                    btn.disabled = false;
+                    btn.innerHTML = 'Create Account';
+                }
+            } catch (error) {
+                showError('signup', 'Signup failed. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = 'Create Account';
+            }
+        });
+    </script>
+</body>
+</html>
