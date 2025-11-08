@@ -7,91 +7,47 @@
     <link rel="stylesheet" href="styles/variables.css">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
+    <style>
+      .card {
+        background: var(--surface);
+        box-shadow: var(--shadow-md);
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        margin: 2rem 0;
+        max-width: 350px;
+        text-align: center;
+        font-size: 1.2rem;
+        color: var(--primary-text);
+      }
+      .app {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      header { margin-top: 1.5rem; margin-bottom:1.5rem; }
+      .slogan { font-size:1.4rem;margin-bottom:2rem;color:var(--secondary-text); }
+      .loading { animation: pulse 1s linear infinite; font-size: 1.15rem; margin: 2rem 0; }
+      @keyframes pulse { 0%,100%{ opacity: 1;} 50%{ opacity: 0.45;} }
+      .cards-grid { display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; }
+      @media (max-width:520px){ .cards-grid{ flex-direction:column;align-items:center;}}
+      /* replicate additional sections from sample as needed */
+    </style>
   </head>
   <body>
     <div class="app">
-      <header class="app-header">
-        <div class="logo">monEZ</div>
-        <div class="balance-summary">
-          <div class="balance-label">Your Balance</div>
-          <div class="balance-amount">₹1,160</div>
-        </div>
+      <header>
+        <h1>monEZ</h1>
+        <div class="slogan">Split expenses, not friendships</div>
       </header>
-      <section class="quick-stats">
-        <div class="stat-card positive">
-          <span class="stat-icon">💚</span>
-          <div class="stat-content">
-            <div class="stat-label">You're Owed</div>
-            <div class="stat-value">₹1,320</div>
-          </div>
-        </div>
-        <div class="stat-card negative">
-          <span class="stat-icon">💸</span>
-          <div class="stat-content">
-            <div class="stat-label">You Owe</div>
-            <div class="stat-value">₹865</div>
-          </div>
-        </div>
+      <section class="cards-grid">
+        <div class="card">💰 Track group balances easily</div>
+        <div class="card">👨‍👩‍👧 Add friends, split bills fast</div>
+        <div class="card">📊 Get instant insights on spending</div>
+        <div class="card">⚡ Settle up with one tap</div>
+        <div class="card">🔒 Safe & private expense tracking</div>
       </section>
-      <section class="quick-actions">
-        <div class="action-card primary"><span class="action-icon">➕</span><span class="action-label">Add Expense</span></div>
-        <div class="action-card"><span class="action-icon">🧮</span><span class="action-label">Split Bill</span></div>
-        <div class="action-card"><span class="action-icon">💳</span><span class="action-label">Settle Up</span></div>
-        <div class="action-card premium"><span class="action-icon">✨</span><span class="action-label">AI Insights PRO</span></div>
-      </section>
-      <section class="activity-section">
-        <div class="section-header">
-          <h3>Recent Activity</h3>
-        </div>
-        <div class="activity-list">
-          <div class="activity-item">
-            <span class="activity-icon">🍜</span>
-            <div class="activity-content">
-              <div class="activity-title">Dinner at Sarovar</div>
-              <div class="activity-meta">2 days ago</div>
-            </div>
-            <div class="activity-amount">-₹420</div>
-          </div>
-          <div class="activity-item">
-            <span class="activity-icon">🚌</span>
-            <div class="activity-content">
-              <div class="activity-title">Bus Tickets</div>
-              <div class="activity-meta">4 days ago</div>
-            </div>
-            <div class="activity-amount">-₹150</div>
-          </div>
-        </div>
-      </section>
-      <section class="groups-section">
-        <div class="section-header">
-          <h3>Your Groups</h3>
-        </div>
-        <div class="groups-preview">
-          <div class="group-card">
-            <div class="group-header">
-              <span class="group-icon">🎓</span>
-              <span class="group-name">College Friends</span>
-            </div>
-            <div class="group-members">4 members</div>
-            <div class="group-balance">₹420</div>
-          </div>
-          <div class="group-card">
-            <div class="group-header">
-              <span class="group-icon">✈️</span>
-              <span class="group-name">Family Trip</span>
-            </div>
-            <div class="group-members">5 members</div>
-            <div class="group-balance">+₹150</div>
-          </div>
-        </div>
-      </section>
-      <nav class="bottom-nav">
-        <button class="nav-item active"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
-        <button class="nav-item"><span class="nav-icon">📝</span><span class="nav-label">Expenses</span></button>
-        <button class="nav-item"><span class="nav-icon">⚖️</span><span class="nav-label">Balances</span></button>
-        <button class="nav-item"><span class="nav-icon">👥</span><span class="nav-label">Groups</span><span class="group-count">2</span></button>
-        <button class="nav-item"><span class="nav-icon">✨</span><span class="nav-label">Premium</span></button>
-      </nav>
+      <div class="loading">Loading your financial companion...</div>
     </div>
   </body>
 </html>
