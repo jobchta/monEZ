@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>monEZ - Split expenses, not friendships</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="styles/variables.css">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
@@ -32,27 +34,11 @@
       </section>
       <section class="recent-activity">
         <h3>Recent Activity</h3>
-        <ul>
-          <li>
-            🍽️ Gourmet Dinner at Olive Garden<br>
-            Today, 8:30 PM • Connaught Place, Delhi ⏳ ₹2,850
-          </li>
-          <li>
-            🚗 Premium Uber Ride<br>
-            Today, 6:15 PM • Airport → Hotel ✅ ₹680
-          </li>
-          <li>
-            🎬 IMAX Movie Experience<br>
-            Yesterday, 9:30 PM • PVR Director's Cut ✅ ₹1,200
-          </li>
-        </ul>
+        <ul id="recent-expenses"><!-- Populated via JS --></ul>
       </section>
       <section class="groups">
         <h3>Your Groups (2/3 groups)</h3>
-        <ul>
-          <li>🎓 College Friends<br>4 members ₹420</li>
-          <li>✈️ Family Trip<br>5 members +₹150</li>
-        </ul>
+        <ul><li>🎓 College Friends<br>4 members ₹420</li><li>✈️ Family Trip<br>5 members +₹150</li></ul>
       </section>
       <nav>
         <button>🏠 Home</button>
@@ -61,6 +47,20 @@
         <button>👥 Groups 2</button>
         <button>✨ Premium PRO</button>
       </nav>
+      <section class="dashboard-stats">
+        <div id="total-spent">₹0</div>
+        <div id="total-expenses">0</div>
+        <div id="settled-count">0</div>
+      </section>
+      <div id="main-app"></div>
     </div>
+    <!-- Attach all script modules for full feature set -->
+    <script type="module" src="js/state.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/friends.js"></script>
+    <script type="module" src="js/renderUtils.js"></script>
+    <script type="module" src="js/render.js"></script>
+    <script type="module" src="js/firebase.js"></script>
+    <script type="module" src="js/app.js"></script>
   </body>
 </html>
