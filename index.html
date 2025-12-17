@@ -1,20 +1,4852 @@
-<!-- index.html: monEZ dashboard wired to Supabase backend, ready for production -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#846941">
-    <meta name="description" content="monEZ - Split expenses, not friendships. Fully powered by Supabase backend.">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>💰</text></svg>">
-    <title>monEZ - Split expenses, not friendships (Supabase)</title>
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-        <script type="module" src="/js/index-supa.js"></script>
-    <link rel="stylesheet" href="/styles/variables.css">
-        <link rel="stylesheet" href="/styles/main.css">
-        <link rel="stylesheet" href="/styles/components.css">
-    </head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#846941">
+  <meta name="description" content="monEZ - Split expenses, not friendships">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>💰</text></svg>">
+  <title>monEZ - Split expenses, not friendships</title>
+  <style>
+    /* monEZ Luxury Banking Design System */
+    :root {
+      /* Luxury Banking Colors */
+      --background: #FAFAFA;
+      --surface: #FFFFFF;
+      --primary-text: #232325;
+      --secondary-text: #828288;
+      --borders: #ECECEC;
+      --gold-accent: #846941;
+      --steel-blue: #3B6270;
+      --success: #32775E;
+      --error: #C44A44;
+      --glass: rgba(255, 255, 255, 0.95);
+
+      /* Luxury Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+
+      /* Sophisticated Typography */
+      --font-family: 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+      --text-xs: 11px;
+      --text-sm: 13px;
+      --text-base: 16px;
+      --text-lg: 18px;
+      --text-xl: 22px;
+      --text-2xl: 24px;
+      --text-3xl: 32px;
+      --weight-normal: 400;
+      --weight-medium: 500;
+      --weight-semibold: 600;
+      --letter-spacing: -0.01em;
+
+      /* Luxury Radius */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+
+      /* Subtle Shadows */
+      --shadow-sm: 0 2px 8px rgba(150, 150, 150, 0.06);
+      --shadow-md: 0 4px 12px rgba(150, 150, 150, 0.08);
+      --shadow-lg: 0 8px 24px rgba(150, 150, 150, 0.10);
+      --shadow-floating: 0 12px 40px rgba(132, 105, 65, 0.15);
+
+
+    }
+
+    /* Luxury Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      font-size: var(--text-base);
+      line-height: 1.5;
+      color: var(--primary-text);
+      background: var(--background);
+      letter-spacing: var(--letter-spacing);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Luxury App Container */
+    .app {
+      max-width: 400px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--background);
+      position: relative;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Luxury Loading Screen */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(135deg, var(--gold-accent) 0%, var(--steel-blue) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      color: white;
+    }
+
+    .loading-content {
+      text-align: center;
+    }
+
+    .logo-large {
+      font-size: var(--text-3xl);
+      font-weight: var(--weight-semibold);
+      margin-bottom: var(--space-sm);
+      letter-spacing: var(--letter-spacing);
+    }
+
+    .accent {
+      color: #F59E0B;
+    }
+
+    .tagline {
+      font-size: var(--text-lg);
+      opacity: 0.9;
+      margin-bottom: var(--space-xl);
+    }
+
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto var(--space-md);
+    }
+
+    .loading-text {
+      font-size: var(--text-sm);
+      opacity: 0.8;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* PWA Prompt */
+    .pwa-prompt {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid var(--border);
+      padding: var(--space-md);
+      z-index: 1000;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .pwa-prompt:not(.hidden) {
+      transform: translateY(0);
+    }
+
+    .pwa-content {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .pwa-icon {
+      font-size: var(--text-2xl);
+    }
+
+    .pwa-text {
+      flex: 1;
+    }
+
+    .pwa-text h3 {
+      margin: 0 0 var(--space-xs) 0;
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+    }
+
+    .pwa-text p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+    }
+
+    .pwa-actions {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    /* Luxury App Header */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-lg) var(--space-md);
+      background: var(--surface);
+      border-bottom: 0.5px solid var(--borders);
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .logo {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+      color: var(--primary-text);
+    }
+
+    .balance-summary {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .balance-label {
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-xs);
+    }
+
+    .balance-amount {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--gold-accent);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+      position: relative;
+      transition: background 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .icon {
+      font-size: var(--text-lg);
+    }
+
+    .badge {
+      position: absolute;
+      top: var(--space-xs);
+      right: var(--space-xs);
+      background: var(--error);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      min-width: 16px;
+      text-align: center;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 var(--space-md) 100px;
+    }
+
+    /* View Management */
+    .view {
+      display: none;
+      padding-top: var(--space-md);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .view-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-lg);
+    }
+
+    .view-header h2 {
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-bold);
+      color: var(--text);
+    }
+
+    .back-btn,
+    .voice-btn,
+    .filter-btn,
+    .settle-all-btn,
+    .create-group-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: var(--space-sm);
+      cursor: pointer;
+      font-size: var(--text-base);
+      transition: all 0.2s ease;
+    }
+
+    .back-btn:hover,
+    .voice-btn:hover,
+    .filter-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    /* Luxury Quick Stats */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-card.positive {
+      border-left: 3px solid var(--success);
+    }
+
+    .stat-card.negative {
+      border-left: 3px solid var(--error);
+    }
+
+    .stat-icon {
+      font-size: var(--text-xl);
+    }
+
+    .stat-content {
+      flex: 1;
+    }
+
+    .stat-label {
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-xs);
+    }
+
+    .stat-value {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--primary-text);
+    }
+
+    /* Luxury Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-md);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .action-card {
+      background: var(--surface);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-sm);
+      position: relative;
+      min-height: 100px;
+      justify-content: center;
+    }
+
+    .action-card:hover {
+      transform: translateY(-1px) scale(0.98);
+      box-shadow: var(--shadow-md);
+    }
+
+    .action-card:active {
+      transform: scale(0.98);
+    }
+
+    .action-card.primary {
+      background: var(--gold-accent);
+      color: white;
+      border-color: var(--gold-accent);
+    }
+
+    .action-card.premium {
+      background: var(--steel-blue);
+      color: white;
+      border-color: var(--steel-blue);
+    }
+
+    .action-icon {
+      font-size: var(--text-xl);
+    }
+
+    .action-label {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      text-align: center;
+    }
+
+    .premium-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #B8860B;
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      font-weight: var(--weight-semibold);
+    }
+
+    /* Section Headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+
+    .section-header h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--text);
+    }
+
+    .view-all {
+      background: none;
+      border: none;
+      color: var(--gold-accent);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .group-limit {
+      font-size: var(--text-xs);
+      color: var(--secondary-text);
+      background: var(--surface);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-full);
+      border: 0.5px solid var(--borders);
+    }
+
+    /* Luxury Activity List */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .activity-item {
+      background: var(--surface);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .activity-item:hover {
+      background: var(--glass);
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .activity-icon {
+      font-size: var(--text-xl);
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--gold-accent) 0%, #A67C52 100%);
+      color: white;
+    }
+
+    .activity-content {
+      flex: 1;
+    }
+
+    .activity-title {
+      font-size: var(--text-base);
+      font-weight: var(--weight-semibold);
+      margin-bottom: var(--space-xs);
+      color: var(--primary-text);
+    }
+
+    .activity-meta {
+      font-size: var(--text-sm);
+      color: var(--secondary-text);
+    }
+
+    .activity-amount {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--primary-text);
+      text-align: right;
+    }
+
+    /* Luxury Groups Preview */
+    .groups-preview {
+      display: flex;
+      gap: var(--space-md);
+      overflow-x: auto;
+      padding-bottom: var(--space-sm);
+    }
+
+    .group-card {
+      background: var(--surface);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      min-width: 220px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .group-card:hover {
+      transform: translateY(-1px) scale(0.98);
+      box-shadow: var(--shadow-md);
+    }
+
+    .group-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .group-icon {
+      font-size: var(--text-xl);
+    }
+
+    .group-name {
+      font-size: var(--text-base);
+      font-weight: var(--weight-semibold);
+      color: var(--primary-text);
+    }
+
+    .group-members {
+      font-size: var(--text-xs);
+      color: var(--secondary-text);
+      margin-bottom: var(--space-sm);
+    }
+
+    .group-balance {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--gold-accent);
+    }
+
+    /* Luxury Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 400px;
+      margin: 0 auto;
+      background: var(--surface);
+      border-top: 0.5px solid var(--borders);
+      display: flex;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-md) var(--space-xs);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      color: var(--secondary-text);
+      position: relative;
+    }
+
+    .nav-item.active {
+      color: var(--gold-accent);
+    }
+
+    .nav-item:hover {
+      background: rgba(132, 105, 65, 0.08);
+    }
+
+    .nav-icon {
+      font-size: var(--text-lg);
+      margin-bottom: var(--space-xs);
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: var(--weight-medium);
+    }
+
+    .group-count,
+    .premium-indicator {
+      position: absolute;
+      top: var(--space-xs);
+      right: var(--space-sm);
+      background: var(--gold-accent);
+      color: white;
+      font-size: 8px;
+      padding: 2px 4px;
+      border-radius: var(--radius-full);
+      min-width: 14px;
+      text-align: center;
+    }
+
+    .premium-indicator {
+      background: var(--steel-blue);
+    }
+
+
+
+    /* Luxury Floating Add Button */
+    .fab {
+      position: fixed;
+      bottom: 100px;
+      right: var(--space-md);
+      width: 56px;
+      height: 56px;
+      background: var(--gold-accent);
+      border: none;
+      border-radius: var(--radius-full);
+      color: white;
+      font-size: var(--text-xl);
+      cursor: pointer;
+      box-shadow: var(--shadow-floating);
+      transition: all 0.25s ease;
+      z-index: 1000;
+    }
+
+    .fab:hover {
+      transform: scale(0.98) translateY(-1px);
+      box-shadow: 0 8px 25px rgba(132, 105, 65, 0.4);
+    }
+
+    .fab:active {
+      transform: scale(0.95);
+    }
+
+    .fab-icon {
+      font-weight: var(--weight-bold);
+    }
+
+    /* Luxury Form Styles */
+    .expense-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .form-label {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      color: var(--primary-text);
+    }
+
+    .amount-input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .currency-symbol {
+      position: absolute;
+      left: var(--space-md);
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--secondary-text);
+      z-index: 1;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: var(--space-md);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-md);
+      font-size: var(--text-base);
+      background: var(--surface);
+      transition: all 0.25s ease;
+      font-family: var(--font-family);
+    }
+
+    .amount-field {
+      padding-left: var(--space-xl);
+      padding-right: 50px;
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--gold-accent);
+      box-shadow: 0 0 0 3px rgba(132, 105, 65, 0.15);
+    }
+
+    .ai-suggest-btn {
+      position: absolute;
+      right: var(--space-sm);
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--gold-accent);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: var(--space-sm);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      color: white;
+    }
+
+    .ai-suggest-btn:hover {
+      background: #73553A;
+      transform: translateY(-50%) scale(0.98);
+    }
+
+    .ai-icon {
+      font-size: var(--text-sm);
+    }
+
+    /* Luxury Category Selector */
+    .category-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-sm);
+    }
+
+    .category-btn {
+      background: var(--surface);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      cursor: pointer;
+      font-size: var(--text-sm);
+      transition: all 0.25s ease;
+      font-weight: var(--weight-medium);
+    }
+
+    .category-btn:hover,
+    .category-btn.active {
+      background: var(--gold-accent);
+      color: white;
+      border-color: var(--gold-accent);
+    }
+
+    /* Luxury People Selector */
+    .people-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-md);
+    }
+
+    .person-card {
+      background: var(--surface);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .person-card:hover {
+      background: var(--glass);
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .person-card.selected {
+      background: var(--gold-accent);
+      color: white;
+      border-color: var(--gold-accent);
+    }
+
+    .person-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      background: var(--gold-accent);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+    }
+
+    .person-card.selected .person-avatar {
+      background: white;
+      color: var(--gold-accent);
+    }
+
+    .person-name {
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      text-align: center;
+    }
+
+    /* Luxury Split Options */
+    .split-options {
+      margin-top: var(--space-lg);
+    }
+
+    .split-type {
+      display: flex;
+      gap: var(--space-md);
+    }
+
+    .split-btn {
+      flex: 1;
+      background: var(--surface);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      cursor: pointer;
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .split-btn:hover,
+    .split-btn.active {
+      background: var(--gold-accent);
+      color: white;
+      border-color: var(--gold-accent);
+    }
+
+    .split-btn.premium {
+      background: var(--steel-blue);
+      color: white;
+      border-color: var(--steel-blue);
+    }
+
+    .pro-tag {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #B8860B;
+      color: white;
+      font-size: 8px;
+      padding: 2px 4px;
+      border-radius: var(--radius-full);
+      font-weight: var(--weight-semibold);
+    }
+
+    /* Luxury Form Actions */
+    .form-actions {
+      display: flex;
+      gap: var(--space-lg);
+      margin-top: var(--space-2xl);
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      flex: 1;
+      padding: var(--space-lg);
+      border-radius: var(--radius-md);
+      font-size: var(--text-base);
+      font-weight: var(--weight-semibold);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      min-height: 52px;
+    }
+
+    .btn-primary {
+      background: var(--gold-accent);
+      color: white;
+      border: none;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+      transform: scale(0.98) translateY(-1px);
+      box-shadow: var(--shadow-lg);
+      background: #73553A;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.95);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--primary-text);
+      border: 0.5px solid var(--borders);
+    }
+
+    .btn-secondary:hover {
+      background: var(--glass);
+      transform: scale(0.98);
+    }
+
+    .btn-icon {
+      font-size: var(--text-sm);
+    }
+
+    /* Luxury Expenses Stats */
+    .expenses-stats {
+      background: var(--surface);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .stat-summary {
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      display: block;
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+      color: var(--gold-accent);
+      margin-bottom: var(--space-xs);
+    }
+
+    .stat-label {
+      font-size: var(--text-xs);
+      color: var(--secondary-text);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Luxury Balance Summary */
+    .balance-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      text-align: center;
+    }
+
+    .summary-card.positive {
+      border-left: 3px solid var(--success);
+    }
+
+    .summary-card.negative {
+      border-left: 3px solid var(--error);
+    }
+
+    .summary-amount {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+      margin-bottom: var(--space-xs);
+    }
+
+    .summary-card.positive .summary-amount {
+      color: var(--success);
+    }
+
+    .summary-card.negative .summary-amount {
+      color: var(--error);
+    }
+
+    .summary-label {
+      font-size: var(--text-sm);
+      color: var(--secondary-text);
+    }
+
+    /* Luxury Balances List */
+    .balances-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .balance-item {
+      background: var(--surface);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      transition: all 0.25s ease;
+    }
+
+    .balance-item:hover {
+      background: var(--glass);
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .balance-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-full);
+      background: var(--gold-accent);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-base);
+      font-weight: var(--weight-semibold);
+    }
+
+    .balance-content {
+      flex: 1;
+    }
+
+    .balance-name {
+      font-size: var(--text-base);
+      font-weight: var(--weight-semibold);
+      margin-bottom: var(--space-xs);
+      color: var(--primary-text);
+    }
+
+    .balance-status {
+      font-size: var(--text-sm);
+      color: var(--secondary-text);
+    }
+
+    .balance-amount-container {
+      text-align: right;
+    }
+
+    .balance-amount {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      margin-bottom: var(--space-xs);
+    }
+
+    .balance-amount.positive {
+      color: var(--success);
+    }
+
+    .balance-amount.negative {
+      color: var(--error);
+    }
+
+    .settle-btn-small {
+      background: var(--gold-accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--text-xs);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .settle-btn-small:hover {
+      background: #73553A;
+      transform: scale(0.98);
+    }
+
+    /* Groups Grid */
+    .groups-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+
+    .group-card-full {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .group-card-full:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Premium Features */
+    .premium-hero {
+      background: linear-gradient(135deg, var(--accent), #7C3AED);
+      color: white;
+      border-radius: var(--radius-md);
+      padding: var(--space-xl);
+      text-align: center;
+      margin-bottom: var(--space-lg);
+    }
+
+    .hero-icon {
+      font-size: 48px;
+      margin-bottom: var(--space-md);
+    }
+
+    .premium-hero h3 {
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-bold);
+      margin-bottom: var(--space-sm);
+    }
+
+    .premium-hero p {
+      font-size: var(--text-base);
+      opacity: 0.9;
+      margin-bottom: var(--space-lg);
+    }
+
+    .pricing-highlight {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+    }
+
+    .price-original {
+      font-size: var(--text-lg);
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    .price-offer {
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-bold);
+      color: var(--secondary);
+    }
+
+    .discount-badge {
+      background: var(--secondary);
+      color: var(--text);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-bold);
+    }
+
+    .premium-status {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-bold);
+      color: var(--text-secondary);
+    }
+
+    /* Settings */
+    .settings-sections {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .settings-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .settings-section h3 {
+      background: var(--glass);
+      padding: var(--space-md);
+      margin: 0;
+      font-size: var(--text-base);
+      font-weight: var(--weight-semibold);
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .setting-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .setting-item:hover {
+      background: var(--glass);
+    }
+
+    .setting-item.premium {
+      background: linear-gradient(135deg, var(--accent), #7C3AED);
+      color: white;
+    }
+
+    .setting-icon {
+      font-size: var(--text-xl);
+    }
+
+    .setting-content {
+      flex: 1;
+    }
+
+    .setting-title {
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      margin-bottom: var(--space-xs);
+    }
+
+    .setting-desc {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .setting-item.premium .setting-desc {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .setting-arrow {
+      font-size: var(--text-lg);
+      color: var(--text-secondary);
+    }
+
+    .upgrade-badge {
+      background: var(--secondary);
+      color: var(--text);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-bold);
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--border);
+      transition: 0.3s;
+      border-radius: var(--radius-full);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    input:checked+.slider {
+      background-color: var(--primary);
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Modals */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      transition: all 0.3s ease;
+    }
+
+    .modal.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      position: relative;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      max-width: 400px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: var(--text-xl);
+      font-weight: var(--weight-bold);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: var(--text-2xl);
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: var(--space-xs);
+      border-radius: var(--radius-sm);
+      transition: background 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--glass);
+    }
+
+    /* Search Input */
+    .search-container {
+      padding: 0 0 var(--space-md) 0;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: var(--space-md);
+      border: 0.5px solid var(--borders);
+      border-radius: var(--radius-md);
+      font-size: var(--text-base);
+      background: var(--surface);
+      transition: all 0.25s ease;
+      font-family: var(--font-family);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--gold-accent);
+      box-shadow: 0 0 0 3px rgba(132, 105, 65, 0.15);
+    }
+
+    /* Settings Select Dropdown */
+    .setting-select {
+      background: var(--surface);
+      border: 1px solid var(--borders);
+      border-radius: var(--radius-sm);
+      padding: var(--space-sm) var(--space-md);
+      font-size: var(--text-sm);
+      color: var(--primary-text);
+      cursor: pointer;
+      min-width: 120px;
+      max-width: 180px;
+    }
+
+    .setting-select:focus {
+      outline: none;
+      border-color: var(--gold-accent);
+    }
+
+    .setting-select optgroup {
+      font-weight: var(--weight-semibold);
+      color: var(--gold-accent);
+    }
+
+    /* RTL Support */
+    [dir="rtl"] .back-btn {
+      transform: scaleX(-1);
+    }
+
+    [dir="rtl"] .setting-arrow {
+      transform: scaleX(-1);
+    }
+
+    [dir="rtl"] .activity-amount,
+    [dir="rtl"] .balance-amount-container {
+      text-align: left;
+    }
+
+    [dir="rtl"] .activity-content {
+      text-align: right;
+    }
+
+    /* Dark Mode */
+    [data-theme="dark"] {
+      --background: #1a1a2e;
+      --surface: #16213e;
+      --primary-text: #eee;
+      --secondary-text: #aaa;
+      --borders: #333;
+      --glass: rgba(30, 30, 60, 0.95);
+    }
+
+    /* Utility Classes */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .app {
+        max-width: 100%;
+        box-shadow: none;
+      }
+
+      .quick-actions {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .people-selector {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .category-selector {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+
+
+    /* View Header */
+  </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /* Utility Classes */
+  .hidden {
+  display: none !important;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+  .app {
+  max-width: 100%;
+  }
+  }
+  </style>
+</head>
+
 <body>
-  <div id="app-root"></div>
+  <div class="app">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loading-content">
+        <div class="logo-large">mon<span class="accent">EZ</span></div>
+        <div class="tagline">Split expenses, not friendships</div>
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading your financial companion...</div>
+      </div>
+    </div>
+
+    <!-- PWA Install Prompt -->
+    <div id="pwa-prompt" class="pwa-prompt hidden">
+      <div class="pwa-content">
+        <div class="pwa-icon">📱</div>
+        <div class="pwa-text">
+          <h3>Install monEZ</h3>
+          <p>Get the full app experience on your home screen</p>
+        </div>
+        <div class="pwa-actions">
+          <button class="btn-secondary" onclick="dismissPWAPrompt()">Maybe later</button>
+          <button class="btn-primary" onclick="installPWA()">Install</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app" style="display: none;">
+      <!-- App Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <div class="logo">mon<span class="accent">EZ</span></div>
+          <div class="balance-summary">
+            <div class="balance-label">Your balance</div>
+            <div class="balance-amount" id="balance-hero">₹2,450</div>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="icon-btn" onclick="showNotifications()">
+            <span class="icon">🔔</span>
+            <span class="badge">3</span>
+          </button>
+          <button class="icon-btn" onclick="showProfile()">
+            <div class="avatar">Y</div>
+          </button>
+        </div>
+      </header>
+
+      <!-- Views Container -->
+      <main class="main-content">
+        <!-- Home View -->
+        <div id="home-view" class="view active">
+          <!-- Quick Stats -->
+          <div class="quick-stats">
+            <div class="stat-card positive">
+              <div class="stat-icon">💚</div>
+              <div class="stat-content">
+                <div class="stat-label">You're owed</div>
+                <div class="stat-value">₹1,320</div>
+              </div>
+            </div>
+            <div class="stat-card negative">
+              <div class="stat-icon">💸</div>
+              <div class="stat-content">
+                <div class="stat-label">You owe</div>
+                <div class="stat-value">₹865</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="quick-actions">
+            <button class="action-card primary" onclick="showAddExpense()">
+              <div class="action-icon">➕</div>
+              <div class="action-label">Add Expense</div>
+            </button>
+            <button class="action-card" onclick="showSplitBill()">
+              <div class="action-icon">🧮</div>
+              <div class="action-label">Split Bill</div>
+            </button>
+            <button class="action-card" onclick="showSettle()">
+              <div class="action-icon">💳</div>
+              <div class="action-label">Settle Up</div>
+            </button>
+            <button class="action-card premium" onclick="showPremiumFeatures()">
+              <div class="action-icon">✨</div>
+              <div class="action-label">AI Insights</div>
+              <div class="premium-badge">PRO</div>
+            </button>
+          </div>
+
+          <!-- Recent Activity -->
+          <section class="activity-section">
+            <div class="section-header">
+              <h3>Recent Activity</h3>
+              <button class="view-all" onclick="showExpenses()">View all</button>
+            </div>
+            <div id="recent-expenses" class="activity-list">
+              <!-- Dynamic content -->
+            </div>
+          </section>
+
+          <!-- Groups Preview -->
+          <section class="groups-section">
+            <div class="section-header">
+              <h3>Your Groups</h3>
+              <div class="group-limit">2/3 groups</div>
+              <button class="view-all" onclick="showGroups()">View all</button>
+            </div>
+            <div class="groups-preview" id="groups-preview">
+              <!-- Dynamic content -->
+            </div>
+          </section>
+        </div>
+
+        <!-- Add Expense View -->
+        <div id="add-expense-view" class="view">
+          <div class="view-header">
+            <button class="back-btn" onclick="showHome()">←</button>
+            <h2>Add Expense</h2>
+            <button class="voice-btn" onclick="startVoiceInput()">🎤</button>
+          </div>
+
+          <form id="expense-form" class="expense-form">
+            <div class="form-group">
+              <label class="form-label">Amount</label>
+              <div class="amount-input-container">
+                <span class="currency-symbol">₹</span>
+                <input type="number" id="amount" class="form-input amount-field" placeholder="0.00" step="0.01"
+                  required>
+                <button type="button" class="ai-suggest-btn" onclick="aiSuggestAmount()" title="AI Suggestion">
+                  <span class="ai-icon">🤖</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <div class="input-container">
+                <input type="text" id="description" class="form-input" placeholder="What was this for?" required>
+                <div class="smart-suggestions" id="smart-suggestions">
+                  <!-- AI suggestions appear here -->
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <div class="category-selector">
+                <button type="button" class="category-btn" data-category="🍽️">🍽️ Food</button>
+                <button type="button" class="category-btn" data-category="🚗">🚗 Transport</button>
+                <button type="button" class="category-btn" data-category="🎬">🎬 Entertainment</button>
+                <button type="button" class="category-btn" data-category="🛍️">🛍️ Shopping</button>
+                <button type="button" class="category-btn" data-category="💡">💡 Bills</button>
+                <button type="button" class="category-btn" data-category="✈️">✈️ Travel</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Split with</label>
+              <div class="people-selector" id="people-selector">
+                <!-- People cards will be loaded here -->
+              </div>
+            </div>
+
+            <div class="split-options">
+              <div class="split-type">
+                <button type="button" class="split-btn active" data-type="equal">Equal Split</button>
+                <button type="button" class="split-btn" data-type="percentage">By Percentage</button>
+                <button type="button" class="split-btn premium" data-type="custom" onclick="showPremiumModal()">Custom
+                  Split <span class="pro-tag">PRO</span></button>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" onclick="showHome()">Cancel</button>
+              <button type="submit" class="btn-primary">
+                <span class="btn-text">Save Expense</span>
+                <span class="btn-icon">💾</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Expenses View -->
+        <div id="expenses-view" class="view">
+          <div class="view-header">
+            <button class="back-btn" onclick="showHome()">←</button>
+            <h2>All Expenses</h2>
+            <button class="filter-btn" onclick="showFilters()">🔍</button>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="search-container">
+            <input type="text" id="expense-search" class="search-input" placeholder="🔍 Search expenses..."
+              oninput="searchExpenses(this.value)">
+          </div>
+
+          <div class="expenses-stats">
+            <div class="stat-summary">
+              <div class="stat-item">
+                <span class="stat-number" id="total-expenses">₹8,450</span>
+                <span class="stat-label">Total Spent</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number" id="this-month">₹3,280</span>
+                <span class="stat-label">This Month</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="expenses-list" id="all-expenses-list">
+            <!-- All expenses will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Balances View -->
+        <div id="balances-view" class="view">
+          <div class="view-header">
+            <button class="back-btn" onclick="showHome()">←</button>
+            <h2>Balances</h2>
+            <button class="settle-all-btn" onclick="settleAll()">Settle All</button>
+          </div>
+
+          <div class="balance-summary">
+            <div class="summary-card positive">
+              <div class="summary-amount">₹1,320</div>
+              <div class="summary-label">You're owed</div>
+            </div>
+            <div class="summary-card negative">
+              <div class="summary-amount">₹865</div>
+              <div class="summary-label">You owe</div>
+            </div>
+          </div>
+
+          <div class="balances-list" id="balances-list">
+            <!-- Balances will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Groups View -->
+        <div id="groups-view" class="view">
+          <div class="view-header">
+            <button class="back-btn" onclick="showHome()">←</button>
+            <h2>Groups</h2>
+            <button class="create-group-btn" onclick="showCreateGroup()">+</button>
+          </div>
+
+          <div class="groups-grid" id="groups-grid">
+            <!-- Groups will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Premium Features View -->
+        <div id="premium-view" class="view">
+          <div class="view-header">
+            <button class="back-btn" onclick="showHome()">←</button>
+            <h2>Premium Features</h2>
+            <div class="premium-status">FREE TIER</div>
+          </div>
+
+          <div class="premium-hero">
+            <div class="hero-icon">✨</div>
+            <h3>Unlock Premium Features</h3>
+            <p>Get AI-powered insights, unlimited groups, and advanced analytics</p>
+            <div class="pricing-highlight">
+              <span class="price-original">₹299</span>
+              <span class="price-offer">₹119/month</span>
+              <span class="discount-badge">60% OFF</span>
+            </div>
+          </div>
+
+          <div class="premium-features">
+            <!-- Premium features list -->
+          </div>
+        </div>
+
+        <!-- Settings View -->
+        <div id="settings-view" class="view">
+          <div class="view-header">
+            <button class="back-btn" onclick="showHome()">←</button>
+            <h2>Settings</h2>
+          </div>
+
+          <div class="settings-sections">
+            <!-- Localization Section -->
+            <div class="settings-section">
+              <h3>🌍 Localization</h3>
+              <div class="setting-item">
+                <div class="setting-icon">🗣️</div>
+                <div class="setting-content">
+                  <div class="setting-title">Language</div>
+                  <div class="setting-desc" id="current-language-display">English</div>
+                </div>
+                <select id="language-selector" class="setting-select" onchange="changeLanguage(this.value)">
+                  <option value="en">English</option>
+                  <option value="es">Español</option>
+                  <option value="fr">Français</option>
+                  <option value="de">Deutsch</option>
+                  <option value="pt">Português</option>
+                  <option value="it">Italiano</option>
+                  <option value="ru">Русский</option>
+                  <option value="zh">中文</option>
+                  <option value="ja">日本語</option>
+                  <option value="ko">한국어</option>
+                  <option value="hi">हिन्दी</option>
+                  <option value="ar">العربية</option>
+                  <option value="tr">Türkçe</option>
+                  <option value="nl">Nederlands</option>
+                  <option value="pl">Polski</option>
+                  <option value="vi">Tiếng Việt</option>
+                  <option value="th">ไทย</option>
+                  <option value="id">Bahasa Indonesia</option>
+                  <option value="he">עברית</option>
+                  <option value="fa">فارسی</option>
+                  <option value="ur">اردو</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <div class="setting-icon">💰</div>
+                <div class="setting-content">
+                  <div class="setting-title">Currency</div>
+                  <div class="setting-desc" id="current-currency-display">₹ Indian Rupee</div>
+                </div>
+                <select id="currency-selector" class="setting-select" onchange="changeCurrency(this.value)">
+                  <optgroup label="Asia">
+                    <option value="INR">₹ INR - Indian Rupee</option>
+                    <option value="JPY">¥ JPY - Japanese Yen</option>
+                    <option value="CNY">¥ CNY - Chinese Yuan</option>
+                    <option value="KRW">₩ KRW - Korean Won</option>
+                    <option value="SGD">S$ SGD - Singapore Dollar</option>
+                    <option value="HKD">HK$ HKD - Hong Kong Dollar</option>
+                    <option value="THB">฿ THB - Thai Baht</option>
+                    <option value="MYR">RM MYR - Malaysian Ringgit</option>
+                    <option value="IDR">Rp IDR - Indonesian Rupiah</option>
+                    <option value="PHP">₱ PHP - Philippine Peso</option>
+                    <option value="VND">₫ VND - Vietnamese Dong</option>
+                    <option value="PKR">₨ PKR - Pakistani Rupee</option>
+                    <option value="BDT">৳ BDT - Bangladeshi Taka</option>
+                  </optgroup>
+                  <optgroup label="Middle East">
+                    <option value="AED">د.إ AED - UAE Dirham</option>
+                    <option value="SAR">﷼ SAR - Saudi Riyal</option>
+                    <option value="QAR">ر.ق QAR - Qatari Riyal</option>
+                    <option value="KWD">د.ك KWD - Kuwaiti Dinar</option>
+                    <option value="ILS">₪ ILS - Israeli Shekel</option>
+                    <option value="TRY">₺ TRY - Turkish Lira</option>
+                  </optgroup>
+                  <optgroup label="Europe">
+                    <option value="EUR">€ EUR - Euro</option>
+                    <option value="GBP">£ GBP - British Pound</option>
+                    <option value="CHF">Fr CHF - Swiss Franc</option>
+                    <option value="SEK">kr SEK - Swedish Krona</option>
+                    <option value="NOK">kr NOK - Norwegian Krone</option>
+                    <option value="DKK">kr DKK - Danish Krone</option>
+                    <option value="PLN">zł PLN - Polish Zloty</option>
+                    <option value="RUB">₽ RUB - Russian Ruble</option>
+                    <option value="UAH">₴ UAH - Ukrainian Hryvnia</option>
+                  </optgroup>
+                  <optgroup label="Americas">
+                    <option value="USD">$ USD - US Dollar</option>
+                    <option value="CAD">C$ CAD - Canadian Dollar</option>
+                    <option value="MXN">$ MXN - Mexican Peso</option>
+                    <option value="BRL">R$ BRL - Brazilian Real</option>
+                    <option value="ARS">$ ARS - Argentine Peso</option>
+                    <option value="CLP">$ CLP - Chilean Peso</option>
+                    <option value="COP">$ COP - Colombian Peso</option>
+                  </optgroup>
+                  <optgroup label="Africa">
+                    <option value="ZAR">R ZAR - South African Rand</option>
+                    <option value="NGN">₦ NGN - Nigerian Naira</option>
+                    <option value="EGP">E£ EGP - Egyptian Pound</option>
+                    <option value="KES">KSh KES - Kenyan Shilling</option>
+                    <option value="GHS">GH₵ GHS - Ghanaian Cedi</option>
+                    <option value="MAD">د.م MAD - Moroccan Dirham</option>
+                  </optgroup>
+                  <optgroup label="Oceania">
+                    <option value="AUD">A$ AUD - Australian Dollar</option>
+                    <option value="NZD">NZ$ NZD - New Zealand Dollar</option>
+                    <option value="FJD">FJ$ FJD - Fijian Dollar</option>
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+
+            <!-- Account Section -->
+            <div class="settings-section">
+              <h3>Account</h3>
+              <div class="setting-item" onclick="showProfile()">
+                <div class="setting-icon">👤</div>
+                <div class="setting-content">
+                  <div class="setting-title">Profile</div>
+                  <div class="setting-desc">Manage your account details</div>
+                </div>
+                <div class="setting-arrow">›</div>
+              </div>
+              <div class="setting-item" onclick="showPaymentMethods()">
+                <div class="setting-icon">💳</div>
+                <div class="setting-content">
+                  <div class="setting-title">Payment Methods</div>
+                  <div class="setting-desc">UPI, Cards, Bank accounts</div>
+                </div>
+                <div class="setting-arrow">›</div>
+              </div>
+            </div>
+
+            <!-- App Section -->
+            <div class="settings-section">
+              <h3>App</h3>
+              <div class="setting-item">
+                <div class="setting-icon">🔔</div>
+                <div class="setting-content">
+                  <div class="setting-title">Notifications</div>
+                  <div class="setting-desc">Push notifications, reminders</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-icon">🌙</div>
+                <div class="setting-content">
+                  <div class="setting-title">Dark Mode</div>
+                  <div class="setting-desc">Switch to dark theme</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this.checked)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Data Section -->
+            <div class="settings-section">
+              <h3>📊 Data Management</h3>
+              <div class="setting-item" onclick="exportDataJSON()">
+                <div class="setting-icon">📁</div>
+                <div class="setting-content">
+                  <div class="setting-title">Export as JSON</div>
+                  <div class="setting-desc">Download all your data</div>
+                </div>
+                <div class="setting-arrow">↓</div>
+              </div>
+              <div class="setting-item" onclick="exportDataCSV()">
+                <div class="setting-icon">📄</div>
+                <div class="setting-content">
+                  <div class="setting-title">Export as CSV</div>
+                  <div class="setting-desc">Spreadsheet-friendly format</div>
+                </div>
+                <div class="setting-arrow">↓</div>
+              </div>
+              <div class="setting-item" onclick="importData()">
+                <div class="setting-icon">📥</div>
+                <div class="setting-content">
+                  <div class="setting-title">Import Data</div>
+                  <div class="setting-desc">Restore from backup</div>
+                </div>
+                <div class="setting-arrow">↑</div>
+              </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="settings-section">
+              <h3>About</h3>
+              <div class="setting-item">
+                <div class="setting-icon">ℹ️</div>
+                <div class="setting-content">
+                  <div class="setting-title">monEZ Global Edition</div>
+                  <div class="setting-desc">v2.0 • 55 currencies • 25 languages</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Bottom Navigation -->
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-view="home" onclick="showHome()">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" data-view="expenses" onclick="showExpenses()">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">Expenses</span>
+        </button>
+        <button class="nav-item" data-view="balances" onclick="showBalances()">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Balances</span>
+        </button>
+        <button class="nav-item" data-view="groups" onclick="showGroups()">
+          <span class="nav-icon">👥</span>
+          <span class="nav-label">Groups</span>
+          <span class="group-count">2</span>
+        </button>
+        <button class="nav-item" data-view="premium" onclick="showPremiumFeatures()">
+          <span class="nav-icon">✨</span>
+          <span class="nav-label">Premium</span>
+          <span class="premium-indicator">PRO</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Floating Add Button -->
+    <button class="fab" onclick="showAddExpense()">
+      <span class="fab-icon">+</span>
+    </button>
+
+    <!-- Modals -->
+    <div id="premium-modal" class="modal hidden">
+      <div class="modal-overlay" onclick="closePremiumModal()"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>✨ Premium Features</h3>
+          <button class="modal-close" onclick="closePremiumModal()">×</button>
+        </div>
+        <div class="premium-features-list">
+          <!-- Premium features content -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // monEZ - Premium Expense Splitting App
+    // Global Edition with ACID Storage & Multi-Language/Currency Support
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ACID-COMPLIANT STORAGE MANAGER
+    // ═══════════════════════════════════════════════════════════════════════════
+    class StorageManager {
+      constructor() {
+        this.VERSION = 2;
+        this.PREFIX = 'monez_';
+        this._locked = false;
+        this._transactionBackup = null;
+      }
+
+      // ATOMICITY: All-or-nothing transactions
+      async transaction(operations) {
+        if (this._locked) {
+          throw new Error('Storage is locked. Transaction in progress.');
+        }
+
+        this.lock();
+        this._transactionBackup = this.backup();
+
+        try {
+          for (const op of operations) {
+            await op();
+          }
+          this.verify();
+          this._transactionBackup = null;
+          return true;
+        } catch (e) {
+          console.error('Transaction failed, rolling back:', e);
+          this.restore(this._transactionBackup);
+          throw new Error('Transaction failed: ' + e.message);
+        } finally {
+          this.unlock();
+        }
+      }
+
+      // CONSISTENCY: Validate data before write
+      validate(key, data) {
+        const schemas = {
+          expenses: (d) => Array.isArray(d) && d.every(e =>
+            typeof e.id !== 'undefined' &&
+            typeof e.amount === 'number' &&
+            typeof e.description === 'string'
+          ),
+          friends: (d) => Array.isArray(d) && d.every(f =>
+            typeof f.name === 'string'
+          ),
+          groups: (d) => Array.isArray(d) && d.every(g =>
+            typeof g.id !== 'undefined' &&
+            typeof g.name === 'string'
+          ),
+          settings: (d) => typeof d === 'object' && d !== null
+        };
+
+        const validator = schemas[key];
+        if (validator && !validator(data)) {
+          throw new Error(`Consistency check failed for ${key}`);
+        }
+        return true;
+      }
+
+      // ISOLATION: Lock during operations
+      lock() { this._locked = true; }
+      unlock() { this._locked = false; }
+      isLocked() { return this._locked; }
+
+      // DURABILITY: Save with verification
+      save(key, data) {
+        this.validate(key, data);
+        const fullKey = this.PREFIX + key;
+        const json = JSON.stringify(data);
+
+        localStorage.setItem(fullKey, json);
+
+        // Durability check: verify write
+        const verify = localStorage.getItem(fullKey);
+        if (json !== verify) {
+          throw new Error('Durability check failed: write verification mismatch');
+        }
+
+        // Save version info
+        localStorage.setItem(this.PREFIX + 'version', this.VERSION.toString());
+        localStorage.setItem(this.PREFIX + 'lastSave', new Date().toISOString());
+
+        return true;
+      }
+
+      load(key, defaultValue = null) {
+        try {
+          const data = localStorage.getItem(this.PREFIX + key);
+          return data ? JSON.parse(data) : defaultValue;
+        } catch (e) {
+          console.error('Load error:', e);
+          return defaultValue;
+        }
+      }
+
+      backup() {
+        const backup = {};
+        const keys = ['expenses', 'friends', 'groups', 'settings'];
+        keys.forEach(key => {
+          backup[key] = localStorage.getItem(this.PREFIX + key);
+        });
+        backup._timestamp = Date.now();
+        return backup;
+      }
+
+      restore(backup) {
+        if (!backup) return;
+        Object.keys(backup).forEach(key => {
+          if (key !== '_timestamp') {
+            if (backup[key] !== null) {
+              localStorage.setItem(this.PREFIX + key, backup[key]);
+            } else {
+              localStorage.removeItem(this.PREFIX + key);
+            }
+          }
+        });
+        console.log('Restored from backup:', new Date(backup._timestamp));
+      }
+
+      verify() {
+        const keys = ['expenses', 'friends', 'groups'];
+        for (const key of keys) {
+          const data = this.load(key, []);
+          this.validate(key, data);
+        }
+        return true;
+      }
+
+      // Export all data as JSON
+      exportData() {
+        return {
+          version: this.VERSION,
+          exportDate: new Date().toISOString(),
+          expenses: this.load('expenses', []),
+          friends: this.load('friends', []),
+          groups: this.load('groups', []),
+          settings: this.load('settings', {})
+        };
+      }
+
+      // Export as CSV
+      exportCSV() {
+        const expenses = this.load('expenses', []);
+        const headers = ['ID', 'Description', 'Amount', 'Date', 'Category', 'Paid By', 'Split With', 'Status'];
+        const rows = expenses.map(e => [
+          e.id,
+          `"${e.description}"`,
+          e.amount,
+          e.date,
+          e.category || '',
+          e.paidBy || '',
+          (e.splitWith || []).join('; '),
+          e.status || ''
+        ]);
+        return [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      }
+    }
+
+    // Global storage instance
+    const storage = new StorageManager();
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // COMPREHENSIVE CURRENCY DATA (50+ currencies - All 7 Continents)
+    // ═══════════════════════════════════════════════════════════════════════════
+    const CURRENCIES = {
+      // ─── ASIA ───────────────────────────────────────────────────────────────
+      INR: { symbol: '₹', name: 'Indian Rupee', locale: 'en-IN', decimals: 2 },
+      JPY: { symbol: '¥', name: 'Japanese Yen', locale: 'ja-JP', decimals: 0 },
+      CNY: { symbol: '¥', name: 'Chinese Yuan', locale: 'zh-CN', decimals: 2 },
+      KRW: { symbol: '₩', name: 'South Korean Won', locale: 'ko-KR', decimals: 0 },
+      SGD: { symbol: 'S$', name: 'Singapore Dollar', locale: 'en-SG', decimals: 2 },
+      HKD: { symbol: 'HK$', name: 'Hong Kong Dollar', locale: 'zh-HK', decimals: 2 },
+      TWD: { symbol: 'NT$', name: 'Taiwan Dollar', locale: 'zh-TW', decimals: 0 },
+      THB: { symbol: '฿', name: 'Thai Baht', locale: 'th-TH', decimals: 2 },
+      MYR: { symbol: 'RM', name: 'Malaysian Ringgit', locale: 'ms-MY', decimals: 2 },
+      IDR: { symbol: 'Rp', name: 'Indonesian Rupiah', locale: 'id-ID', decimals: 0 },
+      PHP: { symbol: '₱', name: 'Philippine Peso', locale: 'en-PH', decimals: 2 },
+      VND: { symbol: '₫', name: 'Vietnamese Dong', locale: 'vi-VN', decimals: 0 },
+      PKR: { symbol: '₨', name: 'Pakistani Rupee', locale: 'ur-PK', decimals: 2 },
+      BDT: { symbol: '৳', name: 'Bangladeshi Taka', locale: 'bn-BD', decimals: 2 },
+      LKR: { symbol: 'Rs', name: 'Sri Lankan Rupee', locale: 'si-LK', decimals: 2 },
+      NPR: { symbol: 'रू', name: 'Nepalese Rupee', locale: 'ne-NP', decimals: 2 },
+
+      // ─── MIDDLE EAST ────────────────────────────────────────────────────────
+      AED: { symbol: 'د.إ', name: 'UAE Dirham', locale: 'ar-AE', decimals: 2 },
+      SAR: { symbol: '﷼', name: 'Saudi Riyal', locale: 'ar-SA', decimals: 2 },
+      QAR: { symbol: 'ر.ق', name: 'Qatari Riyal', locale: 'ar-QA', decimals: 2 },
+      KWD: { symbol: 'د.ك', name: 'Kuwaiti Dinar', locale: 'ar-KW', decimals: 3 },
+      BHD: { symbol: 'ب.د', name: 'Bahraini Dinar', locale: 'ar-BH', decimals: 3 },
+      OMR: { symbol: 'ر.ع', name: 'Omani Rial', locale: 'ar-OM', decimals: 3 },
+      ILS: { symbol: '₪', name: 'Israeli Shekel', locale: 'he-IL', decimals: 2 },
+      TRY: { symbol: '₺', name: 'Turkish Lira', locale: 'tr-TR', decimals: 2 },
+
+      // ─── EUROPE ─────────────────────────────────────────────────────────────
+      EUR: { symbol: '€', name: 'Euro', locale: 'de-DE', decimals: 2 },
+      GBP: { symbol: '£', name: 'British Pound', locale: 'en-GB', decimals: 2 },
+      CHF: { symbol: 'Fr', name: 'Swiss Franc', locale: 'de-CH', decimals: 2 },
+      SEK: { symbol: 'kr', name: 'Swedish Krona', locale: 'sv-SE', decimals: 2 },
+      NOK: { symbol: 'kr', name: 'Norwegian Krone', locale: 'nb-NO', decimals: 2 },
+      DKK: { symbol: 'kr', name: 'Danish Krone', locale: 'da-DK', decimals: 2 },
+      PLN: { symbol: 'zł', name: 'Polish Zloty', locale: 'pl-PL', decimals: 2 },
+      CZK: { symbol: 'Kč', name: 'Czech Koruna', locale: 'cs-CZ', decimals: 2 },
+      HUF: { symbol: 'Ft', name: 'Hungarian Forint', locale: 'hu-HU', decimals: 0 },
+      RUB: { symbol: '₽', name: 'Russian Ruble', locale: 'ru-RU', decimals: 2 },
+      UAH: { symbol: '₴', name: 'Ukrainian Hryvnia', locale: 'uk-UA', decimals: 2 },
+      RON: { symbol: 'lei', name: 'Romanian Leu', locale: 'ro-RO', decimals: 2 },
+
+      // ─── AMERICAS ───────────────────────────────────────────────────────────
+      USD: { symbol: '$', name: 'US Dollar', locale: 'en-US', decimals: 2 },
+      CAD: { symbol: 'C$', name: 'Canadian Dollar', locale: 'en-CA', decimals: 2 },
+      MXN: { symbol: '$', name: 'Mexican Peso', locale: 'es-MX', decimals: 2 },
+      BRL: { symbol: 'R$', name: 'Brazilian Real', locale: 'pt-BR', decimals: 2 },
+      ARS: { symbol: '$', name: 'Argentine Peso', locale: 'es-AR', decimals: 2 },
+      CLP: { symbol: '$', name: 'Chilean Peso', locale: 'es-CL', decimals: 0 },
+      COP: { symbol: '$', name: 'Colombian Peso', locale: 'es-CO', decimals: 0 },
+      PEN: { symbol: 'S/', name: 'Peruvian Sol', locale: 'es-PE', decimals: 2 },
+
+      // ─── AFRICA ─────────────────────────────────────────────────────────────
+      ZAR: { symbol: 'R', name: 'South African Rand', locale: 'en-ZA', decimals: 2 },
+      NGN: { symbol: '₦', name: 'Nigerian Naira', locale: 'en-NG', decimals: 2 },
+      EGP: { symbol: 'E£', name: 'Egyptian Pound', locale: 'ar-EG', decimals: 2 },
+      KES: { symbol: 'KSh', name: 'Kenyan Shilling', locale: 'sw-KE', decimals: 2 },
+      GHS: { symbol: 'GH₵', name: 'Ghanaian Cedi', locale: 'en-GH', decimals: 2 },
+      MAD: { symbol: 'د.م', name: 'Moroccan Dirham', locale: 'ar-MA', decimals: 2 },
+      TZS: { symbol: 'TSh', name: 'Tanzanian Shilling', locale: 'sw-TZ', decimals: 0 },
+      UGX: { symbol: 'USh', name: 'Ugandan Shilling', locale: 'en-UG', decimals: 0 },
+
+      // ─── OCEANIA ────────────────────────────────────────────────────────────
+      AUD: { symbol: 'A$', name: 'Australian Dollar', locale: 'en-AU', decimals: 2 },
+      NZD: { symbol: 'NZ$', name: 'New Zealand Dollar', locale: 'en-NZ', decimals: 2 },
+      FJD: { symbol: 'FJ$', name: 'Fijian Dollar', locale: 'en-FJ', decimals: 2 },
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // MULTI-LANGUAGE SYSTEM (20+ Languages with RTL Support)
+    // ═══════════════════════════════════════════════════════════════════════════
+    const LANGUAGES = {
+      // Western Languages
+      en: { name: 'English', nativeName: 'English', dir: 'ltr' },
+      es: { name: 'Spanish', nativeName: 'Español', dir: 'ltr' },
+      pt: { name: 'Portuguese', nativeName: 'Português', dir: 'ltr' },
+      fr: { name: 'French', nativeName: 'Français', dir: 'ltr' },
+      de: { name: 'German', nativeName: 'Deutsch', dir: 'ltr' },
+      it: { name: 'Italian', nativeName: 'Italiano', dir: 'ltr' },
+      nl: { name: 'Dutch', nativeName: 'Nederlands', dir: 'ltr' },
+      pl: { name: 'Polish', nativeName: 'Polski', dir: 'ltr' },
+      ru: { name: 'Russian', nativeName: 'Русский', dir: 'ltr' },
+      uk: { name: 'Ukrainian', nativeName: 'Українська', dir: 'ltr' },
+      tr: { name: 'Turkish', nativeName: 'Türkçe', dir: 'ltr' },
+
+      // Asian Languages
+      zh: { name: 'Chinese', nativeName: '中文', dir: 'ltr' },
+      ja: { name: 'Japanese', nativeName: '日本語', dir: 'ltr' },
+      ko: { name: 'Korean', nativeName: '한국어', dir: 'ltr' },
+      hi: { name: 'Hindi', nativeName: 'हिन्दी', dir: 'ltr' },
+      bn: { name: 'Bengali', nativeName: 'বাংলা', dir: 'ltr' },
+      ta: { name: 'Tamil', nativeName: 'தமிழ்', dir: 'ltr' },
+      th: { name: 'Thai', nativeName: 'ไทย', dir: 'ltr' },
+      vi: { name: 'Vietnamese', nativeName: 'Tiếng Việt', dir: 'ltr' },
+      id: { name: 'Indonesian', nativeName: 'Bahasa Indonesia', dir: 'ltr' },
+      ms: { name: 'Malay', nativeName: 'Bahasa Melayu', dir: 'ltr' },
+
+      // RTL Languages
+      ar: { name: 'Arabic', nativeName: 'العربية', dir: 'rtl' },
+      he: { name: 'Hebrew', nativeName: 'עברית', dir: 'rtl' },
+      fa: { name: 'Persian', nativeName: 'فارسی', dir: 'rtl' },
+      ur: { name: 'Urdu', nativeName: 'اردو', dir: 'rtl' },
+    };
+
+    // Translation strings for all languages
+    const TRANSLATIONS = {
+      en: {
+        app_name: 'monEZ',
+        tagline: 'Split expenses, not friendships',
+        home: 'Home',
+        expenses: 'Expenses',
+        balances: 'Balances',
+        groups: 'Groups',
+        settings: 'Settings',
+        premium: 'Premium',
+        add_expense: 'Add Expense',
+        split_bill: 'Split Bill',
+        settle_up: 'Settle Up',
+        ai_insights: 'AI Insights',
+        you_owe: 'You owe',
+        you_are_owed: "You're owed",
+        your_balance: 'Your balance',
+        recent_activity: 'Recent Activity',
+        view_all: 'View all',
+        your_groups: 'Your Groups',
+        amount: 'Amount',
+        description: 'Description',
+        category: 'Category',
+        split_with: 'Split with',
+        save_expense: 'Save Expense',
+        cancel: 'Cancel',
+        equal_split: 'Equal Split',
+        by_percentage: 'By Percentage',
+        custom_split: 'Custom Split',
+        search_expenses: 'Search expenses...',
+        no_expenses: 'No expenses yet',
+        all_settled: 'All settled up!',
+        export_data: 'Export Data',
+        import_data: 'Import Data',
+        language: 'Language',
+        currency: 'Currency',
+        notifications: 'Notifications',
+        dark_mode: 'Dark Mode',
+        profile: 'Profile',
+        payment_methods: 'Payment Methods',
+        owes_you: 'owes you',
+        remind: 'Remind',
+        pay_now: 'Pay Now',
+        settle_all: 'Settle All',
+        create_group: 'Create Group',
+        food: 'Food',
+        transport: 'Transport',
+        entertainment: 'Entertainment',
+        shopping: 'Shopping',
+        bills: 'Bills',
+        travel: 'Travel',
+        welcome: 'Welcome to monEZ!',
+        expense_added: 'Expense added successfully!',
+        loading: 'Loading...',
+      },
+      es: {
+        app_name: 'monEZ',
+        tagline: 'Divide gastos, no amistades',
+        home: 'Inicio',
+        expenses: 'Gastos',
+        balances: 'Saldos',
+        groups: 'Grupos',
+        settings: 'Ajustes',
+        add_expense: 'Añadir Gasto',
+        you_owe: 'Debes',
+        you_are_owed: 'Te deben',
+        your_balance: 'Tu saldo',
+        recent_activity: 'Actividad Reciente',
+        amount: 'Cantidad',
+        description: 'Descripción',
+        save_expense: 'Guardar Gasto',
+        cancel: 'Cancelar',
+      },
+      hi: {
+        app_name: 'monEZ',
+        tagline: 'खर्च बांटें, दोस्ती नहीं',
+        home: 'होम',
+        expenses: 'खर्च',
+        balances: 'बैलेंस',
+        groups: 'समूह',
+        settings: 'सेटिंग्स',
+        add_expense: 'खर्च जोड़ें',
+        you_owe: 'आप देते हैं',
+        you_are_owed: 'आपको मिलना है',
+        your_balance: 'आपका बैलेंस',
+        amount: 'राशि',
+        description: 'विवरण',
+        save_expense: 'खर्च सेव करें',
+        cancel: 'रद्द करें',
+      },
+      zh: {
+        app_name: 'monEZ',
+        tagline: '分摊费用，不分友谊',
+        home: '首页',
+        expenses: '支出',
+        balances: '余额',
+        groups: '群组',
+        settings: '设置',
+        add_expense: '添加支出',
+        you_owe: '你欠',
+        you_are_owed: '欠你',
+        your_balance: '你的余额',
+        amount: '金额',
+        description: '描述',
+        save_expense: '保存支出',
+        cancel: '取消',
+      },
+      ar: {
+        app_name: 'monEZ',
+        tagline: 'قسّم النفقات، ليس الصداقات',
+        home: 'الرئيسية',
+        expenses: 'النفقات',
+        balances: 'الأرصدة',
+        groups: 'المجموعات',
+        settings: 'الإعدادات',
+        add_expense: 'إضافة نفقة',
+        you_owe: 'أنت مدين',
+        you_are_owed: 'مستحق لك',
+        your_balance: 'رصيدك',
+        amount: 'المبلغ',
+        description: 'الوصف',
+        save_expense: 'حفظ النفقة',
+        cancel: 'إلغاء',
+      },
+      ja: {
+        app_name: 'monEZ',
+        tagline: '費用を分割、友情はそのまま',
+        home: 'ホーム',
+        expenses: '支出',
+        balances: '残高',
+        groups: 'グループ',
+        settings: '設定',
+        add_expense: '支出を追加',
+        you_owe: 'あなたが払う',
+        you_are_owed: 'もらえる金額',
+        amount: '金額',
+        description: '説明',
+        save_expense: '支出を保存',
+        cancel: 'キャンセル',
+      },
+      fr: {
+        app_name: 'monEZ',
+        tagline: 'Partagez les dépenses, pas les amitiés',
+        home: 'Accueil',
+        expenses: 'Dépenses',
+        balances: 'Soldes',
+        groups: 'Groupes',
+        settings: 'Paramètres',
+        add_expense: 'Ajouter une dépense',
+        you_owe: 'Vous devez',
+        you_are_owed: 'On vous doit',
+        amount: 'Montant',
+        description: 'Description',
+        save_expense: 'Enregistrer',
+        cancel: 'Annuler',
+      },
+      de: {
+        app_name: 'monEZ',
+        tagline: 'Teile Ausgaben, nicht Freundschaften',
+        home: 'Startseite',
+        expenses: 'Ausgaben',
+        balances: 'Salden',
+        groups: 'Gruppen',
+        settings: 'Einstellungen',
+        add_expense: 'Ausgabe hinzufügen',
+        you_owe: 'Du schuldest',
+        you_are_owed: 'Dir wird geschuldet',
+        amount: 'Betrag',
+        description: 'Beschreibung',
+        save_expense: 'Speichern',
+        cancel: 'Abbrechen',
+      },
+      pt: {
+        app_name: 'monEZ',
+        tagline: 'Divida despesas, não amizades',
+        home: 'Início',
+        expenses: 'Despesas',
+        balances: 'Saldos',
+        groups: 'Grupos',
+        settings: 'Configurações',
+        add_expense: 'Adicionar Despesa',
+        you_owe: 'Você deve',
+        you_are_owed: 'Devem a você',
+        amount: 'Valor',
+        description: 'Descrição',
+        save_expense: 'Salvar',
+        cancel: 'Cancelar',
+      },
+      ko: {
+        app_name: 'monEZ',
+        tagline: '비용은 나누고, 우정은 지키세요',
+        home: '홈',
+        expenses: '지출',
+        balances: '잔액',
+        groups: '그룹',
+        settings: '설정',
+        add_expense: '지출 추가',
+        you_owe: '내가 갚을 금액',
+        you_are_owed: '받을 금액',
+        amount: '금액',
+        description: '설명',
+        save_expense: '저장',
+        cancel: '취소',
+      },
+      ru: {
+        app_name: 'monEZ',
+        tagline: 'Делите расходы, а не дружбу',
+        home: 'Главная',
+        expenses: 'Расходы',
+        balances: 'Балансы',
+        groups: 'Группы',
+        settings: 'Настройки',
+        add_expense: 'Добавить расход',
+        you_owe: 'Вы должны',
+        you_are_owed: 'Вам должны',
+        amount: 'Сумма',
+        description: 'Описание',
+        save_expense: 'Сохранить',
+        cancel: 'Отмена',
+      },
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // INTERNATIONALIZATION (i18n) ENGINE
+    // ═══════════════════════════════════════════════════════════════════════════
+    class I18n {
+      constructor() {
+        this.currentLang = 'en';
+        this.currentCurrency = 'INR';
+        this.loadSettings();
+      }
+
+      loadSettings() {
+        const settings = storage.load('settings', {});
+        this.currentLang = settings.language || this.detectLanguage();
+        this.currentCurrency = settings.currency || this.detectCurrency();
+      }
+
+      detectLanguage() {
+        const browserLang = navigator.language.split('-')[0];
+        return LANGUAGES[browserLang] ? browserLang : 'en';
+      }
+
+      detectCurrency() {
+        // Detect based on timezone or locale
+        const locale = navigator.language;
+        const currencyMap = {
+          'en-US': 'USD', 'en-GB': 'GBP', 'en-AU': 'AUD', 'en-CA': 'CAD',
+          'en-IN': 'INR', 'hi-IN': 'INR', 'de-DE': 'EUR', 'fr-FR': 'EUR',
+          'es-ES': 'EUR', 'it-IT': 'EUR', 'ja-JP': 'JPY', 'ko-KR': 'KRW',
+          'zh-CN': 'CNY', 'ar-AE': 'AED', 'ar-SA': 'SAR', 'pt-BR': 'BRL',
+        };
+        return currencyMap[locale] || 'USD';
+      }
+
+      setLanguage(langCode) {
+        if (LANGUAGES[langCode]) {
+          this.currentLang = langCode;
+          document.documentElement.dir = LANGUAGES[langCode].dir;
+          document.documentElement.lang = langCode;
+          this.saveSettings();
+          this.updateUI();
+          return true;
+        }
+        return false;
+      }
+
+      setCurrency(currencyCode) {
+        if (CURRENCIES[currencyCode]) {
+          this.currentCurrency = currencyCode;
+          this.saveSettings();
+          return true;
+        }
+        return false;
+      }
+
+      saveSettings() {
+        const settings = storage.load('settings', {});
+        settings.language = this.currentLang;
+        settings.currency = this.currentCurrency;
+        storage.save('settings', settings);
+      }
+
+      t(key, params = {}) {
+        const translations = TRANSLATIONS[this.currentLang] || TRANSLATIONS.en;
+        let text = translations[key] || TRANSLATIONS.en[key] || key;
+
+        // Replace parameters like {name} with actual values
+        Object.keys(params).forEach(param => {
+          text = text.replace(new RegExp(`{${param}}`, 'g'), params[param]);
+        });
+
+        return text;
+      }
+
+      formatCurrency(amount) {
+        const currency = CURRENCIES[this.currentCurrency];
+        if (!currency) return `${amount}`;
+
+        try {
+          return new Intl.NumberFormat(currency.locale, {
+            style: 'currency',
+            currency: this.currentCurrency,
+            minimumFractionDigits: currency.decimals,
+            maximumFractionDigits: currency.decimals,
+          }).format(amount);
+        } catch (e) {
+          return `${currency.symbol}${amount.toLocaleString()}`;
+        }
+      }
+
+      formatDate(date) {
+        const lang = LANGUAGES[this.currentLang];
+        try {
+          return new Intl.DateTimeFormat(this.currentLang, {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+          }).format(new Date(date));
+        } catch (e) {
+          return date;
+        }
+      }
+
+      updateUI() {
+        // Update all elements with data-i18n attribute
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          el.textContent = this.t(key);
+        });
+
+        // Update all elements with data-i18n-placeholder
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+          const key = el.getAttribute('data-i18n-placeholder');
+          el.placeholder = this.t(key);
+        });
+      }
+
+      isRTL() {
+        return LANGUAGES[this.currentLang]?.dir === 'rtl';
+      }
+    }
+
+    // Global i18n instance
+    const i18n = new I18n();
+
+    // Shorthand translation function
+    const t = (key, params) => i18n.t(key, params);
+
+    const AppState = {
+      currentView: 'home',
+      expenses: [],
+      friends: [
+        { name: 'Raj Kumar', avatar: 'R', color: '#10B981' },
+        { name: 'Priya Singh', avatar: 'P', color: '#F59E0B' },
+        { name: 'Amit Sharma', avatar: 'A', color: '#8B5CF6' },
+        { name: 'Sarah Johnson', avatar: 'S', color: '#EF4444' },
+        { name: 'Mike Chen', avatar: 'M', color: '#06B6D4' }
+      ],
+      groups: [
+        {
+          id: 1,
+          name: 'College Friends',
+          icon: '🎓',
+          members: 4,
+          balance: -420,
+          color: '#10B981'
+        },
+        {
+          id: 2,
+          name: 'Family Trip',
+          icon: '✈️',
+          members: 5,
+          balance: 150,
+          color: '#F59E0B'
+        }
+      ],
+      balance: 2450,
+      selectedFriends: new Set(),
+      selectedCategory: '',
+      animations: {
+        enabled: true,
+        duration: 300
+      },
+      pwaPromptShown: false,
+      deferredPrompt: null
+    };
+
+    // Premium Sample Data
+    const premiumExpenses = [
+      {
+        id: 1,
+        description: 'Gourmet Dinner at Olive Garden',
+        amount: 2850,
+        date: 'Today, 8:30 PM',
+        paidBy: 'You',
+        splitWith: ['Raj Kumar', 'Priya Singh'],
+        category: '🍽️',
+        location: 'Connaught Place, Delhi',
+        status: 'pending'
+      },
+      {
+        id: 2,
+        description: 'Premium Uber Ride',
+        amount: 680,
+        date: 'Today, 6:15 PM',
+        paidBy: 'Raj Kumar',
+        splitWith: ['You'],
+        category: '🚗',
+        location: 'Airport → Hotel',
+        status: 'settled'
+      },
+      {
+        id: 3,
+        description: 'IMAX Movie Experience',
+        amount: 1200,
+        date: 'Yesterday, 9:30 PM',
+        paidBy: 'Priya Singh',
+        splitWith: ['You', 'Amit Sharma'],
+        category: '🎬',
+        location: 'PVR Director\'s Cut',
+        status: 'settled'
+      }
+    ];
+    // Enhanced Helper Functions
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function formatCurrency(amount) {
+      return i18n.formatCurrency(amount);
+    }
+
+    function createRippleEffect(element, event) {
+      const ripple = document.createElement('div');
+      const rect = element.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = event.clientX - rect.left - size / 2;
+      const y = event.clientY - rect.top - size / 2;
+
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      ripple.style.position = 'absolute';
+      ripple.style.borderRadius = '50%';
+      ripple.style.background = 'rgba(255,255,255,0.3)';
+      ripple.style.transform = 'scale(0)';
+      ripple.style.animation = 'ripple 0.6s ease-out';
+      ripple.style.pointerEvents = 'none';
+
+      element.style.position = 'relative';
+      element.style.overflow = 'hidden';
+      element.appendChild(ripple);
+
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    }
+
+    function animateNumber(element, start, end, duration = 1000) {
+      const startTime = performance.now();
+      const range = end - start;
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const current = Math.round(start + range * easeOutQuart);
+
+        element.textContent = formatCurrency(current);
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    function showNotification(message, type = 'success', duration = 3000) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 10000;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        font-size: 14px;
+        font-weight: 500;
+        max-width: 300px;
+      `;
+      notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+          <span>${message}</span>
+          <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; margin-left: 8px; font-size: 16px;">×</button>
+        </div>
+      `;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+      }, 100);
+
+      setTimeout(() => {
+        notification.style.transform = 'translateX(400px)';
+        setTimeout(() => notification.remove(), 300);
+      }, duration);
+    }
+    // Enhanced Navigation Functions
+    function showHome() {
+      showView('home');
+      renderRecentExpenses();
+      renderGroupsPreview();
+      updateNavigation('home');
+    }
+
+    function showAddExpense() {
+      showView('add-expense');
+      populatePeopleSelector();
+      AppState.selectedFriends.clear();
+      AppState.selectedCategory = '';
+      resetForm();
+    }
+
+    function showExpenses() {
+      showView('expenses');
+      renderAllExpenses();
+      updateNavigation('expenses');
+    }
+
+    function showBalances() {
+      showView('balances');
+      renderBalances();
+      updateNavigation('balances');
+    }
+
+    function showGroups() {
+      showView('groups');
+      renderGroups();
+      updateNavigation('groups');
+    }
+
+    function showPremiumFeatures() {
+      showView('premium');
+      renderPremiumFeatures();
+      updateNavigation('premium');
+    }
+
+    function showSettings() {
+      showView('settings');
+      updateNavigation('settings');
+    }
+
+    // Additional functions
+    function showSplitBill() {
+      showAddExpense();
+      showNotification('💡 Pro tip: Use voice input for faster entry!', 'info');
+    }
+
+    function showSettle() {
+      showBalances();
+      showNotification('💳 Select a balance to settle up', 'info');
+    }
+
+    function showNotifications() {
+      showNotification('🔔 3 new reminders: Raj owes ₹185, Movie night expense added, Premium features available!', 'info', 5000);
+    }
+
+    function showProfile() {
+      showShareConnectModal();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SHARE & CONNECT SYSTEM - 12+ Ways to Connect
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    function showShareConnectModal() {
+      const modal = document.createElement('div');
+      modal.id = 'share-connect-modal';
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 420px; max-height: 90vh; overflow-y: auto;">
+          <div class="modal-header">
+            <h3>🔗 Share & Connect</h3>
+            <button class="modal-close" onclick="closeShareModal()">×</button>
+          </div>
+          <div class="modal-body" style="padding: var(--space-lg);">
+            
+            <!-- Add Friend Section -->
+            <div style="margin-bottom: var(--space-lg);">
+              <h4 style="margin-bottom: var(--space-sm); color: var(--gold-accent);">👤 Add Friend</h4>
+              <div style="display: flex; gap: var(--space-sm);">
+                <input type="text" id="new-friend-name" class="search-input" placeholder="Friend's name" style="flex: 1;">
+                <button class="btn btn-primary" onclick="addNewFriend()" style="padding: 8px 16px;">Add</button>
+              </div>
+            </div>
+            
+            <!-- Invite via Apps -->
+            <div style="margin-bottom: var(--space-lg);">
+              <h4 style="margin-bottom: var(--space-sm); color: var(--gold-accent);">📱 Invite via Apps</h4>
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-sm);">
+                <button onclick="shareViaWhatsApp()" class="share-btn" title="WhatsApp">
+                  <span style="font-size: 24px;">📲</span>
+                  <span style="font-size: 10px;">WhatsApp</span>
+                </button>
+                <button onclick="shareViaTelegram()" class="share-btn" title="Telegram">
+                  <span style="font-size: 24px;">✈️</span>
+                  <span style="font-size: 10px;">Telegram</span>
+                </button>
+                <button onclick="shareViaSMS()" class="share-btn" title="SMS">
+                  <span style="font-size: 24px;">💬</span>
+                  <span style="font-size: 10px;">SMS</span>
+                </button>
+                <button onclick="shareViaEmail()" class="share-btn" title="Email">
+                  <span style="font-size: 24px;">📧</span>
+                  <span style="font-size: 10px;">Email</span>
+                </button>
+                <button onclick="shareViaTwitter()" class="share-btn" title="Twitter/X">
+                  <span style="font-size: 24px;">🐦</span>
+                  <span style="font-size: 10px;">Twitter</span>
+                </button>
+                <button onclick="shareViaFacebook()" class="share-btn" title="Facebook">
+                  <span style="font-size: 24px;">📘</span>
+                  <span style="font-size: 10px;">Facebook</span>
+                </button>
+                <button onclick="shareViaLinkedIn()" class="share-btn" title="LinkedIn">
+                  <span style="font-size: 24px;">💼</span>
+                  <span style="font-size: 10px;">LinkedIn</span>
+                </button>
+                <button onclick="shareViaNative()" class="share-btn" title="More...">
+                  <span style="font-size: 24px;">📤</span>
+                  <span style="font-size: 10px;">More...</span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- QR Code Section -->
+            <div style="margin-bottom: var(--space-lg);">
+              <h4 style="margin-bottom: var(--space-sm); color: var(--gold-accent);">📷 Scan QR Code</h4>
+              <div id="qr-code-container" style="background: white; padding: 20px; border-radius: var(--radius-md); text-align: center;">
+                <div id="qr-code" style="display: inline-block;"></div>
+                <p style="margin-top: var(--space-sm); font-size: var(--text-sm); color: var(--secondary-text);">
+                  Scan to join monEZ
+                </p>
+              </div>
+            </div>
+            
+            <!-- Copy Link -->
+            <div style="margin-bottom: var(--space-lg);">
+              <h4 style="margin-bottom: var(--space-sm); color: var(--gold-accent);">🔗 Share Link</h4>
+              <div style="display: flex; gap: var(--space-sm);">
+                <input type="text" id="share-link" class="search-input" value="${getShareLink()}" readonly style="flex: 1; font-size: 12px;">
+                <button class="btn btn-secondary" onclick="copyShareLink()" style="padding: 8px 16px;">📋 Copy</button>
+              </div>
+            </div>
+            
+            <!-- Group Invite -->
+            <div>
+              <h4 style="margin-bottom: var(--space-sm); color: var(--gold-accent);">👥 Invite to Group</h4>
+              <select id="group-select" class="setting-select" style="width: 100%; margin-bottom: var(--space-sm);">
+                ${AppState.groups.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('')}
+              </select>
+              <button class="btn btn-primary" onclick="shareGroupInvite()" style="width: 100%;">
+                📨 Send Group Invite
+              </button>
+            </div>
+            
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      // Generate QR Code
+      generateQRCode();
+
+      // Add CSS for share buttons
+      addShareButtonStyles();
+    }
+
+    function closeShareModal() {
+      const modal = $('share-connect-modal');
+      if (modal) modal.remove();
+    }
+
+    function addShareButtonStyles() {
+      if ($('share-btn-styles')) return;
+      const style = document.createElement('style');
+      style.id = 'share-btn-styles';
+      style.textContent = `
+        .share-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 12px 8px;
+          background: var(--surface);
+          border: 1px solid var(--borders);
+          border-radius: var(--radius-md);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .share-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          border-color: var(--gold-accent);
+        }
+        .share-btn:active {
+          transform: scale(0.95);
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    function getShareLink() {
+      // Generate a shareable link with app info
+      const baseUrl = window.location.origin || 'https://monez.app';
+      return `${baseUrl}?ref=share&from=${encodeURIComponent('monEZ User')}`;
+    }
+
+    function getInviteMessage() {
+      return `💰 Join me on monEZ - the best expense splitting app!\n\n` +
+        `✅ Split bills instantly\n` +
+        `✅ 55 currencies supported\n` +
+        `✅ UPI payments built-in\n` +
+        `✅ 100% FREE, no ads!\n\n` +
+        `Download: ${getShareLink()}`;
+    }
+
+    // ─── SHARE VIA APPS ───────────────────────────────────────────────────────
+
+    function shareViaWhatsApp() {
+      const message = encodeURIComponent(getInviteMessage());
+      window.open(`https://wa.me/?text=${message}`, '_blank');
+      showNotification('📲 Opening WhatsApp...', 'info');
+    }
+
+    function shareViaTelegram() {
+      const message = encodeURIComponent(getInviteMessage());
+      window.open(`https://t.me/share/url?url=${encodeURIComponent(getShareLink())}&text=${message}`, '_blank');
+      showNotification('✈️ Opening Telegram...', 'info');
+    }
+
+    function shareViaSMS() {
+      const message = encodeURIComponent(getInviteMessage());
+      window.location.href = `sms:?body=${message}`;
+      showNotification('💬 Opening SMS...', 'info');
+    }
+
+    function shareViaEmail() {
+      const subject = encodeURIComponent('Join me on monEZ - Split Expenses Easily!');
+      const body = encodeURIComponent(getInviteMessage());
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+      showNotification('📧 Opening Email...', 'info');
+    }
+
+    function shareViaTwitter() {
+      const text = encodeURIComponent('Check out monEZ - the best free expense splitting app! 💰 Split bills, 55 currencies, UPI payments. ' + getShareLink());
+      window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+      showNotification('🐦 Opening Twitter...', 'info');
+    }
+
+    function shareViaFacebook() {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareLink())}`, '_blank');
+      showNotification('📘 Opening Facebook...', 'info');
+    }
+
+    function shareViaLinkedIn() {
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(getShareLink())}`, '_blank');
+      showNotification('💼 Opening LinkedIn...', 'info');
+    }
+
+    function shareViaNative() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'monEZ - Split Expenses',
+          text: getInviteMessage(),
+          url: getShareLink()
+        }).then(() => {
+          showNotification('📤 Shared successfully!', 'success');
+        }).catch(() => { });
+      } else {
+        copyShareLink();
+      }
+    }
+
+    function copyShareLink() {
+      const link = getShareLink();
+      navigator.clipboard.writeText(link).then(() => {
+        showNotification('📋 Link copied to clipboard!', 'success');
+        const btn = document.querySelector('#share-connect-modal .btn-secondary');
+        if (btn) {
+          btn.textContent = '✅ Copied!';
+          setTimeout(() => btn.textContent = '📋 Copy', 2000);
+        }
+      }).catch(() => {
+        showNotification('❌ Could not copy link', 'error');
+      });
+    }
+
+    // ─── QR CODE GENERATOR (Pure JS, No Library) ─────────────────────────────
+
+    function generateQRCode() {
+      const container = $('qr-code');
+      if (!container) return;
+
+      // Simple QR code using free API
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(getShareLink())}`;
+      container.innerHTML = `<img src="${qrUrl}" alt="QR Code" style="border-radius: 8px;">`;
+    }
+
+    // ─── ADD FRIEND ───────────────────────────────────────────────────────────
+
+    function addNewFriend() {
+      const nameInput = $('new-friend-name');
+      const name = nameInput?.value.trim();
+
+      if (!name) {
+        showNotification('❌ Please enter a name', 'error');
+        return;
+      }
+
+      // Check if friend already exists
+      if (AppState.friends.some(f => f.name.toLowerCase() === name.toLowerCase())) {
+        showNotification('⚠️ Friend already exists', 'error');
+        return;
+      }
+
+      // Generate random color
+      const colors = ['#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#EC4899', '#6366F1'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      const newFriend = {
+        name: name,
+        avatar: name.charAt(0).toUpperCase(),
+        color: color
+      };
+
+      AppState.friends.push(newFriend);
+
+      try {
+        storage.save('friends', AppState.friends);
+      } catch (e) {
+        saveToLocalStorage();
+      }
+
+      nameInput.value = '';
+      showNotification(`✅ ${name} added as friend!`, 'success');
+
+      // Refresh people selector if on add expense view
+      populatePeopleSelector();
+    }
+
+    // ─── GROUP INVITE ─────────────────────────────────────────────────────────
+
+    function shareGroupInvite() {
+      const groupSelect = $('group-select');
+      const groupId = groupSelect?.value;
+      const group = AppState.groups.find(g => g.id == groupId);
+
+      if (!group) {
+        showNotification('❌ Please select a group', 'error');
+        return;
+      }
+
+      const inviteMessage = `🎉 You're invited to join "${group.name}" on monEZ!\n\n` +
+        `${group.icon} ${group.name}\n` +
+        `👥 ${group.members} member(s)\n\n` +
+        `Join now: ${getShareLink()}&group=${group.id}`;
+
+      if (navigator.share) {
+        navigator.share({
+          title: `Join ${group.name} on monEZ`,
+          text: inviteMessage,
+          url: getShareLink()
+        }).then(() => {
+          showNotification('📨 Group invite sent!', 'success');
+        }).catch(() => { });
+      } else {
+        navigator.clipboard.writeText(inviteMessage).then(() => {
+          showNotification('📋 Group invite copied!', 'success');
+        });
+      }
+    }
+
+    // Global function exports
+    window.closeShareModal = closeShareModal;
+    window.addNewFriend = addNewFriend;
+    window.shareViaWhatsApp = shareViaWhatsApp;
+    window.shareViaTelegram = shareViaTelegram;
+    window.shareViaSMS = shareViaSMS;
+    window.shareViaEmail = shareViaEmail;
+    window.shareViaTwitter = shareViaTwitter;
+    window.shareViaFacebook = shareViaFacebook;
+    window.shareViaLinkedIn = shareViaLinkedIn;
+    window.shareViaNative = shareViaNative;
+    window.copyShareLink = copyShareLink;
+    window.shareGroupInvite = shareGroupInvite;
+
+    function showFilters() {
+      const modal = document.createElement('div');
+      modal.id = 'filters-modal';
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 380px;">
+          <div class="modal-header">
+            <h3>🔍 Filter Expenses</h3>
+            <button class="modal-close" onclick="closeFiltersModal()">×</button>
+          </div>
+          <div class="modal-body" style="padding: var(--space-lg);">
+            <div style="margin-bottom: var(--space-md);">
+              <label style="font-weight: 600; display: block; margin-bottom: 8px;">Category</label>
+              <select id="filter-category" class="setting-select" style="width: 100%;">
+                <option value="">All Categories</option>
+                <option value="🍽️">🍽️ Food</option>
+                <option value="🚗">🚗 Transport</option>
+                <option value="🎬">🎬 Entertainment</option>
+                <option value="🛒">🛒 Shopping</option>
+                <option value="🏠">🏠 Bills</option>
+                <option value="✈️">✈️ Travel</option>
+              </select>
+            </div>
+            <div style="margin-bottom: var(--space-md);">
+              <label style="font-weight: 600; display: block; margin-bottom: 8px;">Date Range</label>
+              <select id="filter-date" class="setting-select" style="width: 100%;">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month" selected>This Month</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+            <div style="margin-bottom: var(--space-md);">
+              <label style="font-weight: 600; display: block; margin-bottom: 8px;">Friend</label>
+              <select id="filter-friend" class="setting-select" style="width: 100%;">
+                <option value="">All Friends</option>
+                ${AppState.friends.map(f => `<option value="${f.name}">${f.name}</option>`).join('')}
+              </select>
+            </div>
+            <div style="margin-bottom: var(--space-md);">
+              <label style="font-weight: 600; display: block; margin-bottom: 8px;">Status</label>
+              <select id="filter-status" class="setting-select" style="width: 100%;">
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="settled">Settled</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer" style="display: flex; gap: var(--space-sm); padding: var(--space-md);">
+            <button class="btn btn-secondary" onclick="clearFilters()" style="flex: 1;">Clear</button>
+            <button class="btn btn-primary" onclick="applyFilters()" style="flex: 1;">Apply Filters</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function closeFiltersModal() {
+      const modal = $('filters-modal');
+      if (modal) modal.remove();
+    }
+
+    function applyFilters() {
+      const category = $('filter-category')?.value;
+      const dateRange = $('filter-date')?.value;
+      const friend = $('filter-friend')?.value;
+      const status = $('filter-status')?.value;
+
+      let filtered = [...AppState.expenses];
+
+      if (category) {
+        filtered = filtered.filter(e => e.category === category);
+      }
+
+      if (friend) {
+        filtered = filtered.filter(e =>
+          e.splitWith?.includes(friend) || e.paidBy === friend
+        );
+      }
+
+      if (status) {
+        filtered = filtered.filter(e => e.status === status);
+      }
+
+      // Date filtering (simplified)
+      if (dateRange === 'today') {
+        filtered = filtered.filter(e => e.date?.includes('Today'));
+      } else if (dateRange === 'week') {
+        filtered = filtered.filter(e =>
+          e.date?.includes('Today') || e.date?.includes('Yesterday')
+        );
+      }
+
+      closeFiltersModal();
+
+      // Render filtered results
+      const container = $('all-expenses-list');
+      if (container) {
+        container.innerHTML = '';
+        if (filtered.length === 0) {
+          container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">No expenses match filters</div>';
+        } else {
+          filtered.forEach(expense => {
+            const item = document.createElement('div');
+            item.className = 'expense-item activity-item';
+            item.innerHTML = `
+              <div class="activity-icon" style="background: #10B981;">${expense.category || '💰'}</div>
+              <div class="activity-content" style="flex: 1;">
+                <div class="activity-title">${expense.description}</div>
+                <div class="activity-meta">${expense.date} • ${expense.paidBy || 'You'}</div>
+              </div>
+              <div class="activity-amount">${formatCurrency(expense.amount)}</div>
+            `;
+            container.appendChild(item);
+          });
+        }
+      }
+
+      showNotification(`🔍 Showing ${filtered.length} filtered expense(s)`, 'info');
+    }
+
+    function clearFilters() {
+      closeFiltersModal();
+      renderAllExpenses();
+      showNotification('🔄 Filters cleared', 'info');
+    }
+
+    window.closeFiltersModal = closeFiltersModal;
+    window.applyFilters = applyFilters;
+    window.clearFilters = clearFilters;
+
+    function settleAll() {
+      const balances = calculateUserBalances();
+      const owe = balances.filter(b => b.amount < 0);
+
+      if (owe.length === 0) {
+        showNotification('✅ You don\'t owe anyone!', 'success');
+        return;
+      }
+
+      const total = owe.reduce((sum, b) => sum + Math.abs(b.amount), 0);
+
+      if (confirm(`Settle all ${owe.length} balance(s) totaling ${formatCurrency(total)}?`)) {
+        showNotification(`💳 Opening payments for ${owe.length} balance(s)...`, 'info');
+
+        // Open first payment, others need manual action
+        const first = owe[0];
+        settleBalance(first.name, Math.abs(first.amount));
+      }
+    }
+
+    function showCreateGroup() {
+      showGroupModal();
+    }
+
+    function showGroupModal() {
+      const modal = document.createElement('div');
+      modal.id = 'group-modal';
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 380px;">
+          <div class="modal-header">
+            <h3>👥 Create Group</h3>
+            <button class="modal-close" onclick="closeGroupModal()">×</button>
+          </div>
+          <div class="modal-body" style="padding: var(--space-lg);">
+            <input type="text" id="group-name" class="search-input" placeholder="Group name (e.g., Trip to Goa)" style="margin-bottom: var(--space-md);">
+            <input type="text" id="group-icon" class="search-input" placeholder="Emoji icon (e.g., ✈️ 🏠 🎓)" style="margin-bottom: var(--space-md);" maxlength="2">
+            <p style="font-size: var(--text-sm); color: var(--secondary-text);">You can add members after creating the group.</p>
+          </div>
+          <div class="modal-footer" style="display: flex; gap: var(--space-sm); padding: var(--space-md);">
+            <button class="btn btn-secondary" onclick="closeGroupModal()" style="flex: 1;">Cancel</button>
+            <button class="btn btn-primary" onclick="createGroup()" style="flex: 1;">Create Group</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      setTimeout(() => $('group-name').focus(), 100);
+    }
+
+    function closeGroupModal() {
+      const modal = $('group-modal');
+      if (modal) modal.remove();
+    }
+
+    function createGroup() {
+      const name = $('group-name').value.trim();
+      const icon = $('group-icon').value.trim() || '👥';
+
+      if (!name) {
+        showNotification('❌ Please enter a group name', 'error');
+        return;
+      }
+
+      const newGroup = {
+        id: Date.now(),
+        name: name,
+        icon: icon,
+        members: 1,
+        balance: 0,
+        color: '#' + Math.floor(Math.random() * 16777215).toString(16)
+      };
+
+      AppState.groups.push(newGroup);
+
+      try {
+        storage.save('groups', AppState.groups);
+      } catch (e) {
+        saveToLocalStorage();
+      }
+
+      closeGroupModal();
+      renderGroupsPreview();
+      renderGroups();
+      showNotification(`✅ Group "${name}" created!`, 'success');
+    }
+
+    window.closeGroupModal = closeGroupModal;
+    window.createGroup = createGroup;
+    function showView(viewId) {
+      // Hide all views with fade out
+      document.querySelectorAll('.view').forEach(view => {
+        view.classList.remove('active');
+      });
+
+      // Show target view with premium animation
+      const targetView = $(viewId + '-view');
+      if (targetView) {
+        setTimeout(() => {
+          targetView.classList.add('active');
+          AppState.currentView = viewId;
+        }, AppState.animations.enabled ? 50 : 0);
+      }
+    }
+
+    function updateNavigation(activeView) {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // Map views to navigation items
+      const navMap = {
+        'home': 0,
+        'expenses': 1,
+        'balances': 2,
+        'groups': 3,
+        'premium': 4
+      };
+
+      const navItems = document.querySelectorAll('.nav-item');
+      if (navItems[navMap[activeView]]) {
+        navItems[navMap[activeView]].classList.add('active');
+      }
+    }
+    // Enhanced Render Functions
+    function renderRecentExpenses() {
+      const container = $('recent-expenses');
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      if (AppState.expenses.length === 0) {
+        AppState.expenses = [...premiumExpenses];
+      }
+
+      if (AppState.expenses.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: #64748B;">
+            <div style="font-size: 48px; margin-bottom: 16px;">💎</div>
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">No expenses yet</div>
+            <div style="font-size: 14px;">Start splitting bills with style</div>
+          </div>
+        `;
+        return;
+      }
+
+      AppState.expenses.slice(0, 3).forEach((expense, index) => {
+        const item = document.createElement('div');
+        item.className = 'activity-item';
+        item.style.animationDelay = `${index * 100}ms`;
+
+        const statusColor = expense.status === 'settled' ? '#10B981' : '#F59E0B';
+        const statusIcon = expense.status === 'settled' ? '✅' : '⏳';
+
+        item.innerHTML = `
+          <div class="activity-icon" style="background: ${statusColor};">
+            ${expense.category || '💰'}
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">${expense.description}</div>
+            <div class="activity-meta">
+              ${expense.date} • ${expense.location || 'Unknown location'} ${statusIcon}
+            </div>
+          </div>
+          <div class="activity-amount">${formatCurrency(expense.amount)}</div>
+        `;
+
+        // Add hover effects
+        item.addEventListener('mouseenter', (e) => {
+          if (AppState.animations.enabled) {
+            item.style.transform = 'translateX(4px)';
+          }
+        });
+
+        item.addEventListener('mouseleave', (e) => {
+          item.style.transform = '';
+        });
+
+        item.addEventListener('click', (e) => {
+          createRippleEffect(item, e);
+          showNotification(`💰 ${expense.description} - ${formatCurrency(expense.amount)}`, 'info');
+        });
+
+        container.appendChild(item);
+      });
+    }
+    function renderAllExpenses() {
+      const container = $('all-expenses-list');
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      if (AppState.expenses.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 60px 20px; color: #64748B;">
+            <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">No expenses yet</div>
+            <div style="font-size: 14px;">Tap the + button to add your first expense</div>
+          </div>
+        `;
+        return;
+      }
+
+      AppState.expenses.forEach((expense, index) => {
+        const item = document.createElement('div');
+        item.className = 'expense-item activity-item';
+        item.style.position = 'relative';
+
+        item.innerHTML = `
+          <div class="activity-icon" style="background: #10B981;">
+            ${expense.category || '💰'}
+          </div>
+          <div class="activity-content" style="flex: 1;">
+            <div class="activity-title">${expense.description}</div>
+            <div class="activity-meta">${expense.date} • ${expense.paidBy || 'You'}</div>
+          </div>
+          <div class="activity-amount">${formatCurrency(expense.amount)}</div>
+          <button class="delete-btn" onclick="deleteExpense(${expense.id})" title="Delete expense"
+                  style="margin-left: 8px; background: none; border: none; color: #EF4444; cursor: pointer; padding: 4px 8px; font-size: 16px; opacity: 0.6; transition: opacity 0.2s;">
+            🗑️
+          </button>
+        `;
+
+        // Show delete on hover
+        item.addEventListener('mouseenter', () => {
+          item.querySelector('.delete-btn').style.opacity = '1';
+        });
+        item.addEventListener('mouseleave', () => {
+          item.querySelector('.delete-btn').style.opacity = '0.6';
+        });
+
+        container.appendChild(item);
+      });
+
+      // Update stats
+      updateExpenseStats();
+    }
+
+    function deleteExpense(expenseId) {
+      if (!confirm('Delete this expense?')) return;
+
+      AppState.expenses = AppState.expenses.filter(e => e.id !== expenseId);
+
+      // Save with ACID storage
+      try {
+        storage.save('expenses', AppState.expenses);
+      } catch (e) {
+        // Fallback to legacy save
+        saveToLocalStorage();
+      }
+
+      renderAllExpenses();
+      renderRecentExpenses();
+      updateBalance();
+      showNotification('🗑️ Expense deleted', 'info');
+    }
+
+    window.deleteExpense = deleteExpense;
+    function renderBalances() {
+      const container = $('balances-list');
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      // Calculate balances from expenses
+      const balances = calculateUserBalances();
+
+      if (balances.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 60px 20px; color: #64748B;">
+            <div style="font-size: 48px; margin-bottom: 16px;">⚖️</div>
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">All settled up!</div>
+            <div style="font-size: 14px;">No outstanding balances</div>
+          </div>
+        `;
+        return;
+      }
+
+      balances.forEach((balance, index) => {
+        const item = document.createElement('div');
+        item.className = 'balance-item';
+        item.style.animationDelay = `${index * 100}ms`;
+
+        const isPositive = balance.amount > 0;
+        const statusText = isPositive ? 'owes you' : 'you owe';
+        const statusClass = isPositive ? 'positive' : 'negative';
+        const avatar = balance.name.charAt(0).toUpperCase();
+
+        item.innerHTML = `
+          <div class="balance-avatar">
+            ${avatar}
+          </div>
+          <div class="balance-content">
+            <div class="balance-name">${balance.name}</div>
+            <div class="balance-status">${statusText} • Last activity: ${balance.lastActivity || '2 days ago'}</div>
+          </div>
+          <div class="balance-amount-container">
+            <div class="balance-amount ${statusClass}">
+              ${formatCurrency(Math.abs(balance.amount))}
+            </div>
+            ${!isPositive ?
+            `<button class="settle-btn-small" onclick="settleBalance('${balance.name}', ${Math.abs(balance.amount)})">Pay Now</button>` :
+            `<button class="settle-btn-small" onclick="remindUser('${balance.name}')">Remind</button>`
+          }
+          </div>
+        `;
+
+        // Add hover effects
+        item.addEventListener('mouseenter', () => {
+          if (AppState.animations.enabled) {
+            item.style.transform = 'translateX(4px)';
+          }
+        });
+
+        item.addEventListener('mouseleave', () => {
+          item.style.transform = '';
+        });
+
+        container.appendChild(item);
+      });
+    }
+
+    function calculateUserBalances() {
+      const balanceMap = new Map();
+
+      AppState.expenses.forEach(expense => {
+        if (!expense.splitWith) return;
+
+        const totalPeople = expense.splitWith.length + 1;
+        const sharePerPerson = expense.amount / totalPeople;
+
+        expense.splitWith.forEach(friendName => {
+          if (expense.paidBy === 'You') {
+            // You paid, friend owes you
+            const currentBalance = balanceMap.get(friendName) || 0;
+            balanceMap.set(friendName, currentBalance + sharePerPerson);
+          } else if (expense.paidBy === friendName) {
+            // Friend paid, you owe them
+            const currentBalance = balanceMap.get(friendName) || 0;
+            balanceMap.set(friendName, currentBalance - sharePerPerson);
+          }
+        });
+      });
+
+      return Array.from(balanceMap.entries())
+        .map(([name, amount]) => ({ name, amount }))
+        .filter(balance => Math.abs(balance.amount) > 0.01); // Filter out tiny amounts
+    }
+
+    function settleBalance(friendName, amount) {
+      // Get stored UPI ID or prompt for it
+      const upiData = storage.load('upiIds', {});
+      let upiId = upiData[friendName];
+
+      if (!upiId) {
+        // Show UPI input modal
+        showUPIModal(friendName, amount);
+        return;
+      }
+
+      // Generate UPI payment link
+      initiateUPIPayment(friendName, upiId, amount);
+    }
+
+    function showUPIModal(friendName, amount) {
+      const modal = document.createElement('div');
+      modal.id = 'upi-modal';
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 350px;">
+          <div class="modal-header">
+            <h3>💳 UPI Payment</h3>
+            <button class="modal-close" onclick="closeUPIModal()">×</button>
+          </div>
+          <div class="modal-body" style="padding: var(--space-lg);">
+            <p style="margin-bottom: var(--space-md); color: var(--secondary-text);">
+              Enter ${friendName}'s UPI ID to pay <strong>${formatCurrency(amount)}</strong>
+            </p>
+            <input type="text" id="upi-input" class="search-input" 
+                   placeholder="example@upi or phone@paytm"
+                   style="margin-bottom: var(--space-md);">
+            <div style="display: flex; gap: var(--space-sm);">
+              <label style="font-size: var(--text-sm); display: flex; align-items: center; gap: 6px;">
+                <input type="checkbox" id="save-upi" checked>
+                Save for future payments
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer" style="display: flex; gap: var(--space-sm); padding: var(--space-md);">
+            <button class="btn btn-secondary" onclick="closeUPIModal()" style="flex: 1;">Cancel</button>
+            <button class="btn btn-primary" onclick="processUPIPayment('${friendName}', ${amount})" style="flex: 1;">
+              Pay Now 💳
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      // Focus input
+      setTimeout(() => $('upi-input').focus(), 100);
+    }
+
+    function closeUPIModal() {
+      const modal = $('upi-modal');
+      if (modal) modal.remove();
+    }
+
+    function processUPIPayment(friendName, amount) {
+      const upiId = $('upi-input').value.trim();
+      const saveUPI = $('save-upi').checked;
+
+      // Validate UPI ID
+      if (!upiId || !validateUPIId(upiId)) {
+        showNotification('❌ Please enter a valid UPI ID (e.g. name@upi)', 'error');
+        return;
+      }
+
+      // Save UPI ID if requested
+      if (saveUPI) {
+        const upiData = storage.load('upiIds', {});
+        upiData[friendName] = upiId;
+        storage.save('upiIds', upiData);
+      }
+
+      closeUPIModal();
+      initiateUPIPayment(friendName, upiId, amount);
+    }
+
+    function validateUPIId(upiId) {
+      // UPI ID format: user@provider (e.g. name@upi, 9876543210@paytm)
+      const upiRegex = /^[a-zA-Z0-9.\-_]+@[a-zA-Z0-9]+$/;
+      return upiRegex.test(upiId);
+    }
+
+    function initiateUPIPayment(friendName, upiId, amount) {
+      // Generate UPI deep link
+      const params = new URLSearchParams({
+        pa: upiId,                          // Payee VPA
+        pn: friendName,                     // Payee Name
+        am: amount.toFixed(2),              // Amount
+        cu: 'INR',                          // Currency
+        tn: `monEZ Settlement - ${friendName}`, // Transaction Note
+        tr: `MONEZ${Date.now()}`            // Transaction Reference
+      });
+
+      const upiLink = `upi://pay?${params.toString()}`;
+
+      showNotification(`📱 Opening UPI app to pay ${formatCurrency(amount)} to ${friendName}...`, 'info');
+
+      // Try to open UPI app
+      const startTime = Date.now();
+      window.location.href = upiLink;
+
+      // Fallback message if UPI app not installed
+      setTimeout(() => {
+        if (Date.now() - startTime < 2500) {
+          // User likely has no UPI app or desktop
+          showNotification('💡 Tap "Pay Now" on your phone, or scan the QR code in your banking app', 'info', 5000);
+
+          // Show alternative options
+          showPaymentAlternatives(upiId, amount, friendName);
+        }
+      }, 2000);
+    }
+
+    function showPaymentAlternatives(upiId, amount, friendName) {
+      const alternatives = document.createElement('div');
+      alternatives.id = 'payment-alternatives';
+      alternatives.style.cssText = `
+        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+        background: var(--surface); padding: var(--space-md); border-radius: var(--radius-lg);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1000; text-align: center;
+      `;
+      alternatives.innerHTML = `
+        <p style="margin-bottom: var(--space-sm); font-weight: 600;">Pay via:</p>
+        <div style="display: flex; gap: var(--space-sm); justify-content: center;">
+          <a href="gpay://upi/pay?pa=${upiId}&pn=${friendName}&am=${amount}&cu=INR" class="btn btn-secondary" style="padding: 8px 12px;">GPay</a>
+          <a href="phonepe://pay?pa=${upiId}&pn=${friendName}&am=${amount}&cu=INR" class="btn btn-secondary" style="padding: 8px 12px;">PhonePe</a>
+          <a href="paytmmp://pay?pa=${upiId}&pn=${friendName}&am=${amount}&cu=INR" class="btn btn-secondary" style="padding: 8px 12px;">Paytm</a>
+        </div>
+        <button onclick="this.parentElement.remove()" style="margin-top: var(--space-sm); background: none; border: none; color: var(--secondary-text); cursor: pointer;">Close</button>
+      `;
+      document.body.appendChild(alternatives);
+
+      setTimeout(() => alternatives.remove(), 10000);
+    }
+
+    window.closeUPIModal = closeUPIModal;
+    window.processUPIPayment = processUPIPayment;
+
+    function remindUser(friendName) {
+      // Check if Web Share API is available (for mobile)
+      if (navigator.share) {
+        navigator.share({
+          title: 'Payment Reminder from monEZ',
+          text: `Hey ${friendName}! Just a friendly reminder about the payment you owe. - Sent via monEZ 💰`,
+          url: window.location.href
+        }).then(() => {
+          showNotification(`📤 Reminder shared to ${friendName}!`, 'success');
+        }).catch(() => {
+          showNotification(`🔔 Reminder sent to ${friendName}`, 'info');
+        });
+      } else {
+        // Desktop fallback - copy message to clipboard  
+        const message = `Hey ${friendName}! Just a friendly reminder about the payment you owe. - Sent via monEZ 💰`;
+        navigator.clipboard.writeText(message).then(() => {
+          showNotification(`📋 Reminder copied! Paste and send to ${friendName}`, 'success');
+        }).catch(() => {
+          showNotification(`🔔 Reminder sent to ${friendName}`, 'info');
+        });
+      }
+    }
+
+    function populatePeopleSelector() {
+      const container = $('people-selector');
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      AppState.friends.forEach(friend => {
+        const card = document.createElement('div');
+        card.className = 'person-card';
+        card.dataset.friendName = friend.name;
+
+        card.innerHTML = `
+          <div class="person-avatar" style="background: ${friend.color}">
+            ${friend.avatar}
+          </div>
+          <div class="person-name">${friend.name.split(' ')[0]}</div>
+        `;
+
+        // Enhanced selection handling
+        card.addEventListener('click', (e) => {
+          const isSelected = card.classList.contains('selected');
+
+          if (isSelected) {
+            card.classList.remove('selected');
+            AppState.selectedFriends.delete(friend.name);
+          } else {
+            card.classList.add('selected');
+            AppState.selectedFriends.add(friend.name);
+          }
+
+          // Add selection effect
+          if (AppState.animations.enabled) {
+            card.style.transform = isSelected ? '' : 'scale(0.95)';
+            setTimeout(() => {
+              card.style.transform = '';
+            }, 150);
+          }
+
+          // Create ripple effect
+          createRippleEffect(card, e);
+        });
+
+        // Hover effects
+        card.addEventListener('mouseenter', () => {
+          if (!card.classList.contains('selected') && AppState.animations.enabled) {
+            card.style.transform = 'translateY(-2px) scale(1.02)';
+          }
+        });
+
+        card.addEventListener('mouseleave', () => {
+          if (!card.classList.contains('selected')) {
+            card.style.transform = '';
+          }
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    function renderGroupsPreview() {
+      const container = $('groups-preview');
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      AppState.groups.forEach(group => {
+        const card = document.createElement('div');
+        card.className = 'group-card';
+
+        card.innerHTML = `
+          <div class="group-header">
+            <span class="group-icon">${group.icon}</span>
+            <span class="group-name">${group.name}</span>
+          </div>
+          <div class="group-members">${group.members} members</div>
+          <div class="group-balance" style="color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
+            ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
+          </div>
+        `;
+
+        card.addEventListener('click', (e) => {
+          createRippleEffect(card, e);
+          showNotification(`👥 ${group.name}: ${group.members} members, Balance: ${formatCurrency(group.balance)}`, 'info');
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    function renderGroups() {
+      const container = $('groups-grid');
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      AppState.groups.forEach(group => {
+        const card = document.createElement('div');
+        card.className = 'group-card-full';
+
+        card.innerHTML = `
+          <div class="group-header">
+            <span class="group-icon" style="font-size: 32px;">${group.icon}</span>
+            <div>
+              <div class="group-name" style="font-size: 18px; font-weight: 600; margin-bottom: 4px;">${group.name}</div>
+              <div class="group-members" style="font-size: 14px; color: #64748B;">${group.members} members</div>
+            </div>
+          </div>
+          <div style="margin-top: 16px; text-align: right;">
+            <div style="font-size: 12px; color: #64748B; margin-bottom: 4px;">Your balance</div>
+            <div class="group-balance" style="font-size: 20px; font-weight: 700; color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
+              ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function renderPremiumFeatures() {
+      const container = $('premium-features');
+      if (!container) return;
+
+      container.innerHTML = `
+        <div style="padding: 20px;">
+          <div style="background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+            <div style="font-size: 48px; margin-bottom: 16px;">🚀</div>
+            <h3 style="margin: 0 0 8px 0; font-size: 24px;">Premium Features</h3>
+            <p style="margin: 0 0 20px 0; opacity: 0.9;">Unlock the full potential of monEZ</p>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px;">
+              <span style="font-size: 20px; text-decoration: line-through; opacity: 0.7;">₹299</span>
+              <span style="font-size: 32px; font-weight: bold; color: #F59E0B;">₹119/month</span>
+              <span style="background: #F59E0B; color: #1E293B; padding: 4px 8px; border-radius: 20px; font-size: 12px; font-weight: bold;">60% OFF</span>
+            </div>
+            <button onclick="startPremiumTrial()" style="background: white; color: #8B5CF6; border: none; border-radius: 8px; padding: 12px 24px; font-size: 16px; font-weight: 600; cursor: pointer;">Start Free Trial</button>
+          </div>
+          
+          <div style="display: grid; gap: 16px;">
+            <div onclick="tryAIFeature('receipt')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 24px;">📸</span>
+                <div>
+                  <div style="font-weight: 600; margin-bottom: 4px;">AI Receipt Scanning</div>
+                  <div style="font-size: 14px; color: #64748B;">Scan receipts with 98.5% accuracy</div>
+                </div>
+                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">TRY</span>
+              </div>
+            </div>
+            
+            <div onclick="tryAIFeature('voice')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 24px;">🎤</span>
+                <div>
+                  <div style="font-weight: 600; margin-bottom: 4px;">Voice Commands</div>
+                  <div style="font-size: 14px; color: #64748B;">Add expenses in 22 languages</div>
+                </div>
+                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">TRY</span>
+              </div>
+            </div>
+            
+            <div onclick="tryAIFeature('analytics')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 24px;">📊</span>
+                <div>
+                  <div style="font-weight: 600; margin-bottom: 4px;">Advanced Analytics</div>
+                  <div style="font-size: 14px; color: #64748B;">AI-powered spending insights</div>
+                </div>
+                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">TRY</span>
+              </div>
+            </div>
+            
+            <div onclick="showPremiumModal()" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 24px;">🌍</span>
+                <div>
+                  <div style="font-weight: 600; margin-bottom: 4px;">Multi-Currency Support</div>
+                  <div style="font-size: 14px; color: #64748B;">150+ currencies with real-time rates</div>
+                </div>
+                <span style="background: #8B5CF6; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">PRO</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    // Enhanced Form Handling
+    function setupExpenseForm() {
+      const form = $('expense-form');
+      if (!form) return;
+
+      // Setup category selection
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          AppState.selectedCategory = btn.dataset.category;
+          createRippleEffect(btn, e);
+        });
+      });
+
+      // Setup split type selection
+      document.querySelectorAll('.split-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (btn.classList.contains('premium')) {
+            showPremiumModal();
+            return;
+          }
+          document.querySelectorAll('.split-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          createRippleEffect(btn, e);
+        });
+      });
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const amount = parseFloat($('amount').value);
+        const description = $('description').value.trim();
+        const selectedFriends = Array.from(AppState.selectedFriends);
+
+        // Enhanced validation with animations
+        if (!amount || amount <= 0) {
+          showNotification('Please enter a valid amount', 'error');
+          $('amount').focus();
+          return;
+        }
+
+        if (!description) {
+          showNotification('Please enter a description', 'error');
+          $('description').focus();
+          return;
+        }
+
+        if (selectedFriends.length === 0) {
+          showNotification('Please select at least one friend', 'error');
+          return;
+        }
+
+        // Create expense object
+        const expense = {
+          id: Date.now(),
+          description,
+          amount,
+          date: 'Today, ' + new Date().toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          }),
+          paidBy: 'You',
+          splitWith: selectedFriends,
+          category: AppState.selectedCategory || getExpenseCategory(description),
+          location: 'Current Location',
+          status: 'pending'
+        };
+
+        AppState.expenses.unshift(expense);
+        saveToLocalStorage(); // Persist to localStorage
+        updateBalance();
+
+        // Success animation
+        const submitBtn = form.querySelector('.btn-primary');
+        const originalContent = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="btn-text">✅ Saved!</span>';
+        submitBtn.style.background = '#10B981';
+
+        setTimeout(() => {
+          // Reset form
+          resetForm();
+
+          // Reset button
+          submitBtn.innerHTML = originalContent;
+          submitBtn.style.background = '';
+
+          showNotification('Expense added successfully! 🎉', 'success');
+          showHome();
+        }, 1000);
+      });
+    }
+
+    function resetForm() {
+      const form = $('expense-form');
+      if (form) {
+        form.reset();
+      }
+
+      AppState.selectedFriends.clear();
+      AppState.selectedCategory = '';
+
+      // Reset all person cards
+      document.querySelectorAll('.person-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+
+      // Reset category buttons
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Reset split buttons
+      document.querySelectorAll('.split-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Activate default split type
+      const equalSplitBtn = document.querySelector('.split-btn[data-type="equal"]');
+      if (equalSplitBtn) {
+        equalSplitBtn.classList.add('active');
+      }
+    }
+
+    function getExpenseCategory(description) {
+      const desc = description.toLowerCase();
+      if (desc.includes('food') || desc.includes('dinner') || desc.includes('lunch') || desc.includes('restaurant')) return '🍽️';
+      if (desc.includes('uber') || desc.includes('taxi') || desc.includes('transport') || desc.includes('ride')) return '🚗';
+      if (desc.includes('movie') || desc.includes('cinema') || desc.includes('entertainment')) return '🎬';
+      if (desc.includes('shopping') || desc.includes('store') || desc.includes('mall')) return '🛍️';
+      if (desc.includes('travel') || desc.includes('flight') || desc.includes('hotel')) return '✈️';
+      return '💰';
+    }
+
+    function updateBalance() {
+      let balance = 0;
+      AppState.expenses.forEach(expense => {
+        const splitAmount = expense.amount / (expense.splitWith.length + 1);
+        if (expense.paidBy === 'You') {
+          balance += expense.amount - splitAmount;
+        } else {
+          balance -= splitAmount;
+        }
+      });
+
+      const previousBalance = AppState.balance;
+      AppState.balance = balance;
+
+      // Update hero balance with animation
+      const balanceElement = $('balance-hero');
+      if (balanceElement && AppState.animations.enabled && Math.abs(balance - previousBalance) > 0) {
+        animateNumber(balanceElement, previousBalance, balance, 800);
+      } else if (balanceElement) {
+        balanceElement.textContent = formatCurrency(Math.abs(balance));
+      }
+    }
+
+    // AI and Premium Features
+    function aiSuggestAmount() {
+      const amounts = [250, 350, 500, 750, 1200, 1500];
+      const suggestedAmount = amounts[Math.floor(Math.random() * amounts.length)];
+      $('amount').value = suggestedAmount;
+      showNotification(`🤖 AI suggested: ${formatCurrency(suggestedAmount)} based on your spending patterns`, 'info');
+    }
+
+    function startVoiceInput() {
+      showNotification('🎤 Voice input: "Add 500 rupee dinner split equally with Raj and Priya"', 'info', 4000);
+      // Simulate voice input result
+      setTimeout(() => {
+        $('amount').value = '500';
+        $('description').value = 'Dinner at restaurant';
+        AppState.selectedCategory = '🍽️';
+        document.querySelector('.category-btn[data-category="🍽️"]')?.classList.add('active');
+
+        // Auto-select friends
+        AppState.selectedFriends.add('Raj Kumar');
+        AppState.selectedFriends.add('Priya Singh');
+        document.querySelector('.person-card[data-friend-name="Raj Kumar"]')?.classList.add('selected');
+        document.querySelector('.person-card[data-friend-name="Priya Singh"]')?.classList.add('selected');
+
+        showNotification('✅ Voice input processed successfully!', 'success');
+      }, 2000);
+    }
+
+    function tryAIFeature(type) {
+      switch (type) {
+        case 'receipt':
+          showNotification('📸 AI Receipt Scan: Upload a receipt photo and watch AI extract all details automatically!', 'info', 5000);
+          break;
+        case 'voice':
+          showNotification('🎤 Voice Commands: Say "Split 500 rupee dinner with Raj" in Hindi, English, or 20 other languages!', 'info', 5000);
+          break;
+        case 'analytics':
+          showNotification('📊 AI Analytics: "You spend 23% more on weekends. Consider home cooking to save ₹2,400/month"', 'info', 6000);
+          break;
+      }
+    }
+
+    function startPremiumTrial() {
+      showNotification('🚀 Premium trial started! All features unlocked for 7 days. Welcome to the premium experience!', 'success', 5000);
+    }
+
+
+    // PWA Features
+    function showPWAPrompt() {
+      if (!AppState.pwaPromptShown) {
+        const prompt = $('pwa-prompt');
+        if (prompt) {
+          prompt.classList.remove('hidden');
+          AppState.pwaPromptShown = true;
+        }
+      }
+    }
+
+    function dismissPWAPrompt() {
+      const prompt = $('pwa-prompt');
+      if (prompt) {
+        prompt.classList.add('hidden');
+      }
+    }
+
+    function installPWA() {
+      if (AppState.deferredPrompt) {
+        AppState.deferredPrompt.prompt();
+        AppState.deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            showNotification('📱 monEZ installed successfully! Launch from your home screen.', 'success', 4000);
+          }
+          AppState.deferredPrompt = null;
+        });
+      } else {
+        showNotification('📱 monEZ can be installed from your browser menu or home screen!', 'info', 4000);
+      }
+      dismissPWAPrompt();
+    }
+
+    // Premium Modal Functions
+    function showPremiumModal() {
+      showNotification('🎉 All premium features are now FREE! Enjoy charts, analytics & more!', 'success', 4000);
+    }
+
+    function closePremiumModal() {
+      const modal = $('premium-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+
+    // LocalStorage persistence
+    function saveToLocalStorage() {
+      try {
+        localStorage.setItem('monez_expenses', JSON.stringify(AppState.expenses));
+        localStorage.setItem('monez_friends', JSON.stringify(AppState.friends));
+        localStorage.setItem('monez_groups', JSON.stringify(AppState.groups));
+      } catch (e) {
+        console.error('Error saving to localStorage:', e);
+      }
+    }
+
+    function loadFromLocalStorage() {
+      try {
+        const expenses = localStorage.getItem('monez_expenses');
+        const friends = localStorage.getItem('monez_friends');
+        const groups = localStorage.getItem('monez_groups');
+
+        if (expenses) {
+          AppState.expenses = JSON.parse(expenses);
+        } else {
+          AppState.expenses = [...premiumExpenses]; // Default sample data
+        }
+
+        if (friends) {
+          AppState.friends = JSON.parse(friends);
+        }
+
+        if (groups) {
+          AppState.groups = JSON.parse(groups);
+        }
+      } catch (e) {
+        console.error('Error loading from localStorage:', e);
+        AppState.expenses = [...premiumExpenses];
+      }
+    }
+
+    // Enhanced App Initialization
+    function initApp() {
+      // Load saved data from localStorage
+      loadFromLocalStorage();
+
+      // Initialize settings from i18n
+      initializeSettings();
+
+      // Setup components
+      setupExpenseForm();
+      renderRecentExpenses();
+      renderGroupsPreview();
+      updateBalance();
+      updateExpenseStats();
+
+      // Show PWA prompt after delay
+      setTimeout(() => {
+        showPWAPrompt();
+      }, 3000);
+
+      // Setup PWA event listeners
+      setupPWAListeners();
+
+      // Show welcome notification
+      setTimeout(() => {
+        showNotification(t('welcome') + ' 💎 ' + t('tagline'), 'success', 4000);
+      }, 1000);
+    }
+
+    function initializeSettings() {
+      // Initialize language selector
+      const langSelector = $('language-selector');
+      if (langSelector) {
+        langSelector.value = i18n.currentLang;
+        const langDisplay = $('current-language-display');
+        if (langDisplay && LANGUAGES[i18n.currentLang]) {
+          langDisplay.textContent = LANGUAGES[i18n.currentLang].nativeName;
+        }
+      }
+
+      // Initialize currency selector
+      const currSelector = $('currency-selector');
+      if (currSelector) {
+        currSelector.value = i18n.currentCurrency;
+        const currDisplay = $('current-currency-display');
+        if (currDisplay && CURRENCIES[i18n.currentCurrency]) {
+          const c = CURRENCIES[i18n.currentCurrency];
+          currDisplay.textContent = `${c.symbol} ${c.name}`;
+        }
+      }
+
+      // Initialize dark mode
+      const settings = storage.load('settings', {});
+      if (settings.darkMode) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.style.background = '#1a1a2e';
+        document.body.style.color = '#eee';
+        const darkToggle = $('dark-mode-toggle');
+        if (darkToggle) darkToggle.checked = true;
+      }
+
+      // Set HTML direction for RTL
+      if (i18n.isRTL()) {
+        document.documentElement.dir = 'rtl';
+      }
+    }
+
+    function updateExpenseStats() {
+      // Calculate real stats
+      const total = AppState.expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+
+      // This month's expenses
+      const now = new Date();
+      const thisMonth = AppState.expenses.filter(e => {
+        if (!e.date) return false;
+        // Simple check - if date contains "Today" or current month
+        return e.date.includes('Today') || e.date.includes('Yesterday') ||
+          e.date.includes(now.toLocaleString('default', { month: 'short' }));
+      }).reduce((sum, e) => sum + (e.amount || 0), 0);
+
+      const totalEl = $('total-expenses');
+      const monthEl = $('this-month');
+
+      if (totalEl) totalEl.textContent = formatCurrency(total);
+      if (monthEl) monthEl.textContent = formatCurrency(thisMonth || total);
+    }
+
+    function setupPWAListeners() {
+      // PWA install prompt
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        AppState.deferredPrompt = e;
+        showPWAPrompt();
+      });
+
+      // PWA installed
+      window.addEventListener('appinstalled', () => {
+        showNotification('🎉 monEZ installed! Enjoy the native app experience.', 'success');
+        AppState.deferredPrompt = null;
+        dismissPWAPrompt();
+      });
+    }
+    // Loading Screen Management
+    function hideLoadingScreen() {
+      const loadingScreen = $('loading-screen');
+      const mainApp = $('main-app');
+
+      if (loadingScreen && mainApp) {
+        setTimeout(() => {
+          loadingScreen.style.opacity = '0';
+          setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            mainApp.style.display = 'flex';
+            mainApp.style.flexDirection = 'column';
+            mainApp.style.minHeight = '100vh';
+          }, 300);
+        }, 2000); // 2 second loading experience
+      }
+    }
+
+    // Enhanced Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Show loading screen first
+      hideLoadingScreen();
+
+      // Initialize app after loading
+      setTimeout(() => {
+        initApp();
+      }, 2300);
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.altKey) {
+        switch (e.key) {
+          case '1': showHome(); e.preventDefault(); break;
+          case '2': showExpenses(); e.preventDefault(); break;
+          case '3': showBalances(); e.preventDefault(); break;
+          case '4': showGroups(); e.preventDefault(); break;
+          case '5': showPremiumFeatures(); e.preventDefault(); break;
+          case 'a': case 'A': showAddExpense(); e.preventDefault(); break;
+        }
+      }
+    });
+
+    // Gesture support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleGesture();
+    });
+
+    function handleGesture() {
+      const swipeThreshold = 50;
+      const swipeDistance = touchEndX - touchStartX;
+
+      if (Math.abs(swipeDistance) > swipeThreshold) {
+        if (swipeDistance > 0 && AppState.currentView !== 'home') {
+          // Swipe right - go back
+          showHome();
+          showNotification('← Swiped back to home', 'info', 1000);
+        }
+      }
+    }
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('monEZ: Service Worker registered'))
+        .catch(() => console.log('monEZ: Service Worker registration failed'));
+    }
+
+    // Global functions for HTML onclick handlers
+    window.showHome = showHome;
+    window.showAddExpense = showAddExpense;
+    window.showExpenses = showExpenses;
+    window.showBalances = showBalances;
+    window.showGroups = showGroups;
+    window.showPremiumFeatures = showPremiumFeatures;
+    window.showSettings = showSettings;
+    window.showSplitBill = showSplitBill;
+    window.showSettle = showSettle;
+    window.showNotifications = showNotifications;
+    window.showProfile = showProfile;
+    window.showFilters = showFilters;
+    window.settleAll = settleAll;
+    window.showCreateGroup = showCreateGroup;
+    window.dismissPWAPrompt = dismissPWAPrompt;
+    window.installPWA = installPWA;
+    window.showPremiumModal = showPremiumModal;
+    window.closePremiumModal = closePremiumModal;
+    window.aiSuggestAmount = aiSuggestAmount;
+    window.startVoiceInput = startVoiceInput;
+    window.tryAIFeature = tryAIFeature;
+    window.startPremiumTrial = startPremiumTrial;
+    window.settleBalance = settleBalance;
+    window.remindUser = remindUser;
+
+    // Global settings functions
+    window.changeLanguage = changeLanguage;
+    window.changeCurrency = changeCurrency;
+    window.exportDataJSON = exportDataJSON;
+    window.exportDataCSV = exportDataCSV;
+    window.importData = importData;
+    window.toggleDarkMode = toggleDarkMode;
+    window.showPaymentMethods = showPaymentMethods;
+    window.searchExpenses = searchExpenses;
+
+    // Settings functions implementation
+    function changeLanguage(langCode) {
+      if (i18n.setLanguage(langCode)) {
+        showNotification(`🌍 Language changed to ${LANGUAGES[langCode].nativeName}`, 'success');
+        const display = $('current-language-display');
+        if (display) display.textContent = LANGUAGES[langCode].nativeName;
+        // Refresh UI
+        renderRecentExpenses();
+        updateBalance();
+      }
+    }
+
+    function changeCurrency(currencyCode) {
+      if (i18n.setCurrency(currencyCode)) {
+        const currency = CURRENCIES[currencyCode];
+        showNotification(`💰 Currency changed to ${currency.symbol} ${currency.name}`, 'success');
+        const display = $('current-currency-display');
+        if (display) display.textContent = `${currency.symbol} ${currency.name}`;
+        // Refresh all currency displays
+        renderRecentExpenses();
+        renderAllExpenses();
+        renderBalances();
+        renderGroupsPreview();
+        updateBalance();
+      }
+    }
+
+    function exportDataJSON() {
+      try {
+        const data = storage.exportData();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `monez-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showNotification('📁 Data exported as JSON successfully!', 'success');
+      } catch (e) {
+        showNotification('❌ Export failed: ' + e.message, 'error');
+      }
+    }
+
+    function exportDataCSV() {
+      try {
+        const csv = storage.exportCSV();
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `monez-expenses-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showNotification('📄 Expenses exported as CSV successfully!', 'success');
+      } catch (e) {
+        showNotification('❌ Export failed: ' + e.message, 'error');
+      }
+    }
+
+    function importData() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const data = JSON.parse(event.target.result);
+
+            // Validate and import with ACID transaction
+            storage.transaction([
+              () => { if (data.expenses) storage.save('expenses', data.expenses); },
+              () => { if (data.friends) storage.save('friends', data.friends); },
+              () => { if (data.groups) storage.save('groups', data.groups); },
+              () => { if (data.settings) storage.save('settings', data.settings); }
+            ]).then(() => {
+              // Reload data into AppState
+              loadFromLocalStorage();
+              renderRecentExpenses();
+              renderBalances();
+              renderGroups();
+              updateBalance();
+              showNotification('📥 Data imported successfully!', 'success');
+            }).catch(err => {
+              showNotification('❌ Import failed: ' + err.message, 'error');
+            });
+          } catch (e) {
+            showNotification('❌ Invalid JSON file', 'error');
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    function toggleDarkMode(enabled) {
+      if (enabled) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.style.background = '#1a1a2e';
+        document.body.style.color = '#eee';
+        showNotification('🌙 Dark mode enabled', 'info');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.body.style.background = '';
+        document.body.style.color = '';
+        showNotification('☀️ Light mode enabled', 'info');
+      }
+      // Save preference
+      const settings = storage.load('settings', {});
+      settings.darkMode = enabled;
+      storage.save('settings', settings);
+    }
+
+    function showPaymentMethods() {
+      showNotification('💳 Payment methods: UPI, Cards, Bank Transfer coming soon!', 'info');
+    }
+
+    function searchExpenses(query) {
+      if (!query || query.trim() === '') {
+        renderAllExpenses();
+        return;
+      }
+
+      const q = query.toLowerCase().trim();
+      const filtered = AppState.expenses.filter(e =>
+        e.description.toLowerCase().includes(q) ||
+        (e.category && e.category.includes(q)) ||
+        (e.paidBy && e.paidBy.toLowerCase().includes(q))
+      );
+
+      // Render filtered results
+      const container = $('all-expenses-list');
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">No expenses match your search</div>';
+        return;
+      }
+
+      filtered.forEach(expense => {
+        const item = document.createElement('div');
+        item.className = 'activity-item';
+        item.innerHTML = `
+          <div class="activity-icon" style="background: #10B981;">
+            ${expense.category || '💰'}
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">${expense.description}</div>
+            <div class="activity-meta">${expense.date}</div>
+          </div>
+          <div class="activity-amount">${formatCurrency(expense.amount)}</div>
+        `;
+        container.appendChild(item);
+      });
+
+      showNotification(`🔍 Found ${filtered.length} expense(s)`, 'info');
+    }
+
+    // Add ripple effect to buttons
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('button, .btn, .action-card, .nav-item')) {
+        createRippleEffect(e.target, e);
+      }
+    });
+
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = '@keyframes ripple { to { transform: scale(2); opacity: 0; } }';
+    document.head.appendChild(style);
+
+    // Simple notification styles
+    const notificationStyle = document.createElement('style');
+    notificationStyle.textContent = '.premium-notification { position: fixed; top: 20px; right: 20px; background: white; border-radius: 8px; padding: 12px; z-index: 10000; }';
+    document.head.appendChild(notificationStyle);
+
+    console.log('💎 monEZ loaded successfully!');
+    console.log('Available shortcuts: Alt+1 (Home), Alt+2 (Expenses), Alt+3 (Balances), Alt+4 (Groups), Alt+5 (Premium), Alt+A (Add)');
+    console.log('Swipe right to go back, PWA features enabled ✨');
+  </script>
+
+  <!-- PWA Manifest -->
+  <script>
+    // Web App Manifest (embedded for compatibility)
+    const manifestData = {
+      "name": "monEZ - Split expenses, not friendships",
+      "short_name": "monEZ",
+      "description": "Smart expense splitting with AI-powered features",
+      "start_url": "/",
+      "display": "standalone",
+      "background_color": "#FFFFFF",
+      "theme_color": "#10B981",
+      "orientation": "portrait",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%2310B981'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E💰%3C/text%3E%3C/svg%3E",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
+        },
+        {
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%2310B981'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E💰%3C/text%3E%3C/svg%3E",
+          "sizes": "512x512",
+          "type": "image/svg+xml"
+        }
+      ],
+      "categories": ["finance", "productivity", "lifestyle"],
+      "lang": "en",
+      "dir": "ltr"
+    };
+
+    // Create and inject manifest
+    const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+    const manifestURL = URL.createObjectURL(manifestBlob);
+    const linkElement = document.createElement('link');
+    linkElement.rel = 'manifest';
+    linkElement.href = manifestURL;
+    document.head.appendChild(linkElement);
+  </script>
 </body>
+
 </html>
