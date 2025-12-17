@@ -1536,57 +1536,6 @@
 
     /* View Header */
   </style>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  /* Utility Classes */
-  .hidden {
-  display: none !important;
-  }
-
-  /* Responsive */
-  @media (max-width: 480px) {
-  .app {
-  max-width: 100%;
-  }
-  }
-  </style>
 </head>
 
 <body>
@@ -4413,6 +4362,80 @@
 
     // Enhanced App Initialization
     function initApp() {
+      // Check if this is first visit
+      const isFirstVisit = !localStorage.getItem('monez_visited');
+
+      if (isFirstVisit) {
+        // Show first-visit welcome modal
+        showFirstVisitModal();
+        return; // Wait for user choice before continuing
+      }
+
+      // Continue with normal initialization
+      continueAppInit();
+    }
+
+    function showFirstVisitModal() {
+      const modal = document.createElement('div');
+      modal.id = 'first-visit-modal';
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 16px;">👋</div>
+          <h2 style="margin-bottom: 8px; color: var(--gold-accent);">Welcome to monEZ!</h2>
+          <p style="color: var(--secondary-text); margin-bottom: 24px;">
+            The best free expense splitting app with UPI payments, 55 currencies, and 25 languages.
+          </p>
+          <div style="background: var(--surface); padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px;">
+            <p style="font-size: 14px; color: var(--secondary-text);">
+              Would you like to start with a <strong>fresh empty account</strong> or explore with <strong>sample data</strong>?
+            </p>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" onclick="startFresh()" style="flex: 1; padding: 14px;">
+              🆕 Start Fresh
+            </button>
+            <button class="btn btn-primary" onclick="keepSampleData()" style="flex: 1; padding: 14px;">
+              📊 Explore with Demo
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function startFresh() {
+      // Clear all data
+      localStorage.removeItem('monez_expenses');
+      localStorage.removeItem('monez_friends');
+      localStorage.removeItem('monez_groups');
+
+      // Reset AppState
+      AppState.expenses = [];
+      AppState.friends = [];
+      AppState.groups = [];
+
+      // Mark as visited and continue
+      localStorage.setItem('monez_visited', 'true');
+      closeFirstVisitModal();
+      continueAppInit();
+      showNotification('🆕 Started with a fresh account!', 'success');
+    }
+
+    function keepSampleData() {
+      // Keep sample data, just mark as visited
+      localStorage.setItem('monez_visited', 'true');
+      closeFirstVisitModal();
+      continueAppInit();
+      showNotification('📊 Explore the demo data - add your own expenses anytime!', 'success');
+    }
+
+    function closeFirstVisitModal() {
+      const modal = $('first-visit-modal');
+      if (modal) modal.remove();
+    }
+
+    function continueAppInit() {
       // Load saved data from localStorage
       loadFromLocalStorage();
 
@@ -4624,6 +4647,11 @@
     window.toggleDarkMode = toggleDarkMode;
     window.showPaymentMethods = showPaymentMethods;
     window.searchExpenses = searchExpenses;
+
+    // First-visit modal functions
+    window.startFresh = startFresh;
+    window.keepSampleData = keepSampleData;
+    window.closeFirstVisitModal = closeFirstVisitModal;
 
     // Settings functions implementation
     function changeLanguage(langCode) {
