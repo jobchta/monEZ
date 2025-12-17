@@ -12,6 +12,18 @@
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23846941'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>💰</text></svg>">
   <title>monEZ - Split expenses, not friendships</title>
+
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase Configuration
+    const SUPABASE_URL = 'https://royqgwcrwzqeehrebdrp.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE'; // Replace with your anon key from Supabase dashboard
+
+    // Initialize Supabase client (will be done after DOM loads)
+    let supabase = null;
+  </script>
+
   <style>
     /* monEZ Luxury Banking Design System */
     :root {
@@ -1624,10 +1636,11 @@
               <div class="action-icon">💳</div>
               <div class="action-label">Settle Up</div>
             </button>
-            <button class="action-card premium" onclick="showPremiumFeatures()">
+            <button class="action-card" onclick="showPremiumFeatures()"
+              style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
               <div class="action-icon">✨</div>
               <div class="action-label">AI Insights</div>
-              <div class="premium-badge">PRO</div>
+              <div style="font-size: 10px; color: rgba(255,255,255,0.9);">FREE</div>
             </button>
           </div>
 
@@ -1709,8 +1722,7 @@
               <div class="split-type">
                 <button type="button" class="split-btn active" data-type="equal">Equal Split</button>
                 <button type="button" class="split-btn" data-type="percentage">By Percentage</button>
-                <button type="button" class="split-btn premium" data-type="custom" onclick="showPremiumModal()">Custom
-                  Split <span class="pro-tag">PRO</span></button>
+                <button type="button" class="split-btn" data-type="custom">Custom Split</button>
               </div>
             </div>
 
@@ -2037,9 +2049,9 @@
           <span class="group-count">2</span>
         </button>
         <button class="nav-item" data-view="premium" onclick="showPremiumFeatures()">
-          <span class="nav-icon">✨</span>
-          <span class="nav-label">Premium</span>
-          <span class="premium-indicator">PRO</span>
+          <span class="nav-icon">🎁</span>
+          <span class="nav-label">Features</span>
+          <span class="premium-indicator" style="background: #10B981;">FREE</span>
         </button>
       </nav>
     </div>
@@ -2048,6 +2060,74 @@
     <button class="fab" onclick="showAddExpense()">
       <span class="fab-icon">+</span>
     </button>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal hidden">
+      <div class="modal-overlay" onclick="closeAuthModal()"></div>
+      <div class="modal-content" style="max-width: 400px; padding: 32px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div style="font-size: 48px; margin-bottom: 8px;">🔐</div>
+          <h2 style="color: var(--gold-accent); margin-bottom: 4px;">Sign In to Sync</h2>
+          <p style="color: var(--secondary-text); font-size: 14px;">Access your expenses from any device</p>
+        </div>
+
+        <div id="auth-form">
+          <!-- Email Login -->
+          <div style="margin-bottom: 16px;">
+            <input type="email" id="auth-email" placeholder="Email address"
+              style="width: 100%; padding: 14px; border: 1px solid var(--borders); border-radius: 12px; font-size: 16px; background: var(--surface);">
+          </div>
+          <div style="margin-bottom: 16px;">
+            <input type="password" id="auth-password" placeholder="Password"
+              style="width: 100%; padding: 14px; border: 1px solid var(--borders); border-radius: 12px; font-size: 16px; background: var(--surface);">
+          </div>
+
+          <button onclick="handleEmailAuth()" class="btn btn-primary"
+            style="width: 100%; padding: 14px; margin-bottom: 16px;">
+            Sign In / Sign Up
+          </button>
+
+          <div style="text-align: center; color: var(--secondary-text); margin-bottom: 16px;">or continue with</div>
+
+          <!-- Social Login -->
+          <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+            <button onclick="handleGoogleAuth()"
+              style="flex: 1; padding: 12px; border: 1px solid var(--borders); border-radius: 12px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span style="font-size: 20px;">🔵</span> Google
+            </button>
+            <button onclick="showPhoneAuth()"
+              style="flex: 1; padding: 12px; border: 1px solid var(--borders); border-radius: 12px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span style="font-size: 20px;">📱</span> Phone OTP
+            </button>
+          </div>
+
+          <button onclick="skipAuth()"
+            style="width: 100%; padding: 12px; background: transparent; border: none; color: var(--secondary-text); cursor: pointer; font-size: 14px;">
+            Continue without account (offline only)
+          </button>
+        </div>
+
+        <!-- Phone OTP Form (hidden by default) -->
+        <div id="phone-auth-form" style="display: none;">
+          <div style="margin-bottom: 16px;">
+            <input type="tel" id="auth-phone" placeholder="+91 Phone number"
+              style="width: 100%; padding: 14px; border: 1px solid var(--borders); border-radius: 12px; font-size: 16px; background: var(--surface);">
+          </div>
+          <div id="otp-input" style="display: none; margin-bottom: 16px;">
+            <input type="text" id="auth-otp" placeholder="Enter 6-digit OTP"
+              style="width: 100%; padding: 14px; border: 1px solid var(--borders); border-radius: 12px; font-size: 16px; background: var(--surface); text-align: center; letter-spacing: 8px;">
+          </div>
+          <button onclick="handlePhoneAuth()" class="btn btn-primary"
+            style="width: 100%; padding: 14px; margin-bottom: 16px;">
+            Send OTP
+          </button>
+          <button onclick="showEmailAuth()"
+            style="width: 100%; padding: 12px; background: transparent; border: none; color: var(--secondary-text); cursor: pointer;">
+            ← Back to email login
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Modals -->
     <div id="premium-modal" class="modal hidden">
@@ -2691,33 +2771,13 @@
 
     const AppState = {
       currentView: 'home',
+      user: null, // Supabase user object
+      isAuthenticated: false,
+      isLoading: true,
       expenses: [],
-      friends: [
-        { name: 'Raj Kumar', avatar: 'R', color: '#10B981' },
-        { name: 'Priya Singh', avatar: 'P', color: '#F59E0B' },
-        { name: 'Amit Sharma', avatar: 'A', color: '#8B5CF6' },
-        { name: 'Sarah Johnson', avatar: 'S', color: '#EF4444' },
-        { name: 'Mike Chen', avatar: 'M', color: '#06B6D4' }
-      ],
-      groups: [
-        {
-          id: 1,
-          name: 'College Friends',
-          icon: '🎓',
-          members: 4,
-          balance: -420,
-          color: '#10B981'
-        },
-        {
-          id: 2,
-          name: 'Family Trip',
-          icon: '✈️',
-          members: 5,
-          balance: 150,
-          color: '#F59E0B'
-        }
-      ],
-      balance: 2450,
+      friends: [],
+      groups: [],
+      balance: 0,
       selectedFriends: new Set(),
       selectedCategory: '',
       animations: {
@@ -2725,8 +2785,229 @@
         duration: 300
       },
       pwaPromptShown: false,
-      deferredPrompt: null
+      deferredPrompt: null,
+      syncStatus: 'offline' // 'offline', 'syncing', 'synced', 'error'
     };
+
+    // Demo data for first-time users
+    const demoFriends = [
+      { name: 'Raj Kumar', avatar: 'R', color: '#10B981' },
+      { name: 'Priya Singh', avatar: 'P', color: '#F59E0B' },
+      { name: 'Amit Sharma', avatar: 'A', color: '#8B5CF6' },
+      { name: 'Sarah Johnson', avatar: 'S', color: '#EF4444' },
+      { name: 'Mike Chen', avatar: 'M', color: '#06B6D4' }
+    ];
+
+    const demoGroups = [
+      { id: 1, name: 'College Friends', icon: '🎓', members: 4, balance: -420, color: '#10B981' },
+      { id: 2, name: 'Family Trip', icon: '✈️', members: 5, balance: 150, color: '#F59E0B' }
+    ];
+
+    // ─── SUPABASE MANAGER ─────────────────────────────────────────────────────
+    const SupabaseManager = {
+      client: null,
+
+      // Initialize Supabase client
+      init() {
+        if (typeof supabaseClient !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY !== 'YOUR_ANON_KEY_HERE') {
+          this.client = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          console.log('✅ Supabase connected');
+          return true;
+        }
+        console.log('⚠️ Supabase not configured - running in offline mode');
+        return false;
+      },
+
+      // Check current session
+      async getSession() {
+        if (!this.client) return null;
+        const { data: { session } } = await this.client.auth.getSession();
+        return session;
+      },
+
+      // Sign up with email
+      async signUp(email, password, name) {
+        if (!this.client) return { error: { message: 'Not connected to cloud' } };
+        const { data, error } = await this.client.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: name } }
+        });
+        return { data, error };
+      },
+
+      // Sign in with email
+      async signIn(email, password) {
+        if (!this.client) return { error: { message: 'Not connected to cloud' } };
+        const { data, error } = await this.client.auth.signInWithPassword({ email, password });
+        return { data, error };
+      },
+
+      // Sign in with Google
+      async signInWithGoogle() {
+        if (!this.client) return { error: { message: 'Not connected to cloud' } };
+        const { data, error } = await this.client.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: window.location.origin }
+        });
+        return { data, error };
+      },
+
+      // Sign in with OTP (phone)
+      async signInWithOTP(phone) {
+        if (!this.client) return { error: { message: 'Not connected to cloud' } };
+        const { data, error } = await this.client.auth.signInWithOtp({ phone });
+        return { data, error };
+      },
+
+      // Verify OTP
+      async verifyOTP(phone, token) {
+        if (!this.client) return { error: { message: 'Not connected to cloud' } };
+        const { data, error } = await this.client.auth.verifyOtp({ phone, token, type: 'sms' });
+        return { data, error };
+      },
+
+      // Sign out
+      async signOut() {
+        if (!this.client) return;
+        await this.client.auth.signOut();
+        AppState.user = null;
+        AppState.isAuthenticated = false;
+      },
+
+      // ─── DATA SYNC ─────────────────────────────────────────────────────────
+
+      // Sync expenses to cloud
+      async syncExpenses() {
+        if (!this.client || !AppState.user) return;
+        AppState.syncStatus = 'syncing';
+
+        try {
+          const { error } = await this.client
+            .from('expenses')
+            .upsert(AppState.expenses.map(e => ({
+              ...e,
+              user_id: AppState.user.id
+            })));
+
+          if (error) throw error;
+          AppState.syncStatus = 'synced';
+        } catch (e) {
+          console.error('Sync error:', e);
+          AppState.syncStatus = 'error';
+        }
+      },
+
+      // Load expenses from cloud
+      async loadExpenses() {
+        if (!this.client || !AppState.user) return [];
+
+        const { data, error } = await this.client
+          .from('expenses')
+          .select('*')
+          .eq('user_id', AppState.user.id)
+          .order('created_at', { ascending: false });
+
+        return error ? [] : data;
+      },
+
+      // Sync friends to cloud
+      async syncFriends() {
+        if (!this.client || !AppState.user) return;
+
+        const { error } = await this.client
+          .from('friends')
+          .upsert(AppState.friends.map(f => ({
+            ...f,
+            user_id: AppState.user.id
+          })));
+
+        if (error) console.error('Friends sync error:', error);
+      },
+
+      // Load friends from cloud
+      async loadFriends() {
+        if (!this.client || !AppState.user) return [];
+
+        const { data, error } = await this.client
+          .from('friends')
+          .select('*')
+          .eq('user_id', AppState.user.id);
+
+        return error ? [] : data;
+      },
+
+      // Sync groups to cloud
+      async syncGroups() {
+        if (!this.client || !AppState.user) return;
+
+        const { error } = await this.client
+          .from('groups')
+          .upsert(AppState.groups.map(g => ({
+            ...g,
+            user_id: AppState.user.id
+          })));
+
+        if (error) console.error('Groups sync error:', error);
+      },
+
+      // Load groups from cloud
+      async loadGroups() {
+        if (!this.client || !AppState.user) return [];
+
+        const { data, error } = await this.client
+          .from('groups')
+          .select('*')
+          .eq('user_id', AppState.user.id);
+
+        return error ? [] : data;
+      },
+
+      // Full sync - load all data from cloud
+      async fullSync() {
+        if (!this.client || !AppState.user) return;
+
+        AppState.syncStatus = 'syncing';
+
+        try {
+          const [expenses, friends, groups] = await Promise.all([
+            this.loadExpenses(),
+            this.loadFriends(),
+            this.loadGroups()
+          ]);
+
+          AppState.expenses = expenses;
+          AppState.friends = friends;
+          AppState.groups = groups;
+          AppState.syncStatus = 'synced';
+
+          // Save to localStorage for offline access
+          saveToLocalStorage();
+
+          return true;
+        } catch (e) {
+          console.error('Full sync error:', e);
+          AppState.syncStatus = 'error';
+          return false;
+        }
+      },
+
+      // Setup real-time subscriptions
+      setupRealtimeSync() {
+        if (!this.client || !AppState.user) return;
+
+        this.client
+          .channel('expenses-changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => {
+            this.loadExpenses().then(data => {
+              AppState.expenses = data;
+              renderRecentExpenses();
+            });
+          })
+          .subscribe();
+      }
+    };
+
 
     // Premium Sample Data
     const premiumExpenses = [
@@ -4698,6 +4979,130 @@
     window.startFresh = startFresh;
     window.keepSampleData = keepSampleData;
     window.closeFirstVisitModal = closeFirstVisitModal;
+
+    // Auth modal functions
+    window.showAuthModal = showAuthModal;
+    window.closeAuthModal = closeAuthModal;
+    window.handleEmailAuth = handleEmailAuth;
+    window.handleGoogleAuth = handleGoogleAuth;
+    window.handlePhoneAuth = handlePhoneAuth;
+    window.showPhoneAuth = showPhoneAuth;
+    window.showEmailAuth = showEmailAuth;
+    window.skipAuth = skipAuth;
+    window.signOut = signOut;
+
+    function showAuthModal() {
+      const modal = $('auth-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeAuthModal() {
+      const modal = $('auth-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function handleEmailAuth() {
+      const email = $('auth-email')?.value?.trim();
+      const password = $('auth-password')?.value;
+
+      if (!email || !password) {
+        showNotification('❌ Please enter email and password', 'error');
+        return;
+      }
+
+      showNotification('🔄 Signing in...', 'info');
+
+      // Try sign in first
+      let result = await SupabaseManager.signIn(email, password);
+
+      if (result.error?.message?.includes('Invalid')) {
+        // User doesn't exist, try signing up
+        result = await SupabaseManager.signUp(email, password, email.split('@')[0]);
+      }
+
+      if (result.error) {
+        showNotification(`❌ ${result.error.message}`, 'error');
+        return;
+      }
+
+      if (result.data?.user) {
+        AppState.user = result.data.user;
+        AppState.isAuthenticated = true;
+        closeAuthModal();
+        showNotification('✅ Signed in! Syncing your data...', 'success');
+
+        // Sync data from cloud
+        await SupabaseManager.fullSync();
+        renderRecentExpenses();
+        renderGroupsPreview();
+        updateBalance();
+      }
+    }
+
+    async function handleGoogleAuth() {
+      showNotification('🔄 Opening Google login...', 'info');
+      const result = await SupabaseManager.signInWithGoogle();
+      if (result.error) {
+        showNotification(`❌ ${result.error.message}`, 'error');
+      }
+    }
+
+    let pendingPhone = '';
+    async function handlePhoneAuth() {
+      const phone = $('auth-phone')?.value?.trim();
+      const otp = $('auth-otp')?.value?.trim();
+
+      if (otp) {
+        // Verify OTP
+        const result = await SupabaseManager.verifyOTP(pendingPhone, otp);
+        if (result.error) {
+          showNotification(`❌ ${result.error.message}`, 'error');
+          return;
+        }
+        if (result.data?.user) {
+          AppState.user = result.data.user;
+          AppState.isAuthenticated = true;
+          closeAuthModal();
+          showNotification('✅ Phone verified! Syncing...', 'success');
+          await SupabaseManager.fullSync();
+          renderRecentExpenses();
+        }
+      } else if (phone) {
+        // Send OTP
+        pendingPhone = phone;
+        const result = await SupabaseManager.signInWithOTP(phone);
+        if (result.error) {
+          showNotification(`❌ ${result.error.message}`, 'error');
+          return;
+        }
+        $('otp-input').style.display = 'block';
+        showNotification('📱 OTP sent to your phone!', 'success');
+      } else {
+        showNotification('❌ Please enter phone number', 'error');
+      }
+    }
+
+    function showPhoneAuth() {
+      $('auth-form').style.display = 'none';
+      $('phone-auth-form').style.display = 'block';
+    }
+
+    function showEmailAuth() {
+      $('auth-form').style.display = 'block';
+      $('phone-auth-form').style.display = 'none';
+    }
+
+    function skipAuth() {
+      closeAuthModal();
+      AppState.isAuthenticated = false;
+      showNotification('📴 Running in offline mode. Data stays on this device only.', 'info', 5000);
+    }
+
+    async function signOut() {
+      await SupabaseManager.signOut();
+      showNotification('👋 Signed out', 'success');
+      showAuthModal();
+    }
 
     // Settings functions implementation
     function changeLanguage(langCode) {
