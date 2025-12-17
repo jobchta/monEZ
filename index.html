@@ -1585,7 +1585,7 @@
         <div class="header-left">
           <div class="logo">mon<span class="accent">EZ</span></div>
           <div class="balance-summary">
-            <div class="balance-label">Your balance</div>
+            <div class="balance-label" data-i18n="your_balance">Your balance</div>
             <div class="balance-amount" id="balance-hero">₹2,450</div>
           </div>
         </div>
@@ -1609,14 +1609,14 @@
             <div class="stat-card positive">
               <div class="stat-icon">💚</div>
               <div class="stat-content">
-                <div class="stat-label">You're owed</div>
+                <div class="stat-label" data-i18n="you_are_owed">You're owed</div>
                 <div class="stat-value">₹1,320</div>
               </div>
             </div>
             <div class="stat-card negative">
               <div class="stat-icon">💸</div>
               <div class="stat-content">
-                <div class="stat-label">You owe</div>
+                <div class="stat-label" data-i18n="you_owe">You owe</div>
                 <div class="stat-value">₹865</div>
               </div>
             </div>
@@ -1626,20 +1626,20 @@
           <div class="quick-actions">
             <button class="action-card primary" onclick="showAddExpense()">
               <div class="action-icon">➕</div>
-              <div class="action-label">Add Expense</div>
+              <div class="action-label" data-i18n="add_expense">Add Expense</div>
             </button>
             <button class="action-card" onclick="showSplitBill()">
               <div class="action-icon">🧮</div>
-              <div class="action-label">Split Bill</div>
+              <div class="action-label" data-i18n="split_bill">Split Bill</div>
             </button>
             <button class="action-card" onclick="showSettle()">
               <div class="action-icon">💳</div>
-              <div class="action-label">Settle Up</div>
+              <div class="action-label" data-i18n="settle_up">Settle Up</div>
             </button>
             <button class="action-card" onclick="showPremiumFeatures()"
               style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
               <div class="action-icon">✨</div>
-              <div class="action-label">AI Insights</div>
+              <div class="action-label" data-i18n="ai_insights">AI Insights</div>
               <div style="font-size: 10px; color: rgba(255,255,255,0.9);">FREE</div>
             </button>
           </div>
@@ -1647,7 +1647,7 @@
           <!-- Recent Activity -->
           <section class="activity-section">
             <div class="section-header">
-              <h3>Recent Activity</h3>
+              <h3 data-i18n="recent_activity">Recent Activity</h3>
               <button class="view-all" onclick="showExpenses()">View all</button>
             </div>
             <div id="recent-expenses" class="activity-list">
@@ -1833,7 +1833,7 @@
         <div id="settings-view" class="view">
           <div class="view-header">
             <button class="back-btn" onclick="showHome()">←</button>
-            <h2>Settings</h2>
+            <h2 data-i18n="settings">Settings</h2>
           </div>
 
           <div class="settings-sections">
@@ -1877,7 +1877,7 @@
               <div class="setting-item">
                 <div class="setting-icon">🗣️</div>
                 <div class="setting-content">
-                  <div class="setting-title">Language</div>
+                  <div class="setting-title" data-i18n="language">Language</div>
                   <div class="setting-desc" id="current-language-display">English</div>
                 </div>
                 <select id="language-selector" class="setting-select" onchange="changeLanguage(this.value)">
@@ -1907,7 +1907,7 @@
               <div class="setting-item">
                 <div class="setting-icon">💰</div>
                 <div class="setting-content">
-                  <div class="setting-title">Currency</div>
+                  <div class="setting-title" data-i18n="currency">Currency</div>
                   <div class="setting-desc" id="current-currency-display">₹ Indian Rupee</div>
                 </div>
                 <select id="currency-selector" class="setting-select" onchange="changeCurrency(this.value)">
@@ -1998,7 +1998,7 @@
               <div class="setting-item">
                 <div class="setting-icon">🔔</div>
                 <div class="setting-content">
-                  <div class="setting-title">Notifications</div>
+                  <div class="setting-title" data-i18n="notifications">Notifications</div>
                   <div class="setting-desc">Push notifications, reminders</div>
                 </div>
                 <label class="toggle-switch">
@@ -2009,7 +2009,7 @@
               <div class="setting-item">
                 <div class="setting-icon">🌙</div>
                 <div class="setting-content">
-                  <div class="setting-title">Dark Mode</div>
+                  <div class="setting-title" data-i18n="dark_mode">Dark Mode</div>
                   <div class="setting-desc">Switch to dark theme</div>
                 </div>
                 <label class="toggle-switch">
@@ -2025,7 +2025,7 @@
               <div class="setting-item" onclick="exportDataJSON()">
                 <div class="setting-icon">📁</div>
                 <div class="setting-content">
-                  <div class="setting-title">Export as JSON</div>
+                  <div class="setting-title" data-i18n="export_data">Export as JSON</div>
                   <div class="setting-desc">Download all your data</div>
                 </div>
                 <div class="setting-arrow">↓</div>
@@ -2041,7 +2041,7 @@
               <div class="setting-item" onclick="importData()">
                 <div class="setting-icon">📥</div>
                 <div class="setting-content">
-                  <div class="setting-title">Import Data</div>
+                  <div class="setting-title" data-i18n="import_data">Import Data</div>
                   <div class="setting-desc">Restore from backup</div>
                 </div>
                 <div class="setting-arrow">↑</div>
@@ -2067,24 +2067,24 @@
       <nav class="bottom-nav">
         <button class="nav-item active" data-view="home" onclick="showHome()">
           <span class="nav-icon">🏠</span>
-          <span class="nav-label">Home</span>
+          <span class="nav-label" data-i18n="home">Home</span>
         </button>
         <button class="nav-item" data-view="expenses" onclick="showExpenses()">
           <span class="nav-icon">📝</span>
-          <span class="nav-label">Expenses</span>
+          <span class="nav-label" data-i18n="expenses">Expenses</span>
         </button>
         <button class="nav-item" data-view="balances" onclick="showBalances()">
           <span class="nav-icon">⚖️</span>
-          <span class="nav-label">Balances</span>
+          <span class="nav-label" data-i18n="balances">Balances</span>
         </button>
         <button class="nav-item" data-view="groups" onclick="showGroups()">
           <span class="nav-icon">👥</span>
-          <span class="nav-label">Groups</span>
+          <span class="nav-label" data-i18n="groups">Groups</span>
           <span class="group-count">2</span>
         </button>
         <button class="nav-item" data-view="premium" onclick="showPremiumFeatures()">
           <span class="nav-icon">🎁</span>
-          <span class="nav-label">Features</span>
+          <span class="nav-label" data-i18n="premium">Features</span>
           <span class="premium-indicator" style="background: #10B981;">FREE</span>
         </button>
       </nav>
