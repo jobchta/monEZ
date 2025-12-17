@@ -2809,12 +2809,17 @@
 
       // Initialize Supabase client
       init() {
+        console.log('🔍 Checking Supabase...', typeof window.supabase);
+
         if (typeof window.supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY) {
-          this.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          const { createClient } = window.supabase;
+          this.client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           console.log('✅ Supabase connected to:', SUPABASE_URL);
           return true;
         }
         console.log('⚠️ Supabase not configured - running in offline mode');
+        console.log('   window.supabase:', typeof window.supabase);
+        console.log('   SUPABASE_URL:', SUPABASE_URL);
         return false;
       },
 
