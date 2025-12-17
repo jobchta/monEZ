@@ -4340,19 +4340,27 @@
         const expenses = localStorage.getItem('monez_expenses');
         const friends = localStorage.getItem('monez_friends');
         const groups = localStorage.getItem('monez_groups');
+        const startedFresh = localStorage.getItem('monez_started_fresh');
 
         if (expenses) {
           AppState.expenses = JSON.parse(expenses);
+        } else if (startedFresh) {
+          // User chose to start fresh - don't load sample data
+          AppState.expenses = [];
         } else {
           AppState.expenses = [...premiumExpenses]; // Default sample data
         }
 
         if (friends) {
           AppState.friends = JSON.parse(friends);
+        } else if (startedFresh) {
+          AppState.friends = [];
         }
 
         if (groups) {
           AppState.groups = JSON.parse(groups);
+        } else if (startedFresh) {
+          AppState.groups = [];
         }
       } catch (e) {
         console.error('Error loading from localStorage:', e);
@@ -4415,11 +4423,14 @@
       AppState.friends = [];
       AppState.groups = [];
 
+      // Mark as started fresh (so loadFromLocalStorage won't load sample data)
+      localStorage.setItem('monez_started_fresh', 'true');
+
       // Mark as visited and continue
       localStorage.setItem('monez_visited', 'true');
       closeFirstVisitModal();
       continueAppInit();
-      showNotification('🆕 Started with a fresh account!', 'success');
+      showNotification('🆕 Started with a fresh account! Add your first expense.', 'success');
     }
 
     function keepSampleData() {
