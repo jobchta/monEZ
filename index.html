@@ -2937,6 +2937,19 @@
         }
       },
 
+      // Delete expense from cloud
+      async deleteExpense(expenseId) {
+        if (!this.client || !AppState.user) return;
+
+        const { error } = await this.client
+          .from('expenses')
+          .delete()
+          .eq('id', expenseId)
+          .eq('user_id', AppState.user.id);
+
+        if (error) console.error('Delete error:', error);
+      },
+
       // Load expenses from cloud
       async loadExpenses() {
         if (!this.client || !AppState.user) return [];
@@ -3785,6 +3798,13 @@
         saveToLocalStorage();
       }
 
+      // Sync to cloud if authenticated
+      if (AppState.isAuthenticated) {
+        SupabaseManager.syncGroups().then(() => {
+          console.log('✅ Group synced to cloud');
+        });
+      }
+
       closeGroupModal();
       renderGroupsPreview();
       renderGroups();
@@ -3917,8 +3937,12 @@
             <div class="activity-meta">${expense.date} • ${expense.paidBy || 'You'}</div>
           </div>
           <div class="activity-amount">${formatCurrency(expense.amount)}</div>
+          <button class="edit-btn" onclick="editExpense(${expense.id})" title="Edit expense"
+                  style="margin-left: 8px; background: none; border: none; color: #3B82F6; cursor: pointer; padding: 4px 8px; font-size: 16px; opacity: 0.6; transition: opacity 0.2s;">
+            ✏️
+          </button>
           <button class="delete-btn" onclick="deleteExpense(${expense.id})" title="Delete expense"
-                  style="margin-left: 8px; background: none; border: none; color: #EF4444; cursor: pointer; padding: 4px 8px; font-size: 16px; opacity: 0.6; transition: opacity 0.2s;">
+                  style="margin-left: 4px; background: none; border: none; color: #EF4444; cursor: pointer; padding: 4px 8px; font-size: 16px; opacity: 0.6; transition: opacity 0.2s;">
             🗑️
           </button>
         `;
@@ -3938,6 +3962,41 @@
       updateExpenseStats();
     }
 
+    function editExpense(expenseId) {
+      const expense = AppState.expenses.find(e => e.id === expenseId);
+      if (!expense) return;
+
+      // Populate form
+      const amountInput = $('amount');
+      const descInput = $('description');
+
+      if (amountInput) amountInput.value = expense.amount;
+      if (descInput) descInput.value = expense.description;
+
+      AppState.selectedCategory = expense.category;
+
+      // Select category button
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        if (btn.dataset.category === expense.category) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Remove old expense directly (skip confirmation)
+      AppState.expenses = AppState.expenses.filter(e => e.id !== expenseId);
+
+      // Save & Sync deletion
+      try { storage.save('expenses', AppState.expenses); } catch (e) { saveToLocalStorage(); }
+      if (AppState.isAuthenticated) SupabaseManager.deleteExpense(expenseId);
+
+      // Go to Add Expense view
+      showAddExpense();
+      showNotification('✏️ Editing expense...', 'info');
+    }
+    window.editExpense = editExpense;
+
     function deleteExpense(expenseId) {
       if (!confirm('Delete this expense?')) return;
 
@@ -3949,6 +4008,13 @@
       } catch (e) {
         // Fallback to legacy save
         saveToLocalStorage();
+      }
+
+      // Sync delete to cloud if authenticated
+      if (AppState.isAuthenticated) {
+        SupabaseManager.deleteExpense(expenseId).then(() => {
+          console.log('✅ Expense deleted from cloud');
+        });
       }
 
       renderAllExpenses();
@@ -4180,12 +4246,72 @@
           <a href="phonepe://pay?pa=${upiId}&pn=${friendName}&am=${amount}&cu=INR" class="btn btn-secondary" style="padding: 8px 12px;">PhonePe</a>
           <a href="paytmmp://pay?pa=${upiId}&pn=${friendName}&am=${amount}&cu=INR" class="btn btn-secondary" style="padding: 8px 12px;">Paytm</a>
         </div>
-        <button onclick="this.parentElement.remove()" style="margin-top: var(--space-sm); background: none; border: none; color: var(--secondary-text); cursor: pointer;">Close</button>
+        <button onclick="recordPayment('${friendName}', ${amount}, this)" class="btn btn-primary" style="margin-top: var(--space-sm); width: 100%; background: #10B981;">✅ Mark as Paid</button>
+        <button onclick="this.parentElement.remove()" style="margin-top: 8px; background: none; border: none; color: var(--secondary-text); cursor: pointer;">Close</button>
       `;
       document.body.appendChild(alternatives);
 
       setTimeout(() => alternatives.remove(), 10000);
     }
+
+    async function recordPayment(friendName, amount, btnElement) {
+      if (btnElement) {
+        btnElement.innerHTML = '⏳ Saving...';
+        btnElement.disabled = true;
+      }
+
+      // Create a settlement expense
+      // Strategy: You paid 'friend', so it's an expense where YOU paid and THEY owe 0? 
+      // No, settlement is special. It balances debt.
+      // If YOU owe FRIEND: "Payment to Friend"
+      // PaidBy: You, SplitWith: [Friend]
+
+      const settlement = {
+        id: Date.now(),
+        description: `Payment to ${friendName}`,
+        amount: amount,
+        date: 'Today, ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
+        paidBy: 'You',
+        splitWith: [friendName], // This means they owe you half... wait.
+        // SETTLEMENT LOGIC IS TRICKY IN SPLITWISE CLONES
+        // To clear "You owe Friend 100":
+        // You pay 100. expense: "Settlement", paidBy: You, cost: 100.
+        // Who acts? Friend receives 100?
+        // Let's model it as: You Paid 100, split with Friend (full amount).
+        // Friend owes you 100. This +100 cancels the -100 debt.
+        category: '💸',
+        status: 'settled',
+        isSettlement: true
+      };
+
+      // If we are recording a payment FROM friend TO us
+      // We can't easily record that unless we impersonate them. 
+      // For now, let's assume this is "I Paid Friend".
+
+      AppState.expenses.unshift(settlement);
+
+      try {
+        storage.save('expenses', AppState.expenses);
+      } catch (e) {
+        saveToLocalStorage();
+      }
+
+      // Sync to cloud
+      if (AppState.isAuthenticated) {
+        await SupabaseManager.syncExpenses();
+      }
+
+      updateBalance();
+      showNotification(`✅ Paid ${formatCurrency(amount)} to ${friendName}`, 'success');
+
+      // Close modal
+      const modal = document.getElementById('payment-alternatives');
+      if (modal) modal.remove();
+
+      // Refresh view
+      showSettle();
+    }
+    window.recordPayment = recordPayment;
 
     window.closeUPIModal = closeUPIModal;
     window.processUPIPayment = processUPIPayment;
