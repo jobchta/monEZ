@@ -3509,15 +3509,11 @@
       container.innerHTML = '';
 
       if (AppState.expenses.length === 0) {
-        AppState.expenses = [...premiumExpenses];
-      }
-
-      if (AppState.expenses.length === 0) {
         container.innerHTML = `
           <div style="text-align: center; padding: 40px 20px; color: #64748B;">
             <div style="font-size: 48px; margin-bottom: 16px;">💎</div>
             <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">No expenses yet</div>
-            <div style="font-size: 14px;">Start splitting bills with style</div>
+            <div style="font-size: 14px;">Tap + to add your first expense</div>
           </div>
         `;
         return;
