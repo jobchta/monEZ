@@ -3513,6 +3513,13 @@
         saveToLocalStorage();
       }
 
+      // Sync to cloud if authenticated
+      if (AppState.isAuthenticated) {
+        SupabaseManager.syncFriends().then(() => {
+          console.log('✅ Friend synced to cloud');
+        });
+      }
+
       nameInput.value = '';
       showNotification(`✅ ${name} added as friend!`, 'success');
 
@@ -4487,6 +4494,14 @@
 
         AppState.expenses.unshift(expense);
         saveToLocalStorage(); // Persist to localStorage
+
+        // Sync to cloud if authenticated
+        if (AppState.isAuthenticated) {
+          SupabaseManager.syncExpenses().then(() => {
+            console.log('✅ Expense synced to cloud');
+          });
+        }
+
         updateBalance();
 
         // Success animation
