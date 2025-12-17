@@ -1,4 +1,4 @@
-const CACHE_NAME = "monez-v2.0";
+const CACHE_NAME = "monez-v2.1";
 const urlsToCache = [
   '/',
   '/index.html',
@@ -79,4 +79,4 @@ self.addEventListener("fetch", event => {
   );
 });
 
-console.log('monEZ Service Worker v2.0 loaded');
+console.log('monEZ Service Worker v2.1 loaded');

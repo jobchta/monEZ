@@ -1,7 +1,7 @@
 {
   "name": "monEZ - Split expenses, not friendships",
   "short_name": "monEZ",
-  "description": "Premium expense splitting app with AI features",
+  "description": "Free expense splitting app with AI features",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
