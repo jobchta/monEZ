@@ -1568,12 +1568,12 @@
       <div class="pwa-content">
         <div class="pwa-icon">📱</div>
         <div class="pwa-text">
-          <h3>Install monEZ</h3>
-          <p>Get the full app experience on your home screen</p>
+          <h3 data-i18n="install_app">Install monEZ</h3>
+          <p data-i18n="install_desc">Get the full app experience on your home screen</p>
         </div>
         <div class="pwa-actions">
-          <button class="btn-secondary" onclick="dismissPWAPrompt()">Maybe later</button>
-          <button class="btn-primary" onclick="installPWA()">Install</button>
+          <button class="btn-secondary" onclick="dismissPWAPrompt()" data-i18n="maybe_later">Maybe later</button>
+          <button class="btn-primary" onclick="installPWA()" data-i18n="install">Install</button>
         </div>
       </div>
     </div>
@@ -1678,7 +1678,7 @@
 
           <form id="expense-form" class="expense-form">
             <div class="form-group">
-              <label class="form-label">Amount</label>
+              <label class="form-label" data-i18n="amount">Amount</label>
               <div class="amount-input-container">
                 <span class="currency-symbol">₹</span>
                 <input type="number" id="amount" class="form-input amount-field" placeholder="0.00" step="0.01"
@@ -1690,9 +1690,10 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">Description</label>
+              <label class="form-label" data-i18n="description">Description</label>
               <div class="input-container">
-                <input type="text" id="description" class="form-input" placeholder="What was this for?" required>
+                <input type="text" id="description" class="form-input" placeholder="What was this for?"
+                  data-i18n-placeholder="description" required>
                 <div class="smart-suggestions" id="smart-suggestions">
                   <!-- AI suggestions appear here -->
                 </div>
@@ -1700,7 +1701,7 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">Category</label>
+              <label class="form-label" data-i18n="category">Category</label>
               <div class="category-selector">
                 <button type="button" class="category-btn" data-category="🍽️">🍽️ Food</button>
                 <button type="button" class="category-btn" data-category="🚗">🚗 Transport</button>
@@ -1712,7 +1713,7 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">Split with</label>
+              <label class="form-label" data-i18n="split_with">Split with</label>
               <div class="people-selector" id="people-selector">
                 <!-- People cards will be loaded here -->
               </div>
@@ -1720,16 +1721,19 @@
 
             <div class="split-options">
               <div class="split-type">
-                <button type="button" class="split-btn active" data-type="equal">Equal Split</button>
-                <button type="button" class="split-btn" data-type="percentage">By Percentage</button>
-                <button type="button" class="split-btn" data-type="custom">Custom Split</button>
+                <button type="button" class="split-btn active" data-type="equal" data-i18n="equal_split">Equal
+                  Split</button>
+                <button type="button" class="split-btn" data-type="percentage" data-i18n="by_percentage">By
+                  Percentage</button>
+                <button type="button" class="split-btn" data-type="custom" data-i18n="custom_split">Custom
+                  Split</button>
               </div>
             </div>
 
             <div class="form-actions">
-              <button type="button" class="btn-secondary" onclick="showHome()">Cancel</button>
+              <button type="button" class="btn-secondary" onclick="showHome()" data-i18n="cancel">Cancel</button>
               <button type="submit" class="btn-primary">
-                <span class="btn-text">Save Expense</span>
+                <span class="btn-text" data-i18n="save_expense">Save Expense</span>
                 <span class="btn-icon">💾</span>
               </button>
             </div>
@@ -1740,25 +1744,25 @@
         <div id="expenses-view" class="view">
           <div class="view-header">
             <button class="back-btn" onclick="showHome()">←</button>
-            <h2>All Expenses</h2>
+            <h2 data-i18n="expenses">All Expenses</h2>
             <button class="filter-btn" onclick="showFilters()">🔍</button>
           </div>
 
           <!-- Search Bar -->
           <div class="search-container">
             <input type="text" id="expense-search" class="search-input" placeholder="🔍 Search expenses..."
-              oninput="searchExpenses(this.value)">
+              data-i18n-placeholder="search_expenses" oninput="searchExpenses(this.value)">
           </div>
 
           <div class="expenses-stats">
             <div class="stat-summary">
               <div class="stat-item">
                 <span class="stat-number" id="total-expenses">₹8,450</span>
-                <span class="stat-label">Total Spent</span>
+                <span class="stat-label" data-i18n="total_spent">Total Spent</span>
               </div>
               <div class="stat-item">
                 <span class="stat-number" id="this-month">₹3,280</span>
-                <span class="stat-label">This Month</span>
+                <span class="stat-label" data-i18n="this_month">This Month</span>
               </div>
             </div>
           </div>
@@ -1772,18 +1776,18 @@
         <div id="balances-view" class="view">
           <div class="view-header">
             <button class="back-btn" onclick="showHome()">←</button>
-            <h2>Balances</h2>
-            <button class="settle-all-btn" onclick="settleAll()">Settle All</button>
+            <h2 data-i18n="balances">Balances</h2>
+            <button class="settle-all-btn" onclick="settleAll()" data-i18n="settle_all">Settle All</button>
           </div>
 
           <div class="balance-summary">
             <div class="summary-card positive">
               <div class="summary-amount">₹1,320</div>
-              <div class="summary-label">You're owed</div>
+              <div class="summary-label" data-i18n="you_are_owed">You're owed</div>
             </div>
             <div class="summary-card negative">
               <div class="summary-amount">₹865</div>
-              <div class="summary-label">You owe</div>
+              <div class="summary-label" data-i18n="you_owe">You owe</div>
             </div>
           </div>
 
@@ -1796,7 +1800,7 @@
         <div id="groups-view" class="view">
           <div class="view-header">
             <button class="back-btn" onclick="showHome()">←</button>
-            <h2>Groups</h2>
+            <h2 data-i18n="groups">Groups</h2>
             <button class="create-group-btn" onclick="showCreateGroup()">+</button>
           </div>
 
@@ -1845,8 +1849,8 @@
                 <div id="account-logged-out" class="setting-item" style="cursor: pointer;" onclick="showAuthModal()">
                   <div class="setting-icon">🔒</div>
                   <div class="setting-content">
-                    <div class="setting-title">Sign In to Sync</div>
-                    <div class="setting-desc">Access your data from any device</div>
+                    <div class="setting-title" data-i18n="signin_to_sync">Sign In to Sync</div>
+                    <div class="setting-desc" data-i18n="access_data">Access your data from any device</div>
                   </div>
                   <div class="setting-action">→</div>
                 </div>
@@ -1863,8 +1867,10 @@
                     </div>
                   </div>
                   <div style="display: flex; gap: 12px; margin-top: 12px;">
-                    <button onclick="syncNow()" class="btn btn-secondary" style="flex: 1;">🔄 Sync Now</button>
-                    <button onclick="signOut()" class="btn" style="flex: 1; background: #EF4444; color: white;">Sign
+                    <button onclick="syncNow()" class="btn btn-secondary" style="flex: 1;" data-i18n="sync_now">🔄 Sync
+                      Now</button>
+                    <button onclick="signOut()" class="btn" style="flex: 1; background: #EF4444; color: white;"
+                      data-i18n="sign_out">Sign
                       Out</button>
                   </div>
                 </div>
@@ -1873,7 +1879,7 @@
 
             <!-- Localization Section -->
             <div class="settings-section">
-              <h3>🌍 Localization</h3>
+              <h3 data-i18n="localization">🌍 Localization</h3>
               <div class="setting-item">
                 <div class="setting-icon">🗣️</div>
                 <div class="setting-content">
@@ -2021,7 +2027,7 @@
 
             <!-- Data Section -->
             <div class="settings-section">
-              <h3>📊 Data Management</h3>
+              <h3 data-i18n="data_management">📊 Data Management</h3>
               <div class="setting-item" onclick="exportDataJSON()">
                 <div class="setting-icon">📁</div>
                 <div class="setting-content">
@@ -2050,12 +2056,12 @@
 
             <!-- About Section -->
             <div class="settings-section">
-              <h3>About</h3>
+              <h3 data-i18n="about">About</h3>
               <div class="setting-item">
                 <div class="setting-icon">ℹ️</div>
                 <div class="setting-content">
-                  <div class="setting-title">monEZ Global Edition</div>
-                  <div class="setting-desc">v2.0 • 55 currencies • 25 languages</div>
+                  <div class="setting-title" data-i18n="global_edition">monEZ Global Edition</div>
+                  <div class="setting-desc" data-i18n="version_info">v2.0 • 55 currencies • 25 languages</div>
                 </div>
               </div>
             </div>
@@ -2509,6 +2515,34 @@
         welcome: 'Welcome to monEZ!',
         expense_added: 'Expense added successfully!',
         loading: 'Loading...',
+        // New keys
+        total_spent: 'Total Spent',
+        this_month: 'This Month',
+        filter_expenses: 'Filter Expenses',
+        add_new_expense: 'Add New Expense',
+        what_for: 'What was this for?',
+        install_app: 'Install monEZ',
+        install_desc: 'Get the full app experience on your home screen',
+        maybe_later: 'Maybe later',
+        install: 'Install',
+        signin_to_sync: 'Sign In to Sync',
+        access_data: 'Access your data from any device',
+        synced: 'Synced',
+        sync_now: 'Sync Now',
+        sign_out: 'Sign Out',
+        localization: 'Localization',
+        data_management: 'Data Management',
+        export_json: 'Export as JSON',
+        export_csv: 'Export as CSV',
+        about: 'About',
+        version_info: 'v2.0 • 55 currencies • 25 languages',
+        global_edition: 'monEZ Global Edition',
+        you: 'You',
+        add_first_expense: 'Tap + to add your first expense',
+        unknown_location: 'Unknown location',
+        no_matches: 'No expenses match filters',
+        showing_filtered: 'Showing {count} filtered expense(s)',
+        filters_cleared: 'Filters cleared'
       },
       es: {
         app_name: 'monEZ',
@@ -3593,7 +3627,7 @@
       modal.innerHTML = `
         <div class="modal-content" style="max-width: 380px;">
           <div class="modal-header">
-            <h3>🔍 Filter Expenses</h3>
+            <h3 data-i18n="filter_expenses">Filter Expenses</h3>
             <button class="modal-close" onclick="closeFiltersModal()">×</button>
           </div>
           <div class="modal-body" style="padding: var(--space-lg);">
@@ -3687,7 +3721,7 @@
       if (container) {
         container.innerHTML = '';
         if (filtered.length === 0) {
-          container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">No expenses match filters</div>';
+          container.innerHTML = `<div style="text-align:center;padding:40px;color:#888;">${t('no_matches')}</div>`;
         } else {
           filtered.forEach(expense => {
             const item = document.createElement('div');
@@ -3696,7 +3730,7 @@
               <div class="activity-icon" style="background: #10B981;">${expense.category || '💰'}</div>
               <div class="activity-content" style="flex: 1;">
                 <div class="activity-title">${expense.description}</div>
-                <div class="activity-meta">${expense.date} • ${expense.paidBy || 'You'}</div>
+                <div class="activity-meta">${expense.date} • ${expense.paidBy === 'You' ? t('you') : expense.paidBy}</div>
               </div>
               <div class="activity-amount">${formatCurrency(expense.amount)}</div>
             `;
@@ -3705,13 +3739,13 @@
         }
       }
 
-      showNotification(`🔍 Showing ${filtered.length} filtered expense(s)`, 'info');
+      showNotification(`🔍 ${t('showing_filtered', { count: filtered.length })}`, 'info');
     }
 
     function clearFilters() {
       closeFiltersModal();
       renderAllExpenses();
-      showNotification('🔄 Filters cleared', 'info');
+      showNotification(`🔄 ${t('filters_cleared')}`, 'info');
     }
 
     window.closeFiltersModal = closeFiltersModal;
@@ -3859,8 +3893,8 @@
         container.innerHTML = `
           <div style="text-align: center; padding: 40px 20px; color: #64748B;">
             <div style="font-size: 48px; margin-bottom: 16px;">💎</div>
-            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">No expenses yet</div>
-            <div style="font-size: 14px;">Tap + to add your first expense</div>
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">${t('no_expenses')}</div>
+            <div style="font-size: 14px;">${t('add_first_expense')}</div>
           </div>
         `;
         return;
@@ -3881,7 +3915,7 @@
           <div class="activity-content">
             <div class="activity-title">${expense.description}</div>
             <div class="activity-meta">
-              ${expense.date} • ${expense.location || 'Unknown location'} ${statusIcon}
+              ${expense.date} • ${expense.location || t('unknown_location')} ${statusIcon}
             </div>
           </div>
           <div class="activity-amount">${formatCurrency(expense.amount)}</div>
@@ -3916,8 +3950,8 @@
         container.innerHTML = `
           <div style="text-align: center; padding: 60px 20px; color: #64748B;">
             <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
-            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">No expenses yet</div>
-            <div style="font-size: 14px;">Tap the + button to add your first expense</div>
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">${t('no_expenses')}</div>
+            <div style="font-size: 14px;">${t('add_first_expense')}</div>
           </div>
         `;
         return;
@@ -3934,7 +3968,7 @@
           </div>
           <div class="activity-content" style="flex: 1;">
             <div class="activity-title">${expense.description}</div>
-            <div class="activity-meta">${expense.date} • ${expense.paidBy || 'You'}</div>
+            <div class="activity-meta">${expense.date} • ${expense.paidBy === 'You' ? t('you') : expense.paidBy}</div>
           </div>
           <div class="activity-amount">${formatCurrency(expense.amount)}</div>
           <button class="edit-btn" onclick="editExpense(${expense.id})" title="Edit expense"
