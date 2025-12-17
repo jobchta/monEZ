@@ -1837,6 +1837,40 @@
           </div>
 
           <div class="settings-sections">
+            <!-- Account Section -->
+            <div class="settings-section">
+              <h3>👤 Account</h3>
+              <div id="account-section">
+                <!-- Not logged in state -->
+                <div id="account-logged-out" class="setting-item" style="cursor: pointer;" onclick="showAuthModal()">
+                  <div class="setting-icon">🔒</div>
+                  <div class="setting-content">
+                    <div class="setting-title">Sign In to Sync</div>
+                    <div class="setting-desc">Access your data from any device</div>
+                  </div>
+                  <div class="setting-action">→</div>
+                </div>
+
+                <!-- Logged in state (hidden by default) -->
+                <div id="account-logged-in" style="display: none;">
+                  <div class="setting-item">
+                    <div class="setting-icon"
+                      style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                      ✓</div>
+                    <div class="setting-content">
+                      <div class="setting-title" id="account-email">user@email.com</div>
+                      <div class="setting-desc" id="sync-status">✅ Synced</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 12px; margin-top: 12px;">
+                    <button onclick="syncNow()" class="btn btn-secondary" style="flex: 1;">🔄 Sync Now</button>
+                    <button onclick="signOut()" class="btn" style="flex: 1; background: #EF4444; color: white;">Sign
+                      Out</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Localization Section -->
             <div class="settings-section">
               <h3>🌍 Localization</h3>
@@ -5116,9 +5150,46 @@
 
     async function signOut() {
       await SupabaseManager.signOut();
+      updateAccountUI();
       showNotification('👋 Signed out', 'success');
-      showAuthModal();
     }
+
+    async function syncNow() {
+      if (!AppState.isAuthenticated) {
+        showAuthModal();
+        return;
+      }
+
+      showNotification('🔄 Syncing...', 'info');
+      const syncStatus = $('sync-status');
+      if (syncStatus) syncStatus.textContent = '🔄 Syncing...';
+
+      await SupabaseManager.syncExpenses();
+      await SupabaseManager.syncFriends();
+      await SupabaseManager.syncGroups();
+
+      if (syncStatus) syncStatus.textContent = '✅ Synced just now';
+      showNotification('✅ All data synced!', 'success');
+    }
+    window.syncNow = syncNow;
+
+    function updateAccountUI() {
+      const loggedOut = $('account-logged-out');
+      const loggedIn = $('account-logged-in');
+      const emailEl = $('account-email');
+      const syncStatus = $('sync-status');
+
+      if (AppState.isAuthenticated && AppState.user) {
+        if (loggedOut) loggedOut.style.display = 'none';
+        if (loggedIn) loggedIn.style.display = 'block';
+        if (emailEl) emailEl.textContent = AppState.user.email || 'Signed In';
+        if (syncStatus) syncStatus.textContent = '✅ Synced';
+      } else {
+        if (loggedOut) loggedOut.style.display = 'flex';
+        if (loggedIn) loggedIn.style.display = 'none';
+      }
+    }
+    window.updateAccountUI = updateAccountUI;
 
     // Settings functions implementation
     function changeLanguage(langCode) {
