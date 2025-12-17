@@ -2542,7 +2542,33 @@
         unknown_location: 'Unknown location',
         no_matches: 'No expenses match filters',
         showing_filtered: 'Showing {count} filtered expense(s)',
-        filters_cleared: 'Filters cleared'
+        filters_cleared: 'Filters cleared',
+        all_settled: 'All settled up!',
+        no_outstanding: 'No outstanding balances',
+        owes_you: 'owes you',
+        you_owe: 'you owe', // Lowercase for balance list
+        pay_now: 'Pay Now',
+        remind: 'Remind',
+        last_activity: 'Last activity: {time}',
+        add_friends_first: 'Add Friends First',
+        tap_to_add_friends: 'Tap to add people to split with',
+        create_first_group: 'Create Your First Group',
+        tap_to_create_group: 'Tap to create a group',
+        members: '{count} members',
+        your_balance: 'Your balance',
+        premium_features: 'Advanced Features', // Rebranded
+        unlock_potential: 'Unlock the full potential of monEZ',
+        free_trial: 'Start Free Trial',
+        ai_receipt: 'AI Receipt Scanning',
+        ai_receipt_desc: 'Scan receipts with 98.5% accuracy',
+        try: 'TRY',
+        ai_voice: 'Voice Commands',
+        ai_voice_desc: 'Add expenses in 22 languages',
+        ai_analytics: 'Advanced Analytics',
+        ai_analytics_desc: 'AI-powered spending insights',
+        multi_currency: 'Multi-Currency Support',
+        multi_currency_desc: '150+ currencies with real-time rates',
+        free: 'FREE'
       },
       es: {
         app_name: 'monEZ',
@@ -4071,8 +4097,8 @@
         container.innerHTML = `
           <div style="text-align: center; padding: 60px 20px; color: #64748B;">
             <div style="font-size: 48px; margin-bottom: 16px;">⚖️</div>
-            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">All settled up!</div>
-            <div style="font-size: 14px;">No outstanding balances</div>
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #10B981;">${t('all_settled')}</div>
+            <div style="font-size: 14px;">${t('no_outstanding')}</div>
           </div>
         `;
         return;
@@ -4084,7 +4110,7 @@
         item.style.animationDelay = `${index * 100}ms`;
 
         const isPositive = balance.amount > 0;
-        const statusText = isPositive ? 'owes you' : 'you owe';
+        const statusText = isPositive ? t('owes_you') : t('you_owe');
         const statusClass = isPositive ? 'positive' : 'negative';
         const avatar = balance.name.charAt(0).toUpperCase();
 
@@ -4094,15 +4120,15 @@
           </div>
           <div class="balance-content">
             <div class="balance-name">${balance.name}</div>
-            <div class="balance-status">${statusText} • Last activity: ${balance.lastActivity || '2 days ago'}</div>
+            <div class="balance-status">${statusText} • ${t('last_activity', { time: balance.lastActivity || '2 days ago' })}</div>
           </div>
           <div class="balance-amount-container">
             <div class="balance-amount ${statusClass}">
               ${formatCurrency(Math.abs(balance.amount))}
             </div>
             ${!isPositive ?
-            `<button class="settle-btn-small" onclick="settleBalance('${balance.name}', ${Math.abs(balance.amount)})">Pay Now</button>` :
-            `<button class="settle-btn-small" onclick="remindUser('${balance.name}')">Remind</button>`
+            `<button class="settle-btn-small" onclick="settleBalance('${balance.name}', ${Math.abs(balance.amount)})">${t('pay_now')}</button>` :
+            `<button class="settle-btn-small" onclick="remindUser('${balance.name}')">${t('remind')}</button>`
           }
           </div>
         `;
@@ -4384,8 +4410,8 @@
         container.innerHTML = `
           <div onclick="showShareConnectModal()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 12px; cursor: pointer; color: white; min-width: 100%;">
             <div style="font-size: 32px; margin-bottom: 8px;">👤+</div>
-            <div style="font-size: 14px; font-weight: 600;">Add Friends First</div>
-            <div style="font-size: 12px; opacity: 0.9;">Tap to add people to split with</div>
+            <div style="font-size: 14px; font-weight: 600;">${t('add_friends_first')}</div>
+            <div style="font-size: 12px; opacity: 0.9;">${t('tap_to_add_friends')}</div>
           </div>
         `;
         return;
@@ -4455,8 +4481,8 @@
         container.innerHTML = `
           <div onclick="showCreateGroup()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%); border-radius: 12px; cursor: pointer; color: white; min-width: 100%;">
             <div style="font-size: 32px; margin-bottom: 8px;">👥+</div>
-            <div style="font-size: 14px; font-weight: 600;">Create Your First Group</div>
-            <div style="font-size: 12px; opacity: 0.9;">Tap to create a group</div>
+            <div style="font-size: 14px; font-weight: 600;">${t('create_first_group')}</div>
+            <div style="font-size: 12px; opacity: 0.9;">${t('tap_to_create_group')}</div>
           </div>
         `;
         return;
@@ -4471,7 +4497,7 @@
             <span class="group-icon">${group.icon}</span>
             <span class="group-name">${group.name}</span>
           </div>
-          <div class="group-members">${group.members} members</div>
+          <div class="group-members">${t('members', { count: group.members })}</div>
           <div class="group-balance" style="color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
             ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
           </div>
@@ -4501,11 +4527,11 @@
             <span class="group-icon" style="font-size: 32px;">${group.icon}</span>
             <div>
               <div class="group-name" style="font-size: 18px; font-weight: 600; margin-bottom: 4px;">${group.name}</div>
-              <div class="group-members" style="font-size: 14px; color: #64748B;">${group.members} members</div>
+              <div class="group-members" style="font-size: 14px; color: #64748B;">${t('members', { count: group.members })}</div>
             </div>
           </div>
           <div style="margin-top: 16px; text-align: right;">
-            <div style="font-size: 12px; color: #64748B; margin-bottom: 4px;">Your balance</div>
+            <div style="font-size: 12px; color: #64748B; margin-bottom: 4px;">${t('your_balance')}</div>
             <div class="group-balance" style="font-size: 20px; font-weight: 700; color: ${group.balance >= 0 ? '#10B981' : '#EF4444'}">
               ${group.balance >= 0 ? '+' : ''}${formatCurrency(Math.abs(group.balance))}
             </div>
@@ -4522,16 +4548,10 @@
 
       container.innerHTML = `
         <div style="padding: 20px;">
-          <div style="background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+          <div style="text-align: center; margin-bottom: 24px;">
             <div style="font-size: 48px; margin-bottom: 16px;">🚀</div>
-            <h3 style="margin: 0 0 8px 0; font-size: 24px;">Premium Features</h3>
-            <p style="margin: 0 0 20px 0; opacity: 0.9;">Unlock the full potential of monEZ</p>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px;">
-              <span style="font-size: 20px; text-decoration: line-through; opacity: 0.7;">₹299</span>
-              <span style="font-size: 32px; font-weight: bold; color: #F59E0B;">₹119/month</span>
-              <span style="background: #F59E0B; color: #1E293B; padding: 4px 8px; border-radius: 20px; font-size: 12px; font-weight: bold;">60% OFF</span>
-            </div>
-            <button onclick="startPremiumTrial()" style="background: white; color: #8B5CF6; border: none; border-radius: 8px; padding: 12px 24px; font-size: 16px; font-weight: 600; cursor: pointer;">Start Free Trial</button>
+            <h3 style="margin: 0 0 8px 0; font-size: 24px;">${t('premium_features')}</h3>
+            <p style="margin: 0 0 20px 0; opacity: 0.9;">${t('unlock_potential')}</p>
           </div>
           
           <div style="display: grid; gap: 16px;">
@@ -4539,10 +4559,10 @@
               <div style="display: flex; align-items: center; gap: 12px;">
                 <span style="font-size: 24px;">📸</span>
                 <div>
-                  <div style="font-weight: 600; margin-bottom: 4px;">AI Receipt Scanning</div>
-                  <div style="font-size: 14px; color: #64748B;">Scan receipts with 98.5% accuracy</div>
+                  <div style="font-weight: 600; margin-bottom: 4px;">${t('ai_receipt')}</div>
+                  <div style="font-size: 14px; color: #64748B;">${t('ai_receipt_desc')}</div>
                 </div>
-                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">TRY</span>
+                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">${t('try')}</span>
               </div>
             </div>
             
@@ -4550,10 +4570,10 @@
               <div style="display: flex; align-items: center; gap: 12px;">
                 <span style="font-size: 24px;">🎤</span>
                 <div>
-                  <div style="font-weight: 600; margin-bottom: 4px;">Voice Commands</div>
-                  <div style="font-size: 14px; color: #64748B;">Add expenses in 22 languages</div>
+                  <div style="font-weight: 600; margin-bottom: 4px;">${t('ai_voice')}</div>
+                  <div style="font-size: 14px; color: #64748B;">${t('ai_voice_desc')}</div>
                 </div>
-                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">TRY</span>
+                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">${t('try')}</span>
               </div>
             </div>
             
@@ -4561,21 +4581,21 @@
               <div style="display: flex; align-items: center; gap: 12px;">
                 <span style="font-size: 24px;">📊</span>
                 <div>
-                  <div style="font-weight: 600; margin-bottom: 4px;">Advanced Analytics</div>
-                  <div style="font-size: 14px; color: #64748B;">AI-powered spending insights</div>
+                  <div style="font-weight: 600; margin-bottom: 4px;">${t('ai_analytics')}</div>
+                  <div style="font-size: 14px; color: #64748B;">${t('ai_analytics_desc')}</div>
                 </div>
-                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">TRY</span>
+                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">${t('try')}</span>
               </div>
             </div>
             
-            <div onclick="showPremiumModal()" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+            <div onclick="showSettings()" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
               <div style="display: flex; align-items: center; gap: 12px;">
                 <span style="font-size: 24px;">🌍</span>
                 <div>
-                  <div style="font-weight: 600; margin-bottom: 4px;">Multi-Currency Support</div>
-                  <div style="font-size: 14px; color: #64748B;">150+ currencies with real-time rates</div>
+                  <div style="font-weight: 600; margin-bottom: 4px;">${t('multi_currency')}</div>
+                  <div style="font-size: 14px; color: #64748B;">${t('multi_currency_desc')}</div>
                 </div>
-                <span style="background: #8B5CF6; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">PRO</span>
+                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">${t('free')}</span>
               </div>
             </div>
           </div>
