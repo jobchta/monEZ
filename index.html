@@ -3892,6 +3892,18 @@
 
       container.innerHTML = '';
 
+      // Show add friend option if no friends
+      if (AppState.friends.length === 0) {
+        container.innerHTML = `
+          <div onclick="showShareConnectModal()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 12px; cursor: pointer; color: white; min-width: 100%;">
+            <div style="font-size: 32px; margin-bottom: 8px;">👤+</div>
+            <div style="font-size: 14px; font-weight: 600;">Add Friends First</div>
+            <div style="font-size: 12px; opacity: 0.9;">Tap to add people to split with</div>
+          </div>
+        `;
+        return;
+      }
+
       AppState.friends.forEach(friend => {
         const card = document.createElement('div');
         card.className = 'person-card';
