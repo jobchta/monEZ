@@ -18,10 +18,10 @@
   <script>
     // Supabase Configuration
     const SUPABASE_URL = 'https://royqgwcrwzqeehrebdrp.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE'; // Replace with your anon key from Supabase dashboard
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveXFnd2Nyd3pxZWVocmViZHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1MDY4MDcsImV4cCI6MjA3ODA4MjgwN30.MU3klD6uC91mXpY2AKXIMzxWIUswEo3F2vXjB4SRcDc';
 
     // Initialize Supabase client (will be done after DOM loads)
-    let supabase = null;
+    let supabaseClient = null;
   </script>
 
   <style>
@@ -2809,9 +2809,9 @@
 
       // Initialize Supabase client
       init() {
-        if (typeof supabaseClient !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY !== 'YOUR_ANON_KEY_HERE') {
-          this.client = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          console.log('✅ Supabase connected');
+        if (typeof window.supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY) {
+          this.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          console.log('✅ Supabase connected to:', SUPABASE_URL);
           return true;
         }
         console.log('⚠️ Supabase not configured - running in offline mode');
@@ -4882,9 +4882,20 @@
     }
 
     // Enhanced Event Listeners
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       // Show loading screen first
       hideLoadingScreen();
+
+      // Initialize Supabase
+      SupabaseManager.init();
+
+      // Check for existing session
+      const session = await SupabaseManager.getSession();
+      if (session?.user) {
+        AppState.user = session.user;
+        AppState.isAuthenticated = true;
+        console.log('✅ User session restored:', session.user.email);
+      }
 
       // Initialize app after loading
       setTimeout(() => {
