@@ -4413,24 +4413,39 @@
     }
 
     function startFresh() {
-      // Clear all data
+      // Clear all data from localStorage
       localStorage.removeItem('monez_expenses');
       localStorage.removeItem('monez_friends');
       localStorage.removeItem('monez_groups');
 
-      // Reset AppState
+      // Set AppState to empty
       AppState.expenses = [];
       AppState.friends = [];
       AppState.groups = [];
 
-      // Mark as started fresh (so loadFromLocalStorage won't load sample data)
+      // Mark as started fresh and visited
       localStorage.setItem('monez_started_fresh', 'true');
-
-      // Mark as visited and continue
       localStorage.setItem('monez_visited', 'true');
+
+      // Save empty state to localStorage so it persists
+      localStorage.setItem('monez_expenses', JSON.stringify([]));
+      localStorage.setItem('monez_friends', JSON.stringify([]));
+      localStorage.setItem('monez_groups', JSON.stringify([]));
+
       closeFirstVisitModal();
-      continueAppInit();
-      showNotification('🆕 Started with a fresh account! Add your first expense.', 'success');
+
+      // Initialize UI directly (don't call loadFromLocalStorage)
+      initializeSettings();
+      setupExpenseForm();
+      renderRecentExpenses();
+      renderGroupsPreview();
+      updateBalance();
+      updateExpenseStats();
+
+      setTimeout(() => showPWAPrompt(), 3000);
+      setupPWAListeners();
+
+      showNotification('🆕 Started with a fresh account! Tap + to add your first expense.', 'success', 5000);
     }
 
     function keepSampleData() {
