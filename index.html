@@ -4006,39 +4006,62 @@
       renderCountries();
     }
 
-    function renderCountries() {
+    function renderCountries(searchTerm = '') {
       const container = $('countries-grid');
       if (!container) return;
       container.innerHTML = '';
 
-      Object.entries(LANGUAGES).forEach(([code, lang]) => {
+      const filtered = Object.entries(LANGUAGES).filter(([code, lang]) => {
+        if (!searchTerm) return true;
+        const search = searchTerm.toLowerCase();
+        return lang.name.toLowerCase().includes(search) || 
+               lang.nativeName.toLowerCase().includes(search) ||
+               code.toLowerCase().includes(search);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748B;"><div style="font-size: 48px; margin-bottom: 16px;">🔍</div><div style="font-size: 16px;">No countries found</div></div>';
+        return;
+      }
+
+      filtered.forEach(([code, lang]) => {
         const card = document.createElement('div');
         card.className = 'country-card';
-        card.style.cssText = `
-                background: ${i18n.currentLang === code ? '#ECFDF5' : '#FFFFFF'}; 
-                border: 1px solid ${i18n.currentLang === code ? '#10B981' : '#E2E8F0'}; 
-                border-radius: 12px; 
-                padding: 16px; 
-                cursor: pointer; 
-                text-align: center;
-                transition: transform 0.2s;
-            `;
-        card.onclick = () => {
+        const isActive = i18n.currentLang === code;
+        
+        card.style.cssText = 'background: ' + (isActive ? 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)' : '#FFFFFF') + '; border: 2px solid ' + (isActive ? '#10B981' : '#E2E8F0') + '; border-radius: 12px; padding: 20px; cursor: pointer; text-align: center; transition: all 0.2s ease; position: relative; min-height: 140px; display: flex; flex-direction: column; justify-content: center;';
+        
+        card.onclick = function() {
           changeLanguage(code);
-          showCountry(); // Re-render to update selection
-          showNotification(\`Country changed to \${lang.nativeName}\`, 'success');
-            };
-            
-            card.innerHTML = \`
-                <div style="font-size: 32px; margin-bottom: 8px;">🏳️</div>
-                <div style="font-weight: 600; color: #1E293B;">\${lang.nativeName}</div>
-                <div style="font-size: 12px; color: #64748B;">\${lang.name}</div>
-            \`;
-            
-            container.appendChild(card);
-        });
+          renderCountries(searchTerm);
+          showNotification('Country changed to ' + lang.nativeName, 'success');
+        };
+        
+        const checkmark = isActive ? '<div style="position: absolute; top: 8px; right: 8px; font-size: 20px;">✓</div>' : '';
+        const flagEmoji = lang.flag || '🏳️';
+        card.innerHTML = checkmark + '<div style="font-size: 48px; margin-bottom: 12px;">' + flagEmoji + '</div><div style="font-weight: 600; font-size: 16px; color: #1E293B; margin-bottom: 4px;">' + lang.nativeName + '</div><div style="font-size: 13px; color: #64748B; margin-bottom: 8px;">' + lang.name + '</div><div style="display: inline-block; background: #F1F5F9; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; color: #475569;">' + lang.currency + '</div>';
+        
+        card.onmouseenter = function() {
+          if (!isActive) {
+            card.style.transform = 'translateY(-4px)';
+            card.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+          }
+        };
+        card.onmouseleave = function() {
+          card.style.transform = 'translateY(0)';
+          card.style.boxShadow = 'none';
+        };
+        
+        card.ontouchstart = function() { card.style.transform = 'scale(0.98)'; };
+        card.ontouchend = function() { card.style.transform = 'scale(1)'; };
+        
+        container.appendChild(card);
+      });
     }
 
+    function filterCountries(searchTerm) {
+      renderCountries(searchTerm);
+    }
     // Additional functions
     function showSplitBill() {
       showAddExpense();
