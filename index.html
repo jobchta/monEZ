@@ -2456,6 +2456,44 @@
       FJD: { symbol: 'FJ$', name: 'Fijian Dollar', locale: 'en-FJ', decimals: 2 },
     };
 
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // COUNTRIES - Country-first data model with multi-currency support
+    // ═══════════════════════════════════════════════════════════════════════════
+    const COUNTRIES = {
+      US: { name: 'United States', flag: '🇺🇸', currencies: ['USD'], languages: ['en', 'es'] },
+      GB: { name: 'United Kingdom', flag: '🇬🇧', currencies: ['GBP'], languages: ['en'] },
+      IN: { name: 'India', flag: '🇮🇳', currencies: ['INR'], languages: ['en', 'hi', 'ta', 'bn'] },
+      JP: { name: 'Japan', flag: '🇯🇵', currencies: ['JPY'], languages: ['en', 'ja'] },
+      CN: { name: 'China', flag: '🇨🇳', currencies: ['CNY'], languages: ['en', 'zh'] },
+      DE: { name: 'Germany', flag: '🇩🇪', currencies: ['EUR'], languages: ['en', 'de'] },
+      FR: { name: 'France', flag: '🇫🇷', currencies: ['EUR'], languages: ['en', 'fr'] },
+      ES: { name: 'Spain', flag: '🇪🇸', currencies: ['EUR'], languages: ['en', 'es'] },
+      IT: { name: 'Italy', flag: '🇮🇹', currencies: ['EUR'], languages: ['en', 'it'] },
+      BR: { name: 'Brazil', flag: '🇧🇷', currencies: ['BRL'], languages: ['en', 'pt'] },
+      RU: { name: 'Russia', flag: '🇷🇺', currencies: ['RUB'], languages: ['en', 'ru'] },
+      KR: { name: 'South Korea', flag: '🇰🇷', currencies: ['KRW'], languages: ['en', 'ko'] },
+      MX: { name: 'Mexico', flag: '🇲🇽', currencies: ['MXN'], languages: ['en', 'es'] },
+      CA: { name: 'Canada', flag: '🇨🇦', currencies: ['CAD'], languages: ['en', 'fr'] },
+      AU: { name: 'Australia', flag: '🇦🇺', currencies: ['AUD'], languages: ['en'] },
+      NL: { name: 'Netherlands', flag: '🇳🇱', currencies: ['EUR'], languages: ['en', 'nl'] },
+      PL: { name: 'Poland', flag: '🇵🇱', currencies: ['PLN'], languages: ['en', 'pl'] },
+      TR: { name: 'Turkey', flag: '🇹🇷', currencies: ['TRY'], languages: ['en', 'tr'] },
+      SA: { name: 'Saudi Arabia', flag: '🇸🇦', currencies: ['SAR'], languages: ['en', 'ar'] },
+      AE: { name: 'UAE', flag: '🇦🇪', currencies: ['AED'], languages: ['en', 'ar'] },
+      TH: { name: 'Thailand', flag: '🇹🇭', currencies: ['THB'], languages: ['en', 'th'] },
+      VN: { name: 'Vietnam', flag: '🇻🇳', currencies: ['VND'], languages: ['en', 'vi'] },
+      ID: { name: 'Indonesia', flag: '🇮🇩', currencies: ['IDR'], languages: ['en', 'id'] },
+      MY: { name: 'Malaysia', flag: '🇲🇾', currencies: ['MYR'], languages: ['en', 'ms'] },
+      PK: { name: 'Pakistan', flag: '🇵🇰', currencies: ['PKR'], languages: ['en', 'ur'] },
+      BD: { name: 'Bangladesh', flag: '🇧🇩', currencies: ['BDT'], languages: ['en', 'bn'] },
+      UA: { name: 'Ukraine', flag: '🇺🇦', currencies: ['UAH'], languages: ['en', 'uk'] },
+      IL: { name: 'Israel', flag: '🇮🇱', currencies: ['ILS'], languages: ['en', 'he'] },
+      IR: { name: 'Iran', flag: '🇮🇷', currencies: ['IRR'], languages: ['en', 'fa'] },
+      CH: { name: 'Switzerland', flag: '🇨🇭', currencies: ['CHF', 'EUR'], languages: ['en', 'de', 'fr', 'it'] },
+      ZW: { name: 'Zimbabwe', flag: '🇿🇼', currencies: ['USD', 'ZAR', 'BWP'], languages: ['en'] },
+    };
+
     // ═══════════════════════════════════════════════════════════════════════════
     // MULTI-LANGUAGE SYSTEM (20+ Languages with RTL Support)
     // ═══════════════════════════════════════════════════════════════════════════
@@ -4006,62 +4044,201 @@
       renderCountries();
     }
 
-    function renderCountries(searchTerm = '') {
-      const container = $('countries-grid');
-      if (!container) return;
-      container.innerHTML = '';
+// Global state for country/language selection
+let selectedCountry = null;
+let selectedLanguage = null;
+let selectedCurrency = null;
 
-      const filtered = Object.entries(LANGUAGES).filter(([code, lang]) => {
-        if (!searchTerm) return true;
-        const search = searchTerm.toLowerCase();
-        return lang.name.toLowerCase().includes(search) || 
-               lang.nativeName.toLowerCase().includes(search) ||
-               code.toLowerCase().includes(search);
-      });
+// Render countries grid
+function renderCountries(searchTerm = '') {
+  const container = $('countries-grid');
+  if (!container) return;
+  container.innerHTML = '';
 
-      if (filtered.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748B;"><div style="font-size: 48px; margin-bottom: 16px;">🔍</div><div style="font-size: 16px;">No countries found</div></div>';
-        return;
+  const filtered = Object.entries(COUNTRIES).filter(([code, country]) => {
+    if (!searchTerm) return true;
+    const search = searchTerm.toLowerCase();
+    return country.name.toLowerCase().includes(search) || 
+           code.toLowerCase().includes(search);
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748B;"><div style="font-size: 48px; margin-bottom: 16px;">🔍</div><div style="font-size: 16px;">No countries found</div></div>';
+    return;
+  }
+
+  filtered.forEach(([code, country]) => {
+    const card = document.createElement('div');
+    card.className = 'country-card';
+    const isActive = selectedCountry === code;
+    
+    card.style.cssText = 'background: ' + (isActive ? 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)' : '#FFFFFF') + '; border: 2px solid ' + (isActive ? '#10B981' : '#E2E8F0') + '; border-radius: 12px; padding: 20px; cursor: pointer; text-align: center; transition: all 0.2s ease; position: relative; min-height: 140px; display: flex; flex-direction: column; justify-content: center;';
+    
+    card.onclick = function() {
+      showLanguageSelector(code);
+    };
+    
+    const checkmark = isActive ? '<div style="position: absolute; top: 8px; right: 8px; font-size: 20px;">✓</div>' : '';
+    const currencyBadge = country.currencies.length === 1 ? 
+      '<div style="display: inline-block; background: #F1F5F9; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; color: #475569;">' + country.currencies[0] + '</div>' :
+      '<div style="display: inline-block; background: #FEF3C7; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; color: #92400E;">' + country.currencies.length + ' currencies</div>';
+    
+    card.innerHTML = checkmark + 
+      '<div style="font-size: 48px; margin-bottom: 12px;">' + country.flag + '</div>' +
+      '<div style="font-weight: 600; font-size: 16px; color: #1E293B; margin-bottom: 4px;">' + country.name + '</div>' +
+      '<div style="font-size: 13px; color: #64748B; margin-bottom: 8px;">' + country.languages.length + ' language' + (country.languages.length > 1 ? 's' : '') + '</div>' +
+      currencyBadge;
+    
+    card.onmouseenter = function() {
+      if (!isActive) {
+        card.style.transform = 'translateY(-4px)';
+        card.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
       }
+    };
+    card.onmouseleave = function() {
+      card.style.transform = 'translateY(0)';
+      card.style.boxShadow = 'none';
+    };
+    
+    container.appendChild(card);
+  });
+}
 
-      filtered.forEach(([code, lang]) => {
-        const card = document.createElement('div');
-        card.className = 'country-card';
-        const isActive = i18n.currentLang === code;
-        
-        card.style.cssText = 'background: ' + (isActive ? 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)' : '#FFFFFF') + '; border: 2px solid ' + (isActive ? '#10B981' : '#E2E8F0') + '; border-radius: 12px; padding: 20px; cursor: pointer; text-align: center; transition: all 0.2s ease; position: relative; min-height: 140px; display: flex; flex-direction: column; justify-content: center;';
-        
-        card.onclick = function() {
-          changeLanguage(code);
-          renderCountries(searchTerm);
-          showNotification('Country changed to ' + lang.nativeName, 'success');
-        };
-        
-        const checkmark = isActive ? '<div style="position: absolute; top: 8px; right: 8px; font-size: 20px;">✓</div>' : '';
-        const flagEmoji = lang.flag || '🏳️';
-        card.innerHTML = checkmark + '<div style="font-size: 48px; margin-bottom: 12px;">' + flagEmoji + '</div><div style="font-weight: 600; font-size: 16px; color: #1E293B; margin-bottom: 4px;">' + lang.nativeName + '</div><div style="font-size: 13px; color: #64748B; margin-bottom: 8px;">' + lang.name + '</div><div style="display: inline-block; background: #F1F5F9; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; color: #475569;">' + lang.currency + '</div>';
-        
-        card.onmouseenter = function() {
-          if (!isActive) {
-            card.style.transform = 'translateY(-4px)';
-            card.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-          }
-        };
-        card.onmouseleave = function() {
-          card.style.transform = 'translateY(0)';
-          card.style.boxShadow = 'none';
-        };
-        
-        card.ontouchstart = function() { card.style.transform = 'scale(0.98)'; };
-        card.ontouchend = function() { card.style.transform = 'scale(1)'; };
-        
-        container.appendChild(card);
-      });
-    }
+// Show language selector modal
+function showLanguageSelector(countryCode) {
+  const country = COUNTRIES[countryCode];
+  if (!country) return;
+  
+  selectedCountry = countryCode;
+  
+  const modal = document.createElement('div');
+  modal.id = 'language-selector-modal';
+  modal.className = 'modal';
+  modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+  
+  const modalContent = document.createElement('div');
+  modalContent.style.cssText = 'background: white; border-radius: 16px; padding: 24px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto;';
+  
+  let html = '<div style="text-align: center; margin-bottom: 20px;"><div style="font-size: 48px; margin-bottom: 8px;">' + country.flag + '</div><h3 style="margin: 0 0 8px 0; font-size: 20px; color: #1E293B;">' + country.name + '</h3><p style="margin: 0; font-size: 14px; color: #64748B;">Select your language</p></div>';
+  
+  html += '<div style="display: flex; flex-direction: column; gap: 8px;">';
+  
+  country.languages.forEach(function(langCode) {
+    const lang = LANGUAGES[langCode];
+    if (!lang) return;
+    
+    const isActive = i18n.currentLang === langCode;
+    html += '<button onclick="selectLanguageAndCurrency(\'' + countryCode + '\', \'' + langCode + '\')" style="padding: 16px; border: 2px solid ' + (isActive ? '#10B981' : '#E2E8F0') + '; background: ' + (isActive ? '#ECFDF5' : 'white') + '; border-radius: 12px; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center;">' +
+      '<div><div style="font-weight: 600; font-size: 16px; color: #1E293B;">' + lang.name + '</div><div style="font-size: 14px; color: #64748B;">' + lang.nativeName + '</div></div>' +
+      (isActive ? '<div style="font-size: 20px; color: #10B981;">✓</div>' : '') +
+      '</button>';
+  });
+  
+  html += '</div>';
+  html += '<button onclick="closeLanguageSelector()" style="margin-top: 16px; width: 100%; padding: 12px; background: #F1F5F9; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; color: #475569;">Cancel</button>';
+  
+  modalContent.innerHTML = html;
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+}
 
-    function filterCountries(searchTerm) {
-      renderCountries(searchTerm);
-    }
+// Select language and handle currency
+function selectLanguageAndCurrency(countryCode, langCode) {
+  const country = COUNTRIES[countryCode];
+  
+  // If single currency, auto-select it
+  if (country.currencies.length === 1) {
+    selectedCurrency = country.currencies[0];
+    applySelection(countryCode, langCode, selectedCurrency);
+  } else {
+    // Show currency selector
+    showCurrencySelector(countryCode, langCode);
+  }
+}
+
+// Show currency selector for countries with multiple currencies
+function showCurrencySelector(countryCode, langCode) {
+  const country = COUNTRIES[countryCode];
+  
+  const modal = $('language-selector-modal');
+  if (!modal) return;
+  
+  const modalContent = modal.querySelector('div');
+  
+  let html = '<div style="text-align: center; margin-bottom: 20px;"><div style="font-size: 48px; margin-bottom: 8px;">' + country.flag + '</div><h3 style="margin: 0 0 8px 0; font-size: 20px; color: #1E293B;">' + country.name + '</h3><p style="margin: 0; font-size: 14px; color: #64748B;">Select your currency</p></div>';
+  
+  html += '<div style="display: flex; flex-direction: column; gap: 8px;">';
+  
+  country.currencies.forEach(function(currCode) {
+    const curr = CURRENCIES[currCode];
+    if (!curr) return;
+    
+    html += '<button onclick="applySelection(\'' + countryCode + '\', \'' + langCode + '\', \'' + currCode + '\')" style="padding: 16px; border: 2px solid #E2E8F0; background: white; border-radius: 12px; cursor: pointer; text-align: left; transition: all 0.2s;">' +
+      '<div style="font-weight: 600; font-size: 16px; color: #1E293B;">' + curr.name + '</div>' +
+      '<div style="font-size: 14px; color: #64748B;">' + curr.symbol + ' (' + currCode + ')</div>' +
+      '</button>';
+  });
+  
+  html += '</div>';
+  html += '<button onclick="closeLanguageSelector()" style="margin-top: 16px; width: 100%; padding: 12px; background: #F1F5F9; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; color: #475569;">Cancel</button>';
+  
+  modalContent.innerHTML = html;
+}
+
+// Apply the final selection
+function applySelection(countryCode, langCode, currCode) {
+  selectedCountry = countryCode;
+  selectedLanguage = langCode;
+  selectedCurrency = currCode;
+  
+  // Save to localStorage
+  localStorage.setItem('selectedCountry', countryCode);
+  localStorage.setItem('selectedLanguage', langCode);
+  localStorage.setItem('selectedCurrency', currCode);
+  
+  // Change language
+  changeLanguage(langCode);
+  
+  // Change currency
+  if (window.changeCurrency) {
+    changeCurrency(currCode);
+  }
+  
+  // Close modal
+  closeLanguageSelector();
+  
+  // Re-render countries to show selection
+  renderCountries();
+  
+  // Show notification
+  const country = COUNTRIES[countryCode];
+  const lang = LANGUAGES[langCode];
+  showNotification('Set to ' + country.name + ' - ' + lang.nativeName + ' (' + currCode + ')', 'success');
+}
+
+// Close language selector modal
+function closeLanguageSelector() {
+  const modal = $('language-selector-modal');
+  if (modal) modal.remove();
+}
+
+// Filter countries
+function filterCountries(searchTerm) {
+  renderCountries(searchTerm);
+}
+
+// Initialize from localStorage
+function initializeCountrySelection() {
+  const savedCountry = localStorage.getItem('selectedCountry');
+  const savedLanguage = localStorage.getItem('selectedLanguage');
+  const savedCurrency = localStorage.getItem('selectedCurrency');
+  
+  if (savedCountry && savedLanguage && savedCurrency) {
+    selectedCountry = savedCountry;
+    selectedLanguage = savedLanguage;
+    selectedCurrency = savedCurrency;
+  }
+}
     // Additional functions
     function showSplitBill() {
       showAddExpense();
