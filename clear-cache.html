@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Clear monEZ Cache</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        button {
+            background: #10B981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            background: #059669;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.success {
+            background: #D1FAE5;
+            color: #065F46;
+            display: block;
+        }
+
+        .status.error {
+            background: #FEE2E2;
+            color: #991B1B;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔧 monEZ Cache Clearer</h1>
+        <p>This tool will clear the service worker cache and reload your app with the latest changes.</p>
+
+        <button onclick="clearAndReload()">Clear Cache & Reload</button>
+        <button onclick="openApp()">Open monEZ App</button>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+        async function clearAndReload() {
+            const statusEl = document.getElementById('status');
+            statusEl.className = 'status';
+            statusEl.textContent = 'Clearing cache...';
+            statusEl.style.display = 'block';
+
+            try {
+                // Unregister service workers
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+
+                // Clear all caches
+                const cacheNames = await caches.keys();
+                for (let cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                }
+
+                statusEl.className = 'status success';
+                statusEl.innerHTML = '✅ Cache cleared successfully!<br>Reloading in 2 seconds...';
+
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:3000';
+                }, 2000);
+
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Error: ' + error.message;
+            }
+        }
+
+        function openApp() {
+            window.open('http://localhost:3000', '_blank');
+        }
+    </script>
+</body>
+
+</html>
