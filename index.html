@@ -5942,11 +5942,27 @@
         }
       }
 
-      // Service Worker Registration
+      // Service Worker Registration with cache-busting
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(() => console.log('monEZ: Service Worker registered'))
-          .catch(() => console.log('monEZ: Service Worker registration failed'));
+        // Add timestamp to force fresh download
+        const swUrl = `/service-worker.js?v=${Date.now()}`;
+        navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' })
+          .then(reg => {
+            console.log('monEZ: Service Worker registered');
+            // Force immediate update check
+            reg.update();
+            // Auto-reload when new service worker activates
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+                  console.log('New service worker activated, reloading...');
+                  window.location.reload();
+                }
+              });
+            });
+          })
+          .catch(err => console.log('monEZ: Service Worker registration failed', err));
       }
 
       // Global functions for HTML onclick handlers

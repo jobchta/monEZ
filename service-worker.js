@@ -39,7 +39,7 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - NETWORK FIRST for fresh content
 self.addEventListener("fetch", event => {
   // Skip cross-origin requests
   if (!event.request.url.startsWith(self.location.origin)) {
@@ -47,30 +47,31 @@ self.addEventListener("fetch", event => {
   }
 
   event.respondWith(
-    caches.match(event.request)
+    // Try network first
+    fetch(event.request)
       .then(response => {
-        if (response) {
+        // Don't cache if not a valid response
+        if (!response || response.status !== 200 || response.type === 'error') {
           return response;
         }
 
-        return fetch(event.request)
+        // Clone response and update cache
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME)
+          .then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+
+        return response;
+      })
+      .catch(() => {
+        // Network failed, fallback to cache
+        return caches.match(event.request)
           .then(response => {
-            // Don't cache if not a valid response
-            if (!response || response.status !== 200 || response.type === 'error') {
+            if (response) {
               return response;
             }
-
-            // Clone response and cache it
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          })
-          .catch(() => {
-            // Return offline fallback if available
+            // Return offline fallback for documents
             if (event.request.destination === 'document') {
               return caches.match('/index.html');
             }
