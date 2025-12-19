@@ -2083,6 +2083,14 @@
             <h2><span data-i18n="country">Country</span></h2>
           </header>
           <div class="content-container">
+            <!-- Search Bar -->
+            <div style="padding: 16px; padding-bottom: 0;">
+              <input type="text" id="country-search" class="search-input" placeholder="Search countries..."
+                data-i18n-placeholder="search_countries"
+                style="width: 100%; padding: 12px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px;"
+                oninput="filterCountries(this.value)" />
+            </div>
+            <!-- Countries Grid -->
             <div id="countries-grid"
               style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 16px;">
               <!-- Countries will be rendered here -->
