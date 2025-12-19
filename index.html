@@ -6741,8 +6741,8 @@
 
       const lowerText = text.toLowerCase();
 
-      // Strategy 1: Look for "Total" followed by a number
-      const totalMatch = lowerText.match(/total[\s$:]+([\d,]+\.?\d*)/);
+      // Strategy 1: Look for "Total" followed by a number (Word boundary to avoid Subtotal)
+      const totalMatch = lowerText.match(/\btotal[\s$:]+([\d,]+\.?\d*)/);
       if (totalMatch && totalMatch[1]) {
         const amount = parseFloat(totalMatch[1].replace(/,/g, ''));
         finishProcessing(amount, text);
