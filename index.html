@@ -6,6 +6,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#667eea">
+  <script>
+    window.onerror = function (msg, url, line, col, error) {
+      const div = document.createElement('div');
+      div.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;padding:20px;z-index:99999;font-size:12px;white-space:pre-wrap;';
+      div.textContent = '❌ ERROR: ' + msg + '\n' + url + ':' + line + ':' + col;
+      document.body.appendChild(div);
+      return false;
+    };
+  </script>
   <meta name="description" content="monEZ - Split expenses, not friendships">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1605,7 +1614,7 @@
 
 
     /* View Header */
-  
+
     /* Premium UI Enhancements */
     .segmented-control {
       background: var(--surface-elevated);
@@ -1614,9 +1623,9 @@
       display: flex;
       position: relative;
       border: 1px solid var(--borders);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
     }
-    
+
     .segment-btn {
       flex: 1;
       padding: 10px;
@@ -1630,11 +1639,12 @@
       transition: all 0.3s;
       border-radius: 8px;
     }
-    
+
     .segment-btn.active {
       background: white;
-      color: var(--primary-accent); /* Updated from --primary */
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      color: var(--primary-accent);
+      /* Updated from --primary */
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       font-weight: 600;
     }
 
@@ -1664,11 +1674,11 @@
     .spending-fill {
       height: 100%;
       background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      width: 0%; /* Animated via JS */
+      width: 0%;
+      /* Animated via JS */
       transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
       border-radius: 6px;
     }
-
   </style>
 </head>
 
@@ -1841,18 +1851,19 @@
               </div>
             </div>
 
-            <!-- Expense Type Toggle -->
-            <div class="form-group">
-              <label class="form-label">Expense Type</label>
-              <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                <button type="button" id="personal-toggle" class="expense-type-btn active"
-                  onclick="setExpenseType('personal')"
-                  style="flex: 1; padding: 12px; border: 2px solid #667eea; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer;">
+            <!-- Expense Type Toggle - Premium Segmented Control -->
+            <div class="form-group animate-enter" style="animation-delay: 0.1s;">
+              <label class="form-label" style="margin-bottom: 12px;">Expense Type</label>
+              <div class="segmented-control"
+                style="background: var(--surface-elevated); padding: 4px; border-radius: 12px; display: flex; position: relative; border: 1px solid var(--borders); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                <button type="button" id="personal-toggle" onclick="setExpenseType('personal')"
+                  style="flex: 1; padding: 12px; border: none; background: transparent; color: var(--primary); font-weight: 600; font-size: 14px; cursor: pointer; z-index: 1; transition: all 0.3s; border-radius: 8px;"
+                  class="active">
                   👤 Personal
                 </button>
-                <button type="button" id="split-toggle" class="expense-type-btn" onclick="setExpenseType('split')"
-                  style="flex: 1; padding: 12px; border: 2px solid var(--borders); border-radius: 8px; background: var(--surface); color: var(--text); font-weight: 600; cursor: pointer;">
-                  👥 Split with Friends
+                <button type="button" id="split-toggle" onclick="setExpenseType('split')"
+                  style="flex: 1; padding: 12px; border: none; background: transparent; color: var(--secondary-text); font-weight: 500; font-size: 14px; cursor: pointer; z-index: 1; transition: all 0.3s; border-radius: 8px;">
+                  👥 Split
                 </button>
               </div>
             </div>
@@ -4834,103 +4845,113 @@
 
       function signOut() {
 
-// Expense Type Toggle
-let currentExpenseType = 'personal';
+        // Expense Type Toggle
+        let currentExpenseType = 'personal';
 
-function setExpenseType(type) {
-  currentExpenseType = type;
-  const personalBtn = document.getElementById('personal-toggle');
-  const splitBtn = document.getElementById('split-toggle');
-  const splitSection = document.getElementById('split-section');
+        function setExpenseType(type) {
+          currentExpenseType = type;
+          const personalBtn = document.getElementById('personal-toggle');
+          const splitBtn = document.getElementById('split-toggle');
+          const splitSection = document.getElementById('split-section');
 
-  if (type === 'personal') {
-    personalBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-    personalBtn.style.color = 'white';
-    personalBtn.style.borderColor = '#667eea';
-    splitBtn.style.background = 'var(--surface)';
-    splitBtn.style.color = 'var(--text)';
-    splitBtn.style.borderColor = 'var(--borders)';
-    splitSection.style.display = 'none';
-  } else {
-    splitBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-    splitBtn.style.color = 'white';
-    splitBtn.style.borderColor = '#667eea';
-    personalBtn.style.background = 'var(--surface)';
-    personalBtn.style.color = 'var(--text)';
-    personalBtn.style.borderColor = 'var(--borders)';
-    splitSection.style.display = 'block';
-    populatePeopleSelector();
-  }
-}
+          // Styles for active/inactive states
+          const activeStyle = "flex: 1; padding: 12px; border: none; background: white; color: var(--primary); font-weight: 600; font-size: 14px; cursor: pointer; z-index: 1; transition: all 0.3s; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);";
+          const inactiveStyle = "flex: 1; padding: 12px; border: none; background: transparent; color: var(--secondary-text); font-weight: 500; font-size: 14px; cursor: pointer; z-index: 1; transition: all 0.3s; border-radius: 8px;";
 
-// Friends Management
-function showManageFriends() {
-  const modal = document.createElement('div');
-  modal.id = 'friends-modal';
-  modal.className = 'modal';
-  modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
-  
-  modal.innerHTML = '<div style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h3 style="margin: 0;">👥 Manage Friends</h3><button onclick="closeFriendsModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button></div><div style="margin-bottom: 20px;"><input type="text" id="friend-name" placeholder="Friend\'s name" style="width: 100%; padding: 12px; border: 1px solid var(--borders); border-radius: 8px; margin-bottom: 8px;"><input type="text" id="friend-contact" placeholder="Email or phone (optional)" style="width: 100%; padding: 12px; border: 1px solid var(--borders); border-radius: 8px; margin-bottom: 12px;"><button onclick="addFriend()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">➕ Add Friend</button></div><div id="friends-list" style="display: flex; flex-direction: column; gap: 8px;"></div></div>';
-  
-  document.body.appendChild(modal);
-  renderFriendsList();
-}
+          if (type === 'personal') {
+            personalBtn.style.cssText = activeStyle;
+            splitBtn.style.cssText = inactiveStyle;
+            if (splitSection) splitSection.style.display = 'none';
+          } else {
+            splitBtn.style.cssText = activeStyle;
+            personalBtn.style.cssText = inactiveStyle;
+            if (splitSection) {
+              splitSection.style.display = 'block';
+              populatePeopleSelector();
+            }
+          }
+        }
 
-function closeFriendsModal() {
-  const modal = document.getElementById('friends-modal');
-  if (modal) modal.remove();
-}
+        function updateSpendingVisualizer() {
+          const total = AppState.expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+          const budget = 2000; // Mock budget
+          const percentage = Math.min((total / budget) * 100, 100);
 
-function addFriend() {
-  const nameInput = document.getElementById('friend-name');
-  const contactInput = document.getElementById('friend-contact');
-  const name = nameInput.value.trim();
-  const contact = contactInput.value.trim();
+          const bar = document.getElementById('spending-bar');
+          const label = document.getElementById('spending-percentage');
 
-  if (!name) {
-    showNotification('❌ Please enter a name', 'error');
-    return;
-  }
+          if (bar) bar.style.width = percentage + '%';
+          if (label) label.textContent = Math.round(percentage) + '%';
+        }
 
-  const newFriend = {
-    id: Date.now(),
-    name: name,
-    contact: contact || '',
-    avatar: name.charAt(0).toUpperCase()
-  };
+        // Friends Management
+        function showManageFriends() {
+          const modal = document.createElement('div');
+          modal.id = 'friends-modal';
+          modal.className = 'modal';
+          modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
 
-  AppState.friends.push(newFriend);
-  storage.save('friends', AppState.friends);
+          modal.innerHTML = '<div style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h3 style="margin: 0;">👥 Manage Friends</h3><button onclick="closeFriendsModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button></div><div style="margin-bottom: 20px;"><input type="text" id="friend-name" placeholder="Friend\'s name" style="width: 100%; padding: 12px; border: 1px solid var(--borders); border-radius: 8px; margin-bottom: 8px;"><input type="text" id="friend-contact" placeholder="Email or phone (optional)" style="width: 100%; padding: 12px; border: 1px solid var(--borders); border-radius: 8px; margin-bottom: 12px;"><button onclick="addFriend()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">➕ Add Friend</button></div><div id="friends-list" style="display: flex; flex-direction: column; gap: 8px;"></div></div>';
 
-  nameInput.value = '';
-  contactInput.value = '';
-  
-  renderFriendsList();
-  showNotification('✅ ' + name + ' added!', 'success');
-}
+          document.body.appendChild(modal);
+          renderFriendsList();
+        }
 
-function removeFriend(friendId) {
-  if (confirm('Remove this friend?')) {
-    AppState.friends = AppState.friends.filter(f => f.id !== friendId);
-    storage.save('friends', AppState.friends);
-    renderFriendsList();
-    showNotification('🗑️ Friend removed', 'info');
-  }
-}
+        function closeFriendsModal() {
+          const modal = document.getElementById('friends-modal');
+          if (modal) modal.remove();
+        }
 
-function renderFriendsList() {
-  const container = document.getElementById('friends-list');
-  if (!container) return;
+        function addFriend() {
+          const nameInput = document.getElementById('friend-name');
+          const contactInput = document.getElementById('friend-contact');
+          const name = nameInput.value.trim();
+          const contact = contactInput.value.trim();
 
-  if (AppState.friends.length === 0) {
-    container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--secondary-text);">No friends added yet</div>';
-    return;
-  }
+          if (!name) {
+            showNotification('❌ Please enter a name', 'error');
+            return;
+          }
 
-  container.innerHTML = AppState.friends.map(friend => 
-    '<div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface-elevated); border-radius: 8px;"><div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">' + friend.avatar + '</div><div style="flex: 1;"><div style="font-weight: 600;">' + friend.name + '</div>' + (friend.contact ? '<div style="font-size: 12px; color: var(--secondary-text);">' + friend.contact + '</div>' : '') + '</div><button onclick="removeFriend(' + friend.id + ')" style="background: none; border: none; color: var(--error); cursor: pointer; font-size: 18px;">🗑️</button></div>'
-  ).join('');
-}
+          const newFriend = {
+            id: Date.now(),
+            name: name,
+            contact: contact || '',
+            avatar: name.charAt(0).toUpperCase()
+          };
+
+          AppState.friends.push(newFriend);
+          storage.save('friends', AppState.friends);
+
+          nameInput.value = '';
+          contactInput.value = '';
+
+          renderFriendsList();
+          showNotification('✅ ' + name + ' added!', 'success');
+        }
+
+        function removeFriend(friendId) {
+          if (confirm('Remove this friend?')) {
+            AppState.friends = AppState.friends.filter(f => f.id !== friendId);
+            storage.save('friends', AppState.friends);
+            renderFriendsList();
+            showNotification('🗑️ Friend removed', 'info');
+          }
+        }
+
+        function renderFriendsList() {
+          const container = document.getElementById('friends-list');
+          if (!container) return;
+
+          if (AppState.friends.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--secondary-text);">No friends added yet</div>';
+            return;
+          }
+
+          container.innerHTML = AppState.friends.map(friend =>
+            '<div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface-elevated); border-radius: 8px;"><div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">' + friend.avatar + '</div><div style="flex: 1;"><div style="font-weight: 600;">' + friend.name + '</div>' + (friend.contact ? '<div style="font-size: 12px; color: var(--secondary-text);">' + friend.contact + '</div>' : '') + '</div><button onclick="removeFriend(' + friend.id + ')" style="background: none; border: none; color: var(--error); cursor: pointer; font-size: 18px;">🗑️</button></div>'
+          ).join('');
+        }
 
         if (confirm('Are you sure you want to sign out?')) {
           localStorage.clear();
@@ -6617,7 +6638,7 @@ function renderFriendsList() {
 
       if (totalEl) totalEl.textContent = formatCurrency(total);
       if (monthEl) monthEl.textContent = formatCurrency(thisMonth || total);
-  updateSpendingVisualizer();
+      updateSpendingVisualizer();
     }
 
     function setupPWAListeners() {
@@ -6659,7 +6680,7 @@ function renderFriendsList() {
       hideLoadingScreen();
 
       // Initialize Supabase
-      SupabaseManager.init(); setExpenseType('personal');
+      SupabaseManager.init();
 
       // Check for existing session
       const session = await SupabaseManager.getSession();
