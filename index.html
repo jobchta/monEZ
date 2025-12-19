@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#846941">
+  <meta name="theme-color" content="#667eea">
   <meta name="description" content="monEZ - Split expenses, not friendships">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -34,7 +34,7 @@
       --primary-text: #232325;
       --secondary-text: #828288;
       --borders: #ECECEC;
-      --gold-accent: #846941;
+      --primary-accent: #667eea;
       --steel-blue: #3B6270;
       --success: #32775E;
       --error: #C44A44;
@@ -113,7 +113,7 @@
       left: 0;
       width: 100%;
       height: 100vh;
-      background: linear-gradient(135deg, var(--gold-accent) 0%, var(--steel-blue) 100%);
+      background: linear-gradient(135deg, var(--primary-accent) 0%, var(--steel-blue) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -257,7 +257,7 @@
     .balance-amount {
       font-size: var(--text-lg);
       font-weight: var(--weight-semibold);
-      color: var(--gold-accent);
+      color: var(--primary-accent);
     }
 
     .header-right {
@@ -462,9 +462,9 @@
     }
 
     .action-card.primary {
-      background: var(--gold-accent);
+      background: var(--primary-accent);
       color: white;
-      border-color: var(--gold-accent);
+      border-color: var(--primary-accent);
     }
 
     .action-card.premium {
@@ -512,7 +512,7 @@
     .view-all {
       background: none;
       border: none;
-      color: var(--gold-accent);
+      color: var(--primary-accent);
       font-size: var(--text-sm);
       font-weight: var(--weight-medium);
       cursor: pointer;
@@ -560,7 +560,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, var(--gold-accent) 0%, #A67C52 100%);
+      background: linear-gradient(135deg, var(--primary-accent) 0%, #764ba2 100%);
       color: white;
     }
 
@@ -636,7 +636,7 @@
     .group-balance {
       font-size: var(--text-lg);
       font-weight: var(--weight-semibold);
-      color: var(--gold-accent);
+      color: var(--primary-accent);
     }
 
     /* Luxury Bottom Navigation */
@@ -669,7 +669,7 @@
     }
 
     .nav-item.active {
-      color: var(--gold-accent);
+      color: var(--primary-accent);
     }
 
     .nav-item:hover {
@@ -696,7 +696,7 @@
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #846941 0%, #A08555 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border: none;
       box-shadow: 0 4px 12px rgba(132, 105, 65, 0.4);
       cursor: pointer;
@@ -750,7 +750,7 @@
 
     /* Balance Cards */
     .balance-card-large {
-      background: linear-gradient(135deg, #846941 0%, #A08555 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-radius: 16px;
       padding: 24px;
       color: white;
@@ -778,7 +778,7 @@
 
     /* Quick Action Buttons */
     .quick-action-btn {
-      background: linear-gradient(135deg, #846941 0%, #A08555 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border: none;
       border-radius: 12px;
       padding: 20px;
@@ -873,7 +873,7 @@
       width: 48px;
       height: 48px;
       border-radius: 12px;
-      background: linear-gradient(135deg, #846941 0%, #A08555 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -893,7 +893,7 @@
       position: absolute;
       top: var(--space-xs);
       right: var(--space-sm);
-      background: var(--gold-accent);
+      background: var(--primary-accent);
       color: white;
       font-size: 8px;
       padding: 2px 4px;
@@ -915,7 +915,7 @@
       right: var(--space-md);
       width: 56px;
       height: 56px;
-      background: var(--gold-accent);
+      background: var(--primary-accent);
       border: none;
       border-radius: var(--radius-full);
       color: white;
@@ -993,7 +993,7 @@
 
     .form-input:focus {
       outline: none;
-      border-color: var(--gold-accent);
+      border-color: var(--primary-accent);
       box-shadow: 0 0 0 3px rgba(132, 105, 65, 0.15);
     }
 
@@ -1002,7 +1002,7 @@
       right: var(--space-sm);
       top: 50%;
       transform: translateY(-50%);
-      background: var(--gold-accent);
+      background: var(--primary-accent);
       border: none;
       border-radius: var(--radius-sm);
       padding: var(--space-sm);
@@ -1040,9 +1040,9 @@
 
     .category-btn:hover,
     .category-btn.active {
-      background: var(--gold-accent);
+      background: var(--primary-accent);
       color: white;
-      border-color: var(--gold-accent);
+      border-color: var(--primary-accent);
     }
 
     /* Luxury People Selector */
@@ -1071,16 +1071,16 @@
     }
 
     .person-card.selected {
-      background: var(--gold-accent);
+      background: var(--primary-accent);
       color: white;
-      border-color: var(--gold-accent);
+      border-color: var(--primary-accent);
     }
 
     .person-avatar {
       width: 40px;
       height: 40px;
       border-radius: var(--radius-full);
-      background: var(--gold-accent);
+      background: var(--primary-accent);
       color: white;
       display: flex;
       align-items: center;
@@ -1091,7 +1091,7 @@
 
     .person-card.selected .person-avatar {
       background: white;
-      color: var(--gold-accent);
+      color: var(--primary-accent);
     }
 
     .person-name {
@@ -1125,9 +1125,9 @@
 
     .split-btn:hover,
     .split-btn.active {
-      background: var(--gold-accent);
+      background: var(--primary-accent);
       color: white;
-      border-color: var(--gold-accent);
+      border-color: var(--primary-accent);
     }
 
     .split-btn.premium {
@@ -1172,7 +1172,7 @@
     }
 
     .btn-primary {
-      background: var(--gold-accent);
+      background: var(--primary-accent);
       color: white;
       border: none;
       box-shadow: var(--shadow-md);
@@ -1225,7 +1225,7 @@
       display: block;
       font-size: var(--text-xl);
       font-weight: var(--weight-semibold);
-      color: var(--gold-accent);
+      color: var(--primary-accent);
       margin-bottom: var(--space-xs);
     }
 
@@ -1306,7 +1306,7 @@
       width: 48px;
       height: 48px;
       border-radius: var(--radius-full);
-      background: var(--gold-accent);
+      background: var(--primary-accent);
       color: white;
       display: flex;
       align-items: center;
@@ -1350,7 +1350,7 @@
     }
 
     .settle-btn-small {
-      background: var(--gold-accent);
+      background: var(--primary-accent);
       color: white;
       border: none;
       border-radius: var(--radius-sm);
@@ -1627,7 +1627,7 @@
             <div style="margin-bottom: 24px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <h3 style="font-size: 18px; font-weight: 600; margin: 0;">Recent Activity</h3>
-                <button onclick="showExpenses()" style="background: none; border: none; color: var(--gold-accent); font-size: 14px; cursor: pointer;">View All →</button>
+                <button onclick="showExpenses()" style="background: none; border: none; color: var(--primary-accent); font-size: 14px; cursor: pointer;">View All →</button>
               </div>
               <div id="recent-activity-list">
                 <!-- Will be populated by JavaScript -->
@@ -1643,7 +1643,7 @@
             <div style="margin-bottom: 80px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <h3 style="font-size: 18px; font-weight: 600; margin: 0;">Your Groups</h3>
-                <button onclick="showGroups()" style="background: none; border: none; color: var(--gold-accent); font-size: 14px; cursor: pointer;">View All →</button>
+                <button onclick="showGroups()" style="background: none; border: none; color: var(--primary-accent); font-size: 14px; cursor: pointer;">View All →</button>
               </div>
               <div id="home-groups-list">
                 <!-- Will be populated by JavaScript -->
@@ -2193,7 +2193,7 @@
             <!-- Account Section -->
             <div style="padding: 24px; background: var(--surface); border-radius: 12px; margin-bottom: 16px;">
               <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #846941 0%, #A08555 100%); display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 32px;">
                   👤
                 </div>
                 <div>
@@ -2207,11 +2207,11 @@
             </div>
 
             <!-- Premium Section -->
-            <div style="padding: 24px; background: linear-gradient(135deg, #FFF9E6 0%, #FFE4B3 100%); border-radius: 12px; margin-bottom: 16px; border: 2px solid #846941;">
+            <div style="padding: 24px; background: linear-gradient(135deg, #FFF9E6 0%, #FFE4B3 100%); border-radius: 12px; margin-bottom: 16px; border: 2px solid #667eea;">
               <div style="font-size: 24px; margin-bottom: 8px;">✨</div>
-              <div style="font-size: 18px; font-weight: 600; color: #846941; margin-bottom: 8px;">Upgrade to Premium</div>
+              <div style="font-size: 18px; font-weight: 600; color: #667eea; margin-bottom: 8px;">Upgrade to Premium</div>
               <div style="font-size: 14px; color: #6B5835; margin-bottom: 16px;">Unlock AI insights, unlimited groups, and advanced analytics</div>
-              <button onclick="showPremium()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #846941 0%, #A08555 100%); border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer;">
+              <button onclick="showPremium()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer;">
                 Learn More
               </button>
             </div>
@@ -2359,7 +2359,7 @@
       <div class="modal-content" style="max-width: 400px; padding: 32px;">
         <div style="text-align: center; margin-bottom: 24px;">
           <div style="font-size: 48px; margin-bottom: 8px;">🔐</div>
-          <h2 style="color: var(--gold-accent); margin-bottom: 4px;" data-i18n="signin_to_sync">Sign In to Sync</h2>
+          <h2 style="color: var(--primary-accent); margin-bottom: 4px;" data-i18n="signin_to_sync">Sign In to Sync</h2>
           <p style="color: var(--secondary-text); font-size: 14px;" data-i18n="access_data">Access your expenses from
             any device</p>
         </div>
@@ -4659,7 +4659,7 @@
             
             <!-- Add Friend Section -->
             <div style="margin-bottom: var(--space-lg);">
-              <h4 style="margin-bottom: var(--space-sm); color: var(--gold-accent);">👤 Add Friend</h4>
+              <h4 style="margin-bottom: var(--space-sm); color: var(--primary-accent);">👤 Add Friend</h4>
               <div style="display: flex; gap: 8px;">
                 <input type="text" id="new-friend-name" class="search-input" placeholder="Friend's name" data-i18n-placeholder="friend_name_placeholder" style="flex: 1;">
                 <button class="btn-primary" onclick="addNewFriend()" style="padding: 8px 12px; white-space: nowrap;">+ Add</button>
@@ -4668,7 +4668,7 @@
             
             <!-- Invite via Apps -->
             <div style="margin-bottom: var(--space-lg);">
-              <h4 style="margin-bottom: var(--space-sm); color: var(--gold-accent);">📱 Invite via Apps</h4>
+              <h4 style="margin-bottom: var(--space-sm); color: var(--primary-accent);">📱 Invite via Apps</h4>
               <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-sm);">
                 <button onclick="shareViaWhatsApp()" class="share-btn" title="WhatsApp">
                   <span style="font-size: 24px;">📲</span>
@@ -4707,7 +4707,7 @@
             
             <!-- QR Code Section -->
             <div style="margin-bottom: var(--space-lg);">
-              <h4 style="margin-bottom: var(--space-sm); color: var(--gold-accent);">📷 Scan QR Code</h4>
+              <h4 style="margin-bottom: var(--space-sm); color: var(--primary-accent);">📷 Scan QR Code</h4>
               <div id="qr-code-container" style="background: white; padding: 20px; border-radius: var(--radius-md); text-align: center;">
                 <div id="qr-code" style="display: inline-block;"></div>
                 <p style="margin-top: var(--space-sm); font-size: var(--text-sm); color: var(--secondary-text);">
@@ -4718,7 +4718,7 @@
             
             <!-- Copy Link -->
             <div style="margin-bottom: var(--space-lg);">
-              <h4 style="margin-bottom: var(--space-sm); color: var(--gold-accent);">🔗 Share Link</h4>
+              <h4 style="margin-bottom: var(--space-sm); color: var(--primary-accent);">🔗 Share Link</h4>
               <div style="display: flex; gap: var(--space-sm);">
                 <input type="text" id="share-link" class="search-input" value="${getShareLink()}" readonly style="flex: 1; font-size: 12px;">
                 <button class="btn btn-secondary" onclick="copyShareLink()" style="padding: 8px 16px;">📋 Copy</button>
@@ -4727,7 +4727,7 @@
             
             <!-- Group Invite -->
             <div>
-              <h4 style="margin-bottom: var(--space-sm); color: var(--gold-accent);">👥 Invite to Group</h4>
+              <h4 style="margin-bottom: var(--space-sm); color: var(--primary-accent);">👥 Invite to Group</h4>
               <select id="group-select" class="setting-select" style="width: 100%; margin-bottom: var(--space-sm);">
                 ${AppState.groups.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('')}
               </select>
@@ -6325,7 +6325,7 @@
       modal.innerHTML = `
         <div class="modal-content" style="max-width: 400px; text-align: center;">
           <div style="font-size: 48px; margin-bottom: 16px;">👋</div>
-          <h2 style="margin-bottom: 8px; color: var(--gold-accent);">${t('welcome_modal_title')}</h2>
+          <h2 style="margin-bottom: 8px; color: var(--primary-accent);">${t('welcome_modal_title')}</h2>
           <p style="color: var(--secondary-text); margin-bottom: 24px;">
             ${t('welcome_modal_desc')}
           </p>
