@@ -4773,7 +4773,8 @@
     }
 
     function showProfile() {
-      showShareConnectModal();
+      showView('profile-view');
+      updateNavigation('profile');
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -4917,7 +4918,58 @@
       }
 
       function editProfile() {
-        showNotification('Profile editing coming soon', 'info');
+        // Get current profile
+        const settings = storage.load('settings', {});
+        const name = settings.name || 'User';
+        const currency = settings.currency || 'USD';
+
+        const modal = document.createElement('div');
+        modal.id = 'edit-profile-modal';
+        modal.className = 'modal';
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+
+        const currencyOptions = Object.keys(CURRENCIES).map(c =>
+          `<option value="${c}" ${c === currency ? 'selected' : ''}>${CURRENCIES[c].symbol} ${c} - ${CURRENCIES[c].name}</option>`
+        ).join('');
+
+        modal.innerHTML = `
+        <div class="animate-enter" style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0;">👤 Edit Profile</h3>
+            <button onclick="document.getElementById('edit-profile-modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" style="display:block; margin-bottom:8px; font-weight:600;">Your Name</label>
+            <input type="text" id="profile-name" value="${name}" class="form-input" style="width: 100%; padding: 12px; border: 1px solid var(--borders); border-radius: 8px;">
+          </div>
+          
+          <div class="form-group" style="margin-top: 16px;">
+            <label class="form-label" style="display:block; margin-bottom:8px; font-weight:600;">Currency</label>
+            <select id="profile-currency" class="form-input" style="width: 100%; padding: 12px; border: 1px solid var(--borders); border-radius: 8px;">
+               ${currencyOptions}
+            </select>
+          </div>
+
+          <button onclick="saveProfileDetails()" style="width: 100%; margin-top: 24px; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Save Changes</button>
+        </div>
+      `;
+        document.body.appendChild(modal);
+      }
+
+      function saveProfileDetails() {
+        const name = document.getElementById('profile-name').value;
+        const currency = document.getElementById('profile-currency').value;
+
+        if (!name) return showNotification('Name cannot be empty', 'error');
+
+        const settings = storage.load('settings', {});
+        settings.name = name;
+        settings.currency = currency;
+        storage.save('settings', settings);
+
+        showNotification('✅ Profile updated! Reloading...', 'success');
+        setTimeout(() => location.reload(), 1000);
       }
 
       function showPremium() {
