@@ -1600,16 +1600,18 @@
 
     }
 
-    grid-template-columns: 1fr 1fr;
-    }
+    @media (min-width: 768px) {
+      .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+      }
 
-    .people-selector {
-      grid-template-columns: repeat(2, 1fr);
-    }
+      .people-selector {
+        grid-template-columns: repeat(2, 1fr);
+      }
 
-    .category-selector {
-      grid-template-columns: repeat(2, 1fr);
-    }
+      .category-selector {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
 
