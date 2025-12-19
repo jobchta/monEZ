@@ -5038,15 +5038,92 @@
       }
 
       function showPremium() {
-        showNotification('Premium upgrade coming soon!', 'info');
+        if (localStorage.getItem('isPremium') === 'true') {
+          showNotification('✨ You are already a Premium Member!', 'success');
+          return;
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'premium-modal';
+        modal.className = 'modal';
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+
+        modal.innerHTML = `
+        <div class="animate-enter" style="background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%); border-radius: 20px; padding: 30px; max-width: 350px; width: 90%; text-align: center; border: 2px solid #D4AF37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);">
+          <div style="font-size: 48px; margin-bottom: 20px;">👑</div>
+          <h2 style="color: #D4AF37; margin-bottom: 15px; font-family:serif;">monEZ Gold</h2>
+          <p style="color: #e0e0e0; margin-bottom: 25px; line-height: 1.6;">Unlock the exclusive Gold Theme, remove ads, and support development.</p>
+          <button onclick="activatePremium()" style="width: 100%; padding: 15px; background: linear-gradient(to right, #D4AF37, #F2D06B); color: black; border: none; border-radius: 50px; font-weight: bold; font-size: 16px; cursor: pointer; transition: transform 0.2s;">
+            UNLOCK FOR FREE (Beta)
+          </button>
+          <button onclick="document.getElementById('premium-modal').remove()" style="background: none; border: none; color: #888; margin-top: 15px; cursor: pointer;">No thanks</button>
+        </div>
+      `;
+        document.body.appendChild(modal);
+      }
+
+      function activatePremium() {
+        localStorage.setItem('isPremium', 'true');
+        document.getElementById('premium-modal').remove();
+
+        // Apply gold theme immediately
+        const style = document.createElement('style');
+        style.innerHTML = `
+        :root { --primary: #D4AF37 !important; --primary-accent: #C5A028 !important; }
+        body { background: #121212 !important; color: #f5f5f5 !important; }
+        .view-header { background: #1a1a1a !important; }
+      `;
+        document.head.appendChild(style);
+
+        showNotification('🎉 Welcome to Gold Club!', 'success');
+        setTimeout(() => location.reload(), 1500);
       }
 
       function showHelp() {
-        showNotification('Help & Support coming soon', 'info');
+        const modal = document.createElement('div');
+        modal.id = 'help-modal';
+        modal.className = 'modal';
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+
+        modal.innerHTML = `
+        <div class="animate-enter" style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0;">❓ Help Center</h3>
+            <button onclick="document.getElementById('help-modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
+          </div>
+          <details style="margin-bottom: 10px; border-bottom: 1px solid var(--borders); padding-bottom: 10px;">
+            <summary style="font-weight: 600; cursor: pointer;">How do I split a bill?</summary>
+            <p style="margin-top: 8px; color: var(--secondary-text); font-size: 14px;">Go to Add Expense, select "Split" mode, choose friends, and enter the amount. It will be divided equally.</p>
+          </details>
+          <details style="margin-bottom: 10px; border-bottom: 1px solid var(--borders); padding-bottom: 10px;">
+             <summary style="font-weight: 600; cursor: pointer;">How does "Settle Up" work?</summary>
+             <p style="margin-top: 8px; color: var(--secondary-text); font-size: 14px;">Click the Settle button on Balance screen. It creates a payment transaction that clears your debt.</p>
+          </details>
+        </div>
+      `;
+        document.body.appendChild(modal);
       }
 
       function showPrivacy() {
-        showNotification('Terms & Privacy coming soon', 'info');
+        const modal = document.createElement('div');
+        modal.id = 'privacy-modal';
+        modal.className = 'modal';
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+
+        modal.innerHTML = `
+         <div class="animate-enter" style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0;">🔒 Terms & Privacy</h3>
+            <button onclick="document.getElementById('privacy-modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
+          </div>
+          <div style="font-size: 14px; color: var(--secondary-text); line-height: 1.6;">
+            <p><strong>1. Data Privacy:</strong> All your data is stored LOCALLY on your device using LocalStorage. We do not sell or upload your financial data to cloud servers without your explicit "Sync" action.</p>
+            <p><strong>2. Usage:</strong> This app is provided "as-is" for personal budgeting.</p>
+            <p style="margin-top:20px; font-size: 12px; opacity: 0.7;">Version 2.14 | Build 2024.1</p>
+          </div>
+        </div>
+      `;
+        document.body.appendChild(modal);
       }
 
       // Global Expense Type State
@@ -6606,17 +6683,48 @@
     }
 
     function tryAIFeature(type) {
-      switch (type) {
-        case 'receipt':
-          showNotification('📸 AI Receipt Scan: Upload a receipt photo and watch AI extract all details automatically!', 'info', 5000);
-          break;
-        case 'voice':
-          showNotification('🎤 Voice Commands: Say "Split 500 rupee dinner with Raj" in Hindi, English, or 20 other languages!', 'info', 5000);
-          break;
-        case 'analytics':
-          showNotification('📊 AI Analytics: "You spend 23% more on weekends. Consider home cooking to save ₹2,400/month"', 'info', 6000);
-          break;
+      if (type === 'receipt') {
+        const modal = document.createElement('div');
+        modal.id = 'ai-scan-modal';
+        modal.className = 'modal';
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+
+        modal.innerHTML = `
+          <div class="animate-enter" style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h3 style="margin: 0;">🤖 AI Receipt Parser (Beta)</h3>
+              <button onclick="document.getElementById('ai-scan-modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
+            </div>
+            <p style="font-size: 14px; color: var(--secondary-text); margin-bottom: 12px;">Paste your receipt text below. Our local AI will try to find the total.</p>
+            <textarea id="receipt-text" style="width: 100%; height: 100px; background: var(--surface-elevated); border: 1px solid var(--borders); border-radius: 8px; padding: 12px; color: var(--text); margin-bottom: 16px;" placeholder="Example: Lunch at BurgerKing total $15.50 thank you..."></textarea>
+            <button onclick="processReceipt()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Analyze Text</button>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      } else {
+        showNotification('Voice & Analytics features coming in v3.0!', 'info');
       }
+    }
+
+    function processReceipt() {
+      const text = document.getElementById('receipt-text').value;
+      if (!text) return showNotification('Please paste some text', 'error');
+
+      // Simple regex to find the largest number
+      const numbers = text.match(/\d+(\.\d{1,2})?/g);
+      if (!numbers) return showNotification('No numbers found in text', 'error');
+
+      const maxAmount = Math.max(...numbers.map(n => parseFloat(n)));
+
+      document.getElementById('ai-scan-modal').remove();
+      showAddExpense();
+
+      // Auto-fill form
+      setTimeout(() => {
+        document.getElementById('expense-amount').value = maxAmount;
+        document.getElementById('expense-desc').value = 'Scanned Receipt: ' + text.substring(0, 15) + '...';
+        showNotification(`🤖 AI found amount: ${formatCurrency(maxAmount)}`, 'success');
+      }, 300);
     }
 
     function startPremiumTrial() {
@@ -7362,7 +7470,34 @@
     }
 
     function showPaymentMethods() {
-      showNotification('💳 Payment methods: UPI, Cards, Bank Transfer coming soon!', 'info');
+      const modal = document.createElement('div');
+      modal.id = 'payment-modal';
+      modal.className = 'modal';
+      modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+
+      modal.innerHTML = `
+        <div class="animate-enter" style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0;">💳 Payment Methods</h3>
+            <button onclick="document.getElementById('payment-modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
+          </div>
+          
+          <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 20px; border-radius: 12px; color: white; margin-bottom: 12px; position: relative; overflow: hidden;">
+             <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+             <div style="font-size: 12px; opacity: 0.8; margin-bottom: 4px;">HDFC Bank</div>
+             <div style="font-size: 18px; letter-spacing: 2px; margin-bottom: 12px;">•••• •••• •••• 4242</div>
+             <div style="display: flex; justify-content: space-between;">
+               <div style="font-size: 12px; opacity: 0.8;">Rahul K.</div>
+               <div style="font-weight: bold;">VISA</div>
+             </div>
+          </div>
+          
+          <div style="text-align: center; padding: 12px; border: 1px dashed var(--borders); border-radius: 12px; color: var(--secondary-text); cursor: pointer;">
+            + Add New Method
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
     }
 
     function searchExpenses(query) {
