@@ -1,4 +1,4 @@
-const CACHE_NAME = "monez-v2.2"; // Force refresh for Country tab
+const CACHE_NAME = "monez-v2.3"; // Force refresh - deployment fix
 const urlsToCache = [
   '/',
   '/index.html',
@@ -79,4 +79,4 @@ self.addEventListener("fetch", event => {
   );
 });
 
-console.log('monEZ Service Worker v2.2 loaded');
+console.log('monEZ Service Worker v2.3 loaded');
