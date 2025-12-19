@@ -5691,6 +5691,22 @@
       AppState.expenses.forEach(expense => {
         if (!expense.splitWith) return;
 
+        // Handle direct settlements (100% value transfer)
+        if (expense.isSettlement) {
+          const friendName = expense.splitWith[0]; // Settlement is always 1-on-1
+          if (expense.paidBy === 'You') {
+            // You paid friend -> You reduce what you owe them (or they owe you more)
+            const currentBalance = balanceMap.get(friendName) || 0;
+            balanceMap.set(friendName, currentBalance + expense.amount);
+          } else if (expense.paidBy === friendName) {
+            // Friend paid you -> They reduce what they owe you
+            const currentBalance = balanceMap.get(friendName) || 0;
+            balanceMap.set(friendName, currentBalance - expense.amount);
+          }
+          return;
+        }
+
+        // Handle standard split expenses
         const totalPeople = expense.splitWith.length + 1;
         const sharePerPerson = expense.amount / totalPeople;
 
