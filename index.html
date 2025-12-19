@@ -6426,38 +6426,7 @@
           </div>
           
           <div style="display: grid; gap: 16px;">
-            <div onclick="tryAIFeature('receipt')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 24px;">📸</span>
-                <div>
-                  <div style="font-weight: 600; margin-bottom: 4px;">${t('ai_receipt')}</div>
-                  <div style="font-size: 14px; color: #64748B;">${t('ai_receipt_desc')}</div>
-                </div>
-                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">${t('try')}</span>
-              </div>
-            </div>
-            
-            <div onclick="tryAIFeature('voice')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 24px;">🎤</span>
-                <div>
-                  <div style="font-weight: 600; margin-bottom: 4px;">${t('ai_voice')}</div>
-                  <div style="font-size: 14px; color: #64748B;">${t('ai_voice_desc')}</div>
-                </div>
-                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">${t('try')}</span>
-              </div>
-            </div>
-            
-            <div onclick="tryAIFeature('analytics')" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 24px;">📊</span>
-                <div>
-                  <div style="font-weight: 600; margin-bottom: 4px;">${t('ai_analytics')}</div>
-                  <div style="font-size: 14px; color: #64748B;">${t('ai_analytics_desc')}</div>
-                </div>
-                <span style="background: #10B981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">${t('try')}</span>
-              </div>
-            </div>
+
             
             <div onclick="showSettings()" style="background: #FEFEFE; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
               <div style="display: flex; align-items: center; gap: 12px;">
@@ -7109,9 +7078,7 @@
     window.installPWA = installPWA;
     window.showPremiumModal = showPremiumModal;
     window.closePremiumModal = closePremiumModal;
-    window.aiSuggestAmount = aiSuggestAmount;
-    window.startVoiceInput = startVoiceInput;
-    window.tryAIFeature = tryAIFeature;
+
     window.startPremiumTrial = startPremiumTrial;
     window.settleBalance = settleBalance;
     window.remindUser = remindUser;
