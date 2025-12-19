@@ -598,11 +598,55 @@
 
     /* Luxury Groups Preview */
     .groups-preview {
-      display: flex;
-      gap: var(--space-md);
-      overflow-x: auto;
-      padding-bottom: var(--space-sm);
+      /* ... existing styles ... */
     }
+
+    /* Category Analytics Chart */
+    .chart-container {
+      margin-top: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chart-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chart-label {
+      width: 100px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chart-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: var(--surface-elevated);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .chart-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .chart-value {
+      width: 60px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+
 
     .group-card {
       background: var(--surface);
@@ -1926,17 +1970,15 @@
             </div>
           </div>
 
-          <!-- Spending Visualizer -->
-          <div class="spending-bar-container animate-enter" style="animation-delay: 0.2s;">
-            <div class="spending-bar-label">
-              <span>Monthly Spending Goal</span>
-              <span id="spending-percentage">0%</span>
+          <!-- Category Analytics Chart -->
+          <div class="animate-enter"
+            style="animation-delay: 0.2s; background: var(--surface); border-radius: var(--radius-lg); padding: var(--space-lg); border: 0.5px solid var(--borders); box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h4 style="margin: 0;">Spending Breakdown</h4>
+              <span style="font-size: 12px; color: var(--secondary-text);">Top Categories</span>
             </div>
-            <div class="spending-progress">
-              <div id="spending-bar" class="spending-fill"></div>
-            </div>
-            <div style="font-size: 12px; color: var(--secondary-text); margin-top: 8px; text-align: right;">
-              Target: <span id="budget-target">$1,000</span>
+            <div id="category-chart" class="chart-container">
+              <!-- Bars injected here -->
             </div>
           </div>
 
@@ -4912,11 +4954,28 @@
       }
 
       function showNotificationSettings() {
-        showNotification('Notification settings coming soon', 'info');
+        const settings = storage.load('settings', { notifications: false });
+
+        const enabled = !settings.notifications; // Toggle
+        settings.notifications = enabled;
+        storage.save('settings', settings);
+
+        if (enabled) {
+          showNotification('🔔 Notifications Enabled', 'success');
+          if (Notification.permission !== 'granted') Notification.requestPermission();
+        } else {
+          showNotification('🔕 Notifications Disabled', 'info');
+        }
       }
 
       function showAppearanceSettings() {
-        showNotification('Appearance settings coming soon', 'info');
+        toggleDarkMode();
+        const isDark = document.body.classList.contains('dark-mode');
+        showNotification(isDark ? '🌙 Dark Mode Active' : '☀️ Light Mode Active', 'success');
+
+        const settings = storage.load('settings', {});
+        settings.darkMode = isDark;
+        storage.save('settings', settings);
       }
 
       function showDataSettings() {
@@ -5017,16 +5076,43 @@
         }
       }
 
-      function updateSpendingVisualizer() {
-        const total = AppState.expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-        const budget = 2000; // Mock budget
-        const percentage = Math.min((total / budget) * 100, 100);
+      function renderCategoryAnalytics() {
+        // Group expenses by category
+        const categories = {};
+        const totalSpent = AppState.expenses
+          .filter(e => !e.isSettlement) // Exclude settlements from stats
+          .reduce((sum, e) => {
+            categories[e.category] = (categories[e.category] || 0) + e.amount;
+            return sum + e.amount;
+          }, 0);
 
-        const bar = document.getElementById('spending-bar');
-        const label = document.getElementById('spending-percentage');
+        // Sort by amount desc
+        const sortedCats = Object.entries(categories)
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, 4); // Top 4 only
 
-        if (bar) bar.style.width = percentage + '%';
-        if (label) label.textContent = Math.round(percentage) + '%';
+        const container = document.getElementById('category-chart');
+        if (!container) return;
+
+        if (sortedCats.length === 0) {
+          container.innerHTML = '<div style="text-align: center; color: var(--secondary-text); font-size: 13px; padding: 20px;">No expenses yet to analyze.</div>';
+          return;
+        }
+
+        const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
+
+        container.innerHTML = sortedCats.map(([cat, amount], index) => {
+          const percent = ((amount / totalSpent) * 100).toFixed(1);
+          return `
+          <div class="chart-row">
+            <div class="chart-label">${cat} ${cat.length < 3 ? 'Category' : ''}</div> 
+            <div class="chart-bar-bg">
+              <div class="chart-bar-fill" style="width: ${percent}%; background: ${colors[index] || '#6366F1'};"></div>
+            </div>
+            <div class="chart-value">${percent}%</div>
+          </div>
+        `;
+        }).join('');
       }
 
       function signOut() {
@@ -6807,7 +6893,7 @@
 
       if (totalEl) totalEl.textContent = formatCurrency(total);
       if (monthEl) monthEl.textContent = formatCurrency(thisMonth || total);
-      updateSpendingVisualizer();
+      renderCategoryAnalytics();
     }
 
     function setupPWAListeners() {
