@@ -2238,7 +2238,8 @@
                             👤
                           </div>
                           <div>
-                            <div style="font-size: 20px; font-weight: 600; color: var(--text);">User</div>
+                            <div id="profile-display-name"
+                              style="font-size: 20px; font-weight: 600; color: var(--text);">User</div>
                             <div style="font-size: 14px; color: var(--secondary-text);">user@example.com</div>
                           </div>
                         </div>
@@ -4775,6 +4776,14 @@
     function showProfile() {
       showView('profile-view');
       updateNavigation('profile');
+      renderProfileData();
+    }
+
+    function renderProfileData() {
+      const settings = storage.load('settings', {});
+      const name = settings.name || 'User';
+      const nameEl = document.getElementById('profile-display-name');
+      if (nameEl) nameEl.textContent = name;
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
