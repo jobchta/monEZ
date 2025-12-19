@@ -4673,10 +4673,7 @@
       }
     }
     // Additional functions
-    function showSplitBill() {
-      showAddExpense();
-      showNotification(t('pro_tip_voice'), 'info');
-    }
+
 
     function showSettle() {
       // Calculate current balances first
@@ -7352,8 +7349,10 @@
     }
 
     function showSplitBill() {
-      showExpenses();
-      showNotification('Split Bill feature coming soon', 'info');
+      showAddExpense();
+      setTimeout(() => {
+        setExpenseType('split');
+      }, 100);
     }
     console.log('Available shortcuts: Alt+1 (Home), Alt+2 (Expenses), Alt+3 (Balances), Alt+4 (Groups), Alt+5 (Premium), Alt+A (Add)');
     console.log('Swipe right to go back, PWA features enabled ✨');
