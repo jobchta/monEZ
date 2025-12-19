@@ -6637,31 +6637,6 @@
     }
 
     // AI and Premium Features
-    function aiSuggestAmount() {
-      const amounts = [250, 350, 500, 750, 1200, 1500];
-      const suggestedAmount = amounts[Math.floor(Math.random() * amounts.length)];
-      $('amount').value = suggestedAmount;
-      showNotification(`🤖 AI suggested: ${formatCurrency(suggestedAmount)} based on your spending patterns`, 'info');
-    }
-
-    function startVoiceInput() {
-      showNotification('🎤 Voice input: "Add 500 rupee dinner split equally with Raj and Priya"', 'info', 4000);
-      // Simulate voice input result
-      setTimeout(() => {
-        $('amount').value = '500';
-        $('description').value = 'Dinner at restaurant';
-        AppState.selectedCategory = '🍽️';
-        document.querySelector('.category-btn[data-category="🍽️"]')?.classList.add('active');
-
-        // Auto-select friends
-        AppState.selectedFriends.add('Raj Kumar');
-        AppState.selectedFriends.add('Priya Singh');
-        document.querySelector('.person-card[data-friend-name="Raj Kumar"]')?.classList.add('selected');
-        document.querySelector('.person-card[data-friend-name="Priya Singh"]')?.classList.add('selected');
-
-        showNotification('✅ Voice input processed successfully!', 'success');
-      }, 2000);
-    }
 
 
 
