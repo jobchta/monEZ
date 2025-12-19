@@ -6698,6 +6698,19 @@
       }, 2000);
     }
 
+    function startVoiceInput() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        showNotification('🎤 Listening... (Simulated)', 'info');
+        setTimeout(() => {
+          document.getElementById('expense-desc').value = 'Voice Entry: Pizza with friends';
+          document.getElementById('expense-amount').value = '25.00';
+          showNotification('✅ Voice processed: "Pizza $25"', 'success');
+        }, 1500);
+        return;
+      }
+      showNotification('🎤 Voice control not fully configured in this environment.', 'info');
+    }
+
     function tryAIFeature(type) {
       if (type === 'receipt') {
         const modal = document.createElement('div');
@@ -6726,20 +6739,57 @@
       const text = document.getElementById('receipt-text').value;
       if (!text) return showNotification('Please paste some text', 'error');
 
-      // Simple regex to find the largest number
-      const numbers = text.match(/\d+(\.\d{1,2})?/g);
-      if (!numbers) return showNotification('No numbers found in text', 'error');
+      const lowerText = text.toLowerCase();
 
-      const maxAmount = Math.max(...numbers.map(n => parseFloat(n)));
+      // Strategy 1: Look for "Total" followed by a number
+      const totalMatch = lowerText.match(/total[\s$:]+([\d,]+\.?\d*)/);
+      if (totalMatch && totalMatch[1]) {
+        const amount = parseFloat(totalMatch[1].replace(/,/g, ''));
+        finishProcessing(amount, text);
+        return;
+      }
+
+      // Strategy 2: Look for "Amount" or "Due"
+      const amountMatch = lowerText.match(/(amount|due)[\s$:]+([\d,]+\.?\d*)/);
+      if (amountMatch && amountMatch[2]) {
+        const amount = parseFloat(amountMatch[2].replace(/,/g, ''));
+        finishProcessing(amount, text);
+        return;
+      }
+
+      // Strategy 3: Heuristic Max (Fall back to finding specific price formats)
+      // Look explicitly for numbers with decimal points (most prices have cents)
+      const decimalNumbers = text.match(/[\d,]+\.\d{2}/g);
+      if (decimalNumbers) {
+        const cleanNumbers = decimalNumbers.map(n => parseFloat(n.replace(/,/g, '')));
+        const max = Math.max(...cleanNumbers);
+        finishProcessing(max, text);
+        return;
+      }
+
+      // Fallback: Old max logic but ignore integers > 1000 (likely order IDs)
+      const allNumbers = text.match(/\d+(\.\d{1,2})?/g);
+      if (allNumbers) {
+        const numbers = allNumbers.map(n => parseFloat(n)).filter(n => n < 2000); // Sanity check
+        if (numbers.length > 0) {
+          finishProcessing(Math.max(...numbers), text);
+          return;
+        }
+      }
+
+      showNotification('Could not confidently find a total amount.', 'error');
+    }
+
+    function finishProcessing(amount, text) {
+      if (isNaN(amount)) return showNotification('Invalid amount detected', 'error');
 
       document.getElementById('ai-scan-modal').remove();
       showAddExpense();
 
-      // Auto-fill form
       setTimeout(() => {
-        document.getElementById('expense-amount').value = maxAmount;
-        document.getElementById('expense-desc').value = 'Scanned Receipt: ' + text.substring(0, 15) + '...';
-        showNotification(`🤖 AI found amount: ${formatCurrency(maxAmount)}`, 'success');
+        document.getElementById('expense-amount').value = amount.toFixed(2);
+        document.getElementById('expense-desc').value = 'Scanned: ' + text.substring(0, 15) + '...';
+        showNotification(`✅ Found Total: ${formatCurrency(amount)}`, 'success');
       }, 300);
     }
 
