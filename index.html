@@ -4678,8 +4678,94 @@
     }
 
     function showSettle() {
-      showBalances();
-      showNotification(t('select_balance_settle'), 'info');
+      // Calculate current balances first
+      const balances = calculateUserBalances();
+      const debts = balances.filter(b => b.amount < 0); // Negative means I owe them
+
+      const modal = document.createElement('div');
+      modal.id = 'settle-modal';
+      modal.className = 'modal';
+      modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+
+      let debtsHtml = '';
+      if (debts.length === 0) {
+        debtsHtml = `
+          <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
+            <div style="font-weight: 600; margin-bottom: 4px;">You are debt free!</div>
+            <div style="font-size: 14px; color: var(--secondary-text);">You don't owe anyone anything right now.</div>
+          </div>
+        `;
+      } else {
+        debtsHtml = `<div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">`;
+        debts.forEach(debt => {
+          const amount = Math.abs(debt.amount);
+          debtsHtml += `
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--surface-elevated); padding: 12px 16px; border-radius: 12px; border: 1px solid var(--borders);">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; background: #EF4444; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                  ${debt.name.charAt(0)}
+                </div>
+                <div>
+                  <div style="font-weight: 600;">${debt.name}</div>
+                  <div style="font-size: 12px; color: var(--secondary-text);">You owe</div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                <div style="font-weight: 700; color: #EF4444;">${formatCurrency(amount)}</div>
+                <button onclick="processSettlement('${debt.name}', ${amount})" style="background: #10B981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Pay Now</button>
+              </div>
+            </div>
+          `;
+        });
+        debtsHtml += `</div>`;
+      }
+
+      modal.innerHTML = `
+        <div class="animate-enter" style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">💳 Settle Up</h3>
+            <button onclick="document.getElementById('settle-modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
+          </div>
+          ${debtsHtml}
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+    }
+
+    function processSettlement(friendName, amount) {
+      if (!confirm(`Mark ${formatCurrency(amount)} paid to ${friendName}? This will clear your debt.`)) return;
+
+      // Create settlement expense
+      const expense = {
+        id: Date.now(),
+        description: `Settlement to ${friendName}`,
+        amount: amount,
+        date: new Date().toISOString(),
+        isPersonal: false,
+        isSettlement: true, // Key flag
+        paidBy: 'You',
+        splitWith: [friendName], // Direct 1-to-1
+        category: '💸'
+      };
+
+      // Add to state
+      AppState.expenses.unshift(expense);
+
+      // Save
+      saveToLocalStorage();
+
+      // Update UI
+      renderRecentExpenses();
+      updateBalance();
+      updateExpenseStats();
+
+      // Close modal
+      const modal = document.getElementById('settle-modal');
+      if (modal) modal.remove();
+
+      showNotification(`✅ Paid ${formatCurrency(amount)} to ${friendName}`, 'success');
     }
 
     function showNotifications() {
