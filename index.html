@@ -1833,601 +1833,596 @@
               <div class="action-icon">💳</div>
               <div class="action-label" data-i18n="settle_up">Settle Up</div>
             </button>
-            <button class="action-card" onclick="showPremiumFeatures()"
-              style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
-              <div class="action-icon">✨</div>
-              <div class="action-label" data-i18n="ai_insights">AI Insights</div>
-              <div style="font-size: 10px; color: rgba(255,255,255,0.9);" data-i18n="free">FREE</div>
-            </button>
+            <button class="action-card" onclick="showPremiumFeatures()" <!-- Recent Activity -->
+              <section class="activity-section">
+                <div class="section-header">
+                  <h3 data-i18n="recent_activity">Recent Activity</h3>
+                  <button class="view-all" onclick="showExpenses()" data-i18n="view_all">View all</button>
+                </div>
+                <div id="recent-expenses" class="activity-list">
+                  <!-- Dynamic content -->
+                </div>
+              </section>
+
+              <!-- Groups Preview -->
+              <section class="groups-section">
+                <div class="section-header">
+                  <h3 data-i18n="your_groups">Your Groups</h3>
+                  <div class="group-limit">2/3 groups</div>
+                  <button class="view-all" onclick="showGroups()" data-i18n="view_all">View all</button>
+                </div>
+                <div class="groups-preview" id="groups-preview">
+                  <!-- Dynamic content -->
+                </div>
+              </section>
           </div>
 
-          <!-- Recent Activity -->
-          <section class="activity-section">
-            <div class="section-header">
-              <h3 data-i18n="recent_activity">Recent Activity</h3>
-              <button class="view-all" onclick="showExpenses()" data-i18n="view_all">View all</button>
-            </div>
-            <div id="recent-expenses" class="activity-list">
-              <!-- Dynamic content -->
-            </div>
-          </section>
+          <!-- Add Expense View -->
+          <div id="add-expense-view" class="view">
+            <div class="view-header">
+              <button class="back-btn" onclick="showHome()">←</button>
+              <h2 data-i18n="add_new_expense">Add Expense</h2>
 
-          <!-- Groups Preview -->
-          <section class="groups-section">
-            <div class="section-header">
-              <h3 data-i18n="your_groups">Your Groups</h3>
-              <div class="group-limit">2/3 groups</div>
-              <button class="view-all" onclick="showGroups()" data-i18n="view_all">View all</button>
             </div>
-            <div class="groups-preview" id="groups-preview">
-              <!-- Dynamic content -->
-            </div>
-          </section>
-        </div>
 
-        <!-- Add Expense View -->
-        <div id="add-expense-view" class="view">
-          <div class="view-header">
-            <button class="back-btn" onclick="showHome()">←</button>
-            <h2 data-i18n="add_new_expense">Add Expense</h2>
-            <button class="voice-btn" onclick="startVoiceInput()">🎤</button>
-          </div>
+            <form id="expense-form" class="expense-form">
+              <div class="form-group">
+                <label class="form-label" data-i18n="amount">Amount</label>
+                <div class="amount-input-container">
+                  <span class="currency-symbol" id="add-expense-currency-symbol"></span>
+                  <input type="number" id="amount" class="form-input amount-field" placeholder="0.00" step="0.01"
+                    required>
+                  <button type="button" class="ai-suggest-btn" onclick="aiSuggestAmount()" title="AI Suggestion">
+                    <span class="ai-icon">🤖</span>
+                  </button>
+                </div>
+              </div>
 
-          <form id="expense-form" class="expense-form">
-            <div class="form-group">
-              <label class="form-label" data-i18n="amount">Amount</label>
-              <div class="amount-input-container">
-                <span class="currency-symbol" id="add-expense-currency-symbol"></span>
-                <input type="number" id="amount" class="form-input amount-field" placeholder="0.00" step="0.01"
-                  required>
-                <button type="button" class="ai-suggest-btn" onclick="aiSuggestAmount()" title="AI Suggestion">
-                  <span class="ai-icon">🤖</span>
+              <div class="form-group">
+                <label class="form-label" data-i18n="description">Description</label>
+                <div class="input-container">
+                  <input type="text" id="description" class="form-input" placeholder="What was this for?"
+                    data-i18n-placeholder="description" required>
+                  <div class="smart-suggestions" id="smart-suggestions">
+                    <!-- AI suggestions appear here -->
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" data-i18n="category">Category</label>
+                <div class="category-selector">
+                  <button type="button" class="category-btn" data-category="🍽️"><span class="cat-icon">🍽️</span> <span
+                      data-i18n="cat_food">Food</span></button>
+                  <button type="button" class="category-btn" data-category="🚗"><span class="cat-icon">🚗</span> <span
+                      data-i18n="cat_transport">Transport</span></button>
+                  <button type="button" class="category-btn" data-category="🎬"><span class="cat-icon">🎬</span> <span
+                      data-i18n="cat_entertainment">Entertainment</span></button>
+                  <button type="button" class="category-btn" data-category="🛍️"><span class="cat-icon">🛍️</span> <span
+                      data-i18n="cat_shopping">Shopping</span></button>
+                  <button type="button" class="category-btn" data-category="💡"><span class="cat-icon">💡</span> <span
+                      data-i18n="cat_bills">Bills</span></button>
+                  <button type="button" class="category-btn" data-category="✈️"><span class="cat-icon">✈️</span> <span
+                      data-i18n="cat_travel">Travel</span></button>
+                </div>
+              </div>
+
+              <!-- Expense Type Toggle - Premium Segmented Control -->
+              <div class="form-group animate-enter" style="animation-delay: 0.1s;">
+                <label class="form-label" style="margin-bottom: 12px;">Expense Type</label>
+                <div class="segmented-control"
+                  style="background: var(--surface-elevated); padding: 4px; border-radius: 12px; display: flex; position: relative; border: 1px solid var(--borders); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                  <button type="button" id="personal-toggle" onclick="setExpenseType('personal')"
+                    style="flex: 1; padding: 12px; border: none; background: transparent; color: var(--primary); font-weight: 600; font-size: 14px; cursor: pointer; z-index: 1; transition: all 0.3s; border-radius: 8px;"
+                    class="active">
+                    👤 Personal
+                  </button>
+                  <button type="button" id="split-toggle" onclick="setExpenseType('split')"
+                    style="flex: 1; padding: 12px; border: none; background: transparent; color: var(--secondary-text); font-weight: 500; font-size: 14px; cursor: pointer; z-index: 1; transition: all 0.3s; border-radius: 8px;">
+                    👥 Split
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group" id="split-section" style="display: none;">
+                <label class="form-label" data-i18n="split_with">Split with</label>
+                <div class="people-selector" id="people-selector">
+                  <!-- People cards will be loaded here -->
+                </div>
+              </div>
+
+              <div class="split-options">
+                <div class="split-type">
+                  <button type="button" class="split-btn active" data-type="equal" data-i18n="equal_split">Equal
+                    Split</button>
+                  <button type="button" class="split-btn" data-type="percentage" data-i18n="by_percentage">By
+                    Percentage</button>
+                  <button type="button" class="split-btn" data-type="custom" data-i18n="custom_split">Custom
+                    Split</button>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="showHome()" data-i18n="cancel">Cancel</button>
+                <button type="submit" class="btn-primary">
+                  <span class="btn-text" data-i18n="save_expense">Save Expense</span>
+                  <span class="btn-icon">💾</span>
                 </button>
               </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" data-i18n="description">Description</label>
-              <div class="input-container">
-                <input type="text" id="description" class="form-input" placeholder="What was this for?"
-                  data-i18n-placeholder="description" required>
-                <div class="smart-suggestions" id="smart-suggestions">
-                  <!-- AI suggestions appear here -->
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" data-i18n="category">Category</label>
-              <div class="category-selector">
-                <button type="button" class="category-btn" data-category="🍽️"><span class="cat-icon">🍽️</span> <span
-                    data-i18n="cat_food">Food</span></button>
-                <button type="button" class="category-btn" data-category="🚗"><span class="cat-icon">🚗</span> <span
-                    data-i18n="cat_transport">Transport</span></button>
-                <button type="button" class="category-btn" data-category="🎬"><span class="cat-icon">🎬</span> <span
-                    data-i18n="cat_entertainment">Entertainment</span></button>
-                <button type="button" class="category-btn" data-category="🛍️"><span class="cat-icon">🛍️</span> <span
-                    data-i18n="cat_shopping">Shopping</span></button>
-                <button type="button" class="category-btn" data-category="💡"><span class="cat-icon">💡</span> <span
-                    data-i18n="cat_bills">Bills</span></button>
-                <button type="button" class="category-btn" data-category="✈️"><span class="cat-icon">✈️</span> <span
-                    data-i18n="cat_travel">Travel</span></button>
-              </div>
-            </div>
-
-            <!-- Expense Type Toggle - Premium Segmented Control -->
-            <div class="form-group animate-enter" style="animation-delay: 0.1s;">
-              <label class="form-label" style="margin-bottom: 12px;">Expense Type</label>
-              <div class="segmented-control"
-                style="background: var(--surface-elevated); padding: 4px; border-radius: 12px; display: flex; position: relative; border: 1px solid var(--borders); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-                <button type="button" id="personal-toggle" onclick="setExpenseType('personal')"
-                  style="flex: 1; padding: 12px; border: none; background: transparent; color: var(--primary); font-weight: 600; font-size: 14px; cursor: pointer; z-index: 1; transition: all 0.3s; border-radius: 8px;"
-                  class="active">
-                  👤 Personal
-                </button>
-                <button type="button" id="split-toggle" onclick="setExpenseType('split')"
-                  style="flex: 1; padding: 12px; border: none; background: transparent; color: var(--secondary-text); font-weight: 500; font-size: 14px; cursor: pointer; z-index: 1; transition: all 0.3s; border-radius: 8px;">
-                  👥 Split
-                </button>
-              </div>
-            </div>
-
-            <div class="form-group" id="split-section" style="display: none;">
-              <label class="form-label" data-i18n="split_with">Split with</label>
-              <div class="people-selector" id="people-selector">
-                <!-- People cards will be loaded here -->
-              </div>
-            </div>
-
-            <div class="split-options">
-              <div class="split-type">
-                <button type="button" class="split-btn active" data-type="equal" data-i18n="equal_split">Equal
-                  Split</button>
-                <button type="button" class="split-btn" data-type="percentage" data-i18n="by_percentage">By
-                  Percentage</button>
-                <button type="button" class="split-btn" data-type="custom" data-i18n="custom_split">Custom
-                  Split</button>
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn-secondary" onclick="showHome()" data-i18n="cancel">Cancel</button>
-              <button type="submit" class="btn-primary">
-                <span class="btn-text" data-i18n="save_expense">Save Expense</span>
-                <span class="btn-icon">💾</span>
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Expenses View -->
-        <div id="expenses-view" class="view">
-          <div class="view-header">
-            <button class="back-btn" onclick="showHome()">←</button>
-            <h2 data-i18n="expenses">All Expenses</h2>
-            <button class="filter-btn" onclick="showFilters()">🔍</button>
+            </form>
           </div>
 
-          <!-- Search Bar -->
-          <div class="search-container">
-            <input type="text" id="expense-search" class="search-input" placeholder="🔍 Search expenses..."
-              data-i18n-placeholder="search_expenses" oninput="searchExpenses(this.value)">
-          </div>
-
-          <div class="expenses-stats">
-            <div class="stat-summary">
-              <div class="stat-item">
-                <span class="stat-number" id="total-expenses"></span>
-                <span class="stat-label" data-i18n="total_spent">Total Spent</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number" id="this-month"></span>
-                <span class="stat-label" data-i18n="this_month">This Month</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Category Analytics Chart -->
-          <div class="animate-enter"
-            style="animation-delay: 0.2s; background: var(--surface); border-radius: var(--radius-lg); padding: var(--space-lg); border: 0.5px solid var(--borders); box-shadow: var(--shadow-sm);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <h4 style="margin: 0;">Spending Breakdown</h4>
-              <span style="font-size: 12px; color: var(--secondary-text);">Top Categories</span>
-            </div>
-            <div id="category-chart" class="chart-container">
-              <!-- Bars injected here -->
-            </div>
-          </div>
-
-          <div class="expenses-list" id="all-expenses-list">
-            <!-- All expenses will be loaded here -->
-          </div>
-        </div>
-
-        <!-- Balances View -->
-        <div id="balances-view" class="view">
-          <div class="view-header">
-            <button class="back-btn" onclick="showHome()">←</button>
-            <h2 data-i18n="balances">Balances</h2>
-            <button class="settle-all-btn" onclick="settleAll()" data-i18n="settle_all">Settle All</button>
-          </div>
-
-          <div class="balance-summary">
-            <div class="summary-card positive">
-              <div class="summary-amount" id="you-are-owed-display"></div>
-              <div class="summary-label" data-i18n="you_are_owed">You're owed</div>
-            </div>
-            <div class="summary-card negative">
-              <div class="summary-amount" id="you-owe-display"></div>
-              <div class="summary-label" data-i18n="you_owe">You owe</div>
-            </div>
-          </div>
-
-          <div class="balances-list" id="balances-list">
-            <!-- Balances will be loaded here -->
-          </div>
-        </div>
-
-        <!-- Groups View -->
-        <div id="groups-view" class="view">
-          <div class="view-header">
-            <button class="back-btn" onclick="showHome()">←</button>
-            <h2 data-i18n="groups">Groups</h2>
-            <button class="create-group-btn" onclick="showCreateGroup()">+</button>
-          </div>
-
-          <div class="groups-grid" id="groups-grid">
-            <!-- Groups will be loaded here -->
-          </div>
-        </div>
-
-        <!-- Premium Features View -->
-        <div id="premium-view" class="view">
-          <div class="view-header">
-            <button class="back-btn" onclick="showHome()">←</button>
-            <h2 data-i18n="premium_features">Premium Features</h2>
-            <div class="premium-status" data-i18n="free_tier">FREE TIER</div>
-          </div>
-
-          <div class="premium-hero">
-            <div class="hero-icon">✨</div>
-            <h3 data-i18n="unlock_premium">Unlock Premium Features</h3>
-            <p data-i18n="unlock_premium_desc">Get AI-powered insights, unlimited groups, and advanced analytics</p>
-            <div class="pricing-highlight">
-              <span class="price-original">₹299</span>
-              <span class="price-offer">₹119/month</span>
-              <span class="discount-badge">60% OFF</span>
-            </div>
-          </div>
-
-          <div class="premium-features">
-            <!-- Premium features list -->
-          </div>
-        </div>
-
-        <!-- Settings View -->
-        <div id="settings-view" class="view">
-          <div class="view-header">
-            <button class="back-btn" onclick="showHome()">←</button>
-            <h2 data-i18n="settings">Settings</h2>
-          </div>
-
-          <div class="settings-sections">
-            <!-- Account Section -->
-            <div class="settings-section">
-              <h3>👤 Account</h3>
-              <div id="account-section">
-                <!-- Not logged in state -->
-                <div id="account-logged-out" class="setting-item" style="cursor: pointer;" onclick="showAuthModal()">
-                  <div class="setting-icon">🔒</div>
-                  <div class="setting-content">
-                    <div class="setting-title" data-i18n="signin_to_sync">Sign In to Sync</div>
-                    <div class="setting-desc" data-i18n="access_data">Access your data from any device</div>
-                  </div>
-                  <div class="setting-action">→</div>
-                </div>
-
-                <!-- Logged in state (hidden by default) -->
-                <div id="account-logged-in" style="display: none;">
-                  <div class="setting-item">
-                    <div class="setting-icon"
-                      style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                      ✓</div>
-                    <div class="setting-content">
-                      <div class="setting-title" id="account-email">user@email.com</div>
-                      <div class="setting-desc" id="sync-status">✅ Synced</div>
-                    </div>
-                  </div>
-                  <div style="display: flex; gap: 12px; margin-top: 12px;">
-                    <button onclick="syncNow()" class="btn btn-secondary" style="flex: 1;" data-i18n="sync_now">🔄 Sync
-                      Now</button>
-                    <button onclick="signOut()" class="btn" style="flex: 1; background: #EF4444; color: white;"
-                      data-i18n="sign_out">Sign
-                      Out</button>
-                  </div>
-                </div>
-              </div>
+          <!-- Expenses View -->
+          <div id="expenses-view" class="view">
+            <div class="view-header">
+              <button class="back-btn" onclick="showHome()">←</button>
+              <h2 data-i18n="expenses">All Expenses</h2>
+              <button class="filter-btn" onclick="showFilters()">🔍</button>
             </div>
 
-            <!-- Localization Section -->
-            <div class="settings-section">
-              <h3 data-i18n="localization">🌍 Localization</h3>
-              <div class="setting-item">
-                <div class="setting-icon">🗣️</div>
-                <div class="setting-content">
-                  <div class="setting-title" data-i18n="language">Language</div>
-                  <div class="setting-desc" id="current-language-display">English</div>
-                </div>
-                <select id="language-selector" class="setting-select" onchange="changeLanguage(this.value)">
-                  <option value="en">English</option>
-                  <option value="es">Español</option>
-                  <option value="fr">Français</option>
-                  <option value="de">Deutsch</option>
-                  <option value="pt">Português</option>
-                  <option value="it">Italiano</option>
-                  <option value="ru">Русский</option>
-                  <option value="zh">中文</option>
-                  <option value="ja">日本語</option>
-                  <option value="ko">한국어</option>
-                  <option value="hi">हिन्दी</option>
-                  <option value="ar">العربية</option>
-                  <option value="tr">Türkçe</option>
-                  <option value="nl">Nederlands</option>
-                  <option value="pl">Polski</option>
-                  <option value="vi">Tiếng Việt</option>
-                  <option value="th">ไทย</option>
-                  <option value="id">Bahasa Indonesia</option>
-                  <option value="he">עברית</option>
-                  <option value="fa">فارسی</option>
-                  <option value="ur">اردو</option>
-                </select>
-              </div>
-              <div class="setting-item">
-                <div class="setting-icon">💰</div>
-                <div class="setting-content">
-                  <div class="setting-title" data-i18n="currency">Currency</div>
-                  <div class="setting-desc" id="current-currency-display"></div>
-                </div>
-                <select id="currency-selector" class="setting-select" onchange="changeCurrency(this.value)">
-                  <optgroup label="Asia">
-                    <option value="INR">₹ INR - Indian Rupee</option>
-                    <option value="JPY">¥ JPY - Japanese Yen</option>
-                    <option value="CNY">¥ CNY - Chinese Yuan</option>
-                    <option value="KRW">₩ KRW - Korean Won</option>
-                    <option value="SGD">S$ SGD - Singapore Dollar</option>
-                    <option value="HKD">HK$ HKD - Hong Kong Dollar</option>
-                    <option value="THB">฿ THB - Thai Baht</option>
-                    <option value="MYR">RM MYR - Malaysian Ringgit</option>
-                    <option value="IDR">Rp IDR - Indonesian Rupiah</option>
-                    <option value="PHP">₱ PHP - Philippine Peso</option>
-                    <option value="VND">₫ VND - Vietnamese Dong</option>
-                    <option value="PKR">₨ PKR - Pakistani Rupee</option>
-                    <option value="BDT">৳ BDT - Bangladeshi Taka</option>
-                  </optgroup>
-                  <optgroup label="Middle East">
-                    <option value="AED">د.إ AED - UAE Dirham</option>
-                    <option value="SAR">﷼ SAR - Saudi Riyal</option>
-                    <option value="QAR">ر.ق QAR - Qatari Riyal</option>
-                    <option value="KWD">د.ك KWD - Kuwaiti Dinar</option>
-                    <option value="ILS">₪ ILS - Israeli Shekel</option>
-                    <option value="TRY">₺ TRY - Turkish Lira</option>
-                  </optgroup>
-                  <optgroup label="Europe">
-                    <option value="EUR">€ EUR - Euro</option>
-                    <option value="GBP">£ GBP - British Pound</option>
-                    <option value="CHF">Fr CHF - Swiss Franc</option>
-                    <option value="SEK">kr SEK - Swedish Krona</option>
-                    <option value="NOK">kr NOK - Norwegian Krone</option>
-                    <option value="DKK">kr DKK - Danish Krone</option>
-                    <option value="PLN">zł PLN - Polish Zloty</option>
-                    <option value="RUB">₽ RUB - Russian Ruble</option>
-                    <option value="UAH">₴ UAH - Ukrainian Hryvnia</option>
-                  </optgroup>
-                  <optgroup label="Americas">
-                    <option value="USD">$ USD - US Dollar</option>
-                    <option value="CAD">C$ CAD - Canadian Dollar</option>
-                    <option value="MXN">$ MXN - Mexican Peso</option>
-                    <option value="BRL">R$ BRL - Brazilian Real</option>
-                    <option value="ARS">$ ARS - Argentine Peso</option>
-                    <option value="CLP">$ CLP - Chilean Peso</option>
-                    <option value="COP">$ COP - Colombian Peso</option>
-                  </optgroup>
-                  <optgroup label="Africa">
-                    <option value="ZAR">R ZAR - South African Rand</option>
-                    <option value="NGN">₦ NGN - Nigerian Naira</option>
-                    <option value="EGP">E£ EGP - Egyptian Pound</option>
-                    <option value="KES">KSh KES - Kenyan Shilling</option>
-                    <option value="GHS">GH₵ GHS - Ghanaian Cedi</option>
-                    <option value="MAD">د.م MAD - Moroccan Dirham</option>
-                  </optgroup>
-                  <optgroup label="Oceania">
-                    <option value="AUD">A$ AUD - Australian Dollar</option>
-                    <option value="NZD">NZ$ NZD - New Zealand Dollar</option>
-                    <option value="FJD">FJ$ FJD - Fijian Dollar</option>
-                  </optgroup>
-                </select>
-              </div>
-            </div>
-
-            <!-- Account Section -->
-            <div class="settings-section">
-              <h3 data-i18n="account_section">Account</h3>
-              <div class="setting-item" onclick="showProfile()">
-                <div class="setting-icon">👤</div>
-                <div class="setting-content">
-                  <div class="setting-title" data-i18n="profile">Profile</div>
-                  <div class="setting-desc" data-i18n="profile_desc">Manage your account details</div>
-                </div>
-                <div class="setting-arrow">›</div>
-              </div>
-              <div class="setting-item" onclick="showPaymentMethods()">
-                <div class="setting-icon">💳</div>
-                <div class="setting-content">
-                  <div class="setting-title" data-i18n="payment_methods">Payment Methods</div>
-                  <div class="setting-desc" data-i18n="payment_methods_desc">UPI, Cards, Bank accounts</div>
-                </div>
-                <div class="setting-arrow">›</div>
-              </div>
-            </div>
-
-            <!-- App Section -->
-            <div class="settings-section">
-              <h3 data-i18n="app_section">App</h3>
-              <div class="setting-item">
-                <div class="setting-icon">🔔</div>
-                <div class="setting-content">
-                  <div class="setting-title" data-i18n="notifications">Notifications</div>
-                  <div class="setting-desc" data-i18n="notifications_desc">Push notifications, reminders</div>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" checked>
-                  <span class="slider"></span>
-                </label>
-              </div>
-              <div class="setting-item">
-                <div class="setting-icon">🌙</div>
-                <div class="setting-content">
-                  <div class="setting-title" data-i18n="dark_mode">Dark Mode</div>
-                  <div class="setting-desc" data-i18n="dark_mode_desc">Switch to dark theme</div>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this.checked)">
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Data Section -->
-            <div class="settings-section">
-              <h3 data-i18n="data_management">📊 Data Management</h3>
-              <div class="setting-item" onclick="exportDataJSON()">
-                <div class="setting-icon">📁</div>
-                <div class="setting-content">
-                  <div class="setting-title" data-i18n="export_data">Export as JSON</div>
-                  <div class="setting-desc" data-i18n="export_data_desc">Download all your data</div>
-                </div>
-                <div class="setting-arrow">↓</div>
-              </div>
-              <div class="setting-item" onclick="exportDataCSV()">
-                <div class="setting-icon">📄</div>
-                <div class="setting-content">
-                  <div class="setting-title" data-i18n="export_csv">Export as CSV</div>
-                  <div class="setting-desc" data-i18n="export_csv_desc">Spreadsheet-friendly format</div>
-                </div>
-                <div class="setting-arrow">↓</div>
-              </div>
-              <div class="setting-item" onclick="importData()">
-                <div class="setting-icon">📥</div>
-                <div class="setting-content">
-                  <div class="setting-title" data-i18n="import_data">Import Data</div>
-                  <div class="setting-desc" data-i18n="import_data_desc">Restore from backup</div>
-
-                  <!-- Profile View -->
-                  <div id="profile-view" class="view" style="display: none;">
-                    <div class="view-header">
-                      <h2 data-i18n="profile">Profile</h2>
-                    </div>
-                    <div class="view-content">
-
-                      <!-- Account Section -->
-                      <div style="padding: 24px; background: var(--surface); border-radius: 12px; margin-bottom: 16px;">
-                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-                          <div
-                            style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 32px;">
-                            👤
-                          </div>
-                          <div>
-                            <div id="profile-display-name"
-                              style="font-size: 20px; font-weight: 600; color: var(--text);">User</div>
-                            <div style="font-size: 14px; color: var(--secondary-text);">user@example.com</div>
-                          </div>
-                        </div>
-                        <button onclick="editProfile()"
-                          style="width: 100%; padding: 12px; background: var(--surface-elevated); border: 1px solid var(--borders); border-radius: 8px; color: var(--text); font-size: 14px; cursor: pointer;">
-                          Edit Profile
-                        </button>
-                      </div>
-
-                      <!-- Premium Section -->
-                      <div
-                        style="padding: 24px; background: linear-gradient(135deg, #FFF9E6 0%, #FFE4B3 100%); border-radius: 12px; margin-bottom: 16px; border: 2px solid #667eea;">
-                        <div style="font-size: 24px; margin-bottom: 8px;">✨</div>
-                        <div style="font-size: 18px; font-weight: 600; color: #667eea; margin-bottom: 8px;">Upgrade to
-                          Premium</div>
-                        <div style="font-size: 14px; color: #6B5835; margin-bottom: 16px;">Unlock AI insights, unlimited
-                          groups, and advanced analytics</div>
-                        <button onclick="showPremium()"
-                          style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer;">
-                          Learn More
-                        </button>
-                      </div>
-
-                      <!-- Settings Menu -->
-                      <div
-                        style="background: var(--surface); border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
-                        <div style="padding: 16px; border-bottom: 1px solid var(--borders);">
-                          <div style="font-size: 16px; font-weight: 600; color: var(--text);">⚙️ Settings</div>
-                        </div>
-
-                        <button onclick="showLanguageSettings()" class="settings-item">
-                          <span>🌍</span>
-                          <span>Language & Region</span>
-                          <span style="margin-left: auto; color: var(--secondary-text);">→</span>
-                        </button>
-
-                        <button onclick="showNotificationSettings()" class="settings-item">
-                          <span>🔔</span>
-                          <span>Notifications</span>
-                          <span style="margin-left: auto; color: var(--secondary-text);">→</span>
-                        </button>
-
-                        <button onclick="showAppearanceSettings()" class="settings-item">
-                          <span>🎨</span>
-                          <span>Appearance</span>
-                          <span style="margin-left: auto; color: var(--secondary-text);">→</span>
-                        </button>
-
-                        <button onclick="showDataSettings()" class="settings-item">
-                          <span>📊</span>
-                          <span>Data & Privacy</span>
-                          <span style="margin-left: auto; color: var(--secondary-text);">→</span>
-                        </button>
-                      </div>
-
-                      <!-- About Section -->
-                      <div
-                        style="background: var(--surface); border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
-                        <div style="padding: 16px; border-bottom: 1px solid var(--borders);">
-                          <div style="font-size: 16px; font-weight: 600; color: var(--text);">ℹ️ About</div>
-                        </div>
-
-                        <button onclick="showHelp()" class="settings-item">
-                          <span>❓</span>
-                          <span>Help & Support</span>
-                          <span style="margin-left: auto; color: var(--secondary-text);">→</span>
-                        </button>
-
-                        <button onclick="showPrivacy()" class="settings-item">
-                          <span>🔒</span>
-                          <span>Terms & Privacy</span>
-                          <span style="margin-left: auto; color: var(--secondary-text);">→</span>
-                        </button>
-
-                        <div class="settings-item" style="cursor: default;">
-                          <span>📱</span>
-                          <span>App Version</span>
-                          <span style="margin-left: auto; color: var(--secondary-text);">2.0</span>
-                        </div>
-                      </div>
-
-                      <!-- Sign Out -->
-                      <button onclick="signOut()"
-                        style="width: 100%; padding: 12px; background: var(--surface); border: 1px solid #EF4444; border-radius: 8px; color: #EF4444; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 80px;">
-                        Sign Out
-                      </button>
-
-                    </div>
-                  </div>
-                </div>
-                <div class="setting-arrow">↑</div>
-              </div>
-            </div>
-
-            <!-- About Section -->
-            <div class="settings-section">
-              <h3 data-i18n="about">About</h3>
-              <div class="setting-item">
-                <div class="setting-icon">ℹ️</div>
-                <div class="setting-content">
-                  <div class="setting-title" data-i18n="global_edition">monEZ Global Edition</div>
-                  <div class="setting-desc" data-i18n="version_info">v2.0 • 55 currencies • 25 languages</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-        <!-- Country View -->
-        <div id="country-view" class="view">
-          <header class="app-header">
-            <h2><span data-i18n="country">Country</span></h2>
-          </header>
-          <div class="content-container">
             <!-- Search Bar -->
-            <div style="padding: 16px; padding-bottom: 0;">
-              <input type="text" id="country-search" class="search-input" placeholder="Search countries..."
-                data-i18n-placeholder="search_countries"
-                style="width: 100%; padding: 12px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px;"
-                oninput="filterCountries(this.value)" />
+            <div class="search-container">
+              <input type="text" id="expense-search" class="search-input" placeholder="🔍 Search expenses..."
+                data-i18n-placeholder="search_expenses" oninput="searchExpenses(this.value)">
             </div>
-            <!-- Countries Grid -->
-            <div id="countries-grid"
-              style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 16px;">
-              <!-- Countries will be rendered here -->
+
+            <div class="expenses-stats">
+              <div class="stat-summary">
+                <div class="stat-item">
+                  <span class="stat-number" id="total-expenses"></span>
+                  <span class="stat-label" data-i18n="total_spent">Total Spent</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number" id="this-month"></span>
+                  <span class="stat-label" data-i18n="this_month">This Month</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category Analytics Chart -->
+            <div class="animate-enter"
+              style="animation-delay: 0.2s; background: var(--surface); border-radius: var(--radius-lg); padding: var(--space-lg); border: 0.5px solid var(--borders); box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h4 style="margin: 0;">Spending Breakdown</h4>
+                <span style="font-size: 12px; color: var(--secondary-text);">Top Categories</span>
+              </div>
+              <div id="category-chart" class="chart-container">
+                <!-- Bars injected here -->
+              </div>
+            </div>
+
+            <div class="expenses-list" id="all-expenses-list">
+              <!-- All expenses will be loaded here -->
             </div>
           </div>
-        </div>
+
+          <!-- Balances View -->
+          <div id="balances-view" class="view">
+            <div class="view-header">
+              <button class="back-btn" onclick="showHome()">←</button>
+              <h2 data-i18n="balances">Balances</h2>
+              <button class="settle-all-btn" onclick="settleAll()" data-i18n="settle_all">Settle All</button>
+            </div>
+
+            <div class="balance-summary">
+              <div class="summary-card positive">
+                <div class="summary-amount" id="you-are-owed-display"></div>
+                <div class="summary-label" data-i18n="you_are_owed">You're owed</div>
+              </div>
+              <div class="summary-card negative">
+                <div class="summary-amount" id="you-owe-display"></div>
+                <div class="summary-label" data-i18n="you_owe">You owe</div>
+              </div>
+            </div>
+
+            <div class="balances-list" id="balances-list">
+              <!-- Balances will be loaded here -->
+            </div>
+          </div>
+
+          <!-- Groups View -->
+          <div id="groups-view" class="view">
+            <div class="view-header">
+              <button class="back-btn" onclick="showHome()">←</button>
+              <h2 data-i18n="groups">Groups</h2>
+              <button class="create-group-btn" onclick="showCreateGroup()">+</button>
+            </div>
+
+            <div class="groups-grid" id="groups-grid">
+              <!-- Groups will be loaded here -->
+            </div>
+          </div>
+
+          <!-- Premium Features View -->
+          <div id="premium-view" class="view">
+            <div class="view-header">
+              <button class="back-btn" onclick="showHome()">←</button>
+              <h2 data-i18n="premium_features">Premium Features</h2>
+              <div class="premium-status" data-i18n="free_tier">FREE TIER</div>
+            </div>
+
+            <div class="premium-hero">
+              <div class="hero-icon">✨</div>
+              <h3 data-i18n="unlock_premium">Unlock Premium Features</h3>
+              <p data-i18n="unlock_premium_desc">Get AI-powered insights, unlimited groups, and advanced analytics</p>
+              <div class="pricing-highlight">
+                <span class="price-original">₹299</span>
+                <span class="price-offer">₹119/month</span>
+                <span class="discount-badge">60% OFF</span>
+              </div>
+            </div>
+
+            <div class="premium-features">
+              <!-- Premium features list -->
+            </div>
+          </div>
+
+          <!-- Settings View -->
+          <div id="settings-view" class="view">
+            <div class="view-header">
+              <button class="back-btn" onclick="showHome()">←</button>
+              <h2 data-i18n="settings">Settings</h2>
+            </div>
+
+            <div class="settings-sections">
+              <!-- Account Section -->
+              <div class="settings-section">
+                <h3>👤 Account</h3>
+                <div id="account-section">
+                  <!-- Not logged in state -->
+                  <div id="account-logged-out" class="setting-item" style="cursor: pointer;" onclick="showAuthModal()">
+                    <div class="setting-icon">🔒</div>
+                    <div class="setting-content">
+                      <div class="setting-title" data-i18n="signin_to_sync">Sign In to Sync</div>
+                      <div class="setting-desc" data-i18n="access_data">Access your data from any device</div>
+                    </div>
+                    <div class="setting-action">→</div>
+                  </div>
+
+                  <!-- Logged in state (hidden by default) -->
+                  <div id="account-logged-in" style="display: none;">
+                    <div class="setting-item">
+                      <div class="setting-icon"
+                        style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        ✓</div>
+                      <div class="setting-content">
+                        <div class="setting-title" id="account-email">user@email.com</div>
+                        <div class="setting-desc" id="sync-status">✅ Synced</div>
+                      </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-top: 12px;">
+                      <button onclick="syncNow()" class="btn btn-secondary" style="flex: 1;" data-i18n="sync_now">🔄
+                        Sync
+                        Now</button>
+                      <button onclick="signOut()" class="btn" style="flex: 1; background: #EF4444; color: white;"
+                        data-i18n="sign_out">Sign
+                        Out</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Localization Section -->
+              <div class="settings-section">
+                <h3 data-i18n="localization">🌍 Localization</h3>
+                <div class="setting-item">
+                  <div class="setting-icon">🗣️</div>
+                  <div class="setting-content">
+                    <div class="setting-title" data-i18n="language">Language</div>
+                    <div class="setting-desc" id="current-language-display">English</div>
+                  </div>
+                  <select id="language-selector" class="setting-select" onchange="changeLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="pt">Português</option>
+                    <option value="it">Italiano</option>
+                    <option value="ru">Русский</option>
+                    <option value="zh">中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="ko">한국어</option>
+                    <option value="hi">हिन्दी</option>
+                    <option value="ar">العربية</option>
+                    <option value="tr">Türkçe</option>
+                    <option value="nl">Nederlands</option>
+                    <option value="pl">Polski</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="th">ไทย</option>
+                    <option value="id">Bahasa Indonesia</option>
+                    <option value="he">עברית</option>
+                    <option value="fa">فارسی</option>
+                    <option value="ur">اردو</option>
+                  </select>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-icon">💰</div>
+                  <div class="setting-content">
+                    <div class="setting-title" data-i18n="currency">Currency</div>
+                    <div class="setting-desc" id="current-currency-display"></div>
+                  </div>
+                  <select id="currency-selector" class="setting-select" onchange="changeCurrency(this.value)">
+                    <optgroup label="Asia">
+                      <option value="INR">₹ INR - Indian Rupee</option>
+                      <option value="JPY">¥ JPY - Japanese Yen</option>
+                      <option value="CNY">¥ CNY - Chinese Yuan</option>
+                      <option value="KRW">₩ KRW - Korean Won</option>
+                      <option value="SGD">S$ SGD - Singapore Dollar</option>
+                      <option value="HKD">HK$ HKD - Hong Kong Dollar</option>
+                      <option value="THB">฿ THB - Thai Baht</option>
+                      <option value="MYR">RM MYR - Malaysian Ringgit</option>
+                      <option value="IDR">Rp IDR - Indonesian Rupiah</option>
+                      <option value="PHP">₱ PHP - Philippine Peso</option>
+                      <option value="VND">₫ VND - Vietnamese Dong</option>
+                      <option value="PKR">₨ PKR - Pakistani Rupee</option>
+                      <option value="BDT">৳ BDT - Bangladeshi Taka</option>
+                    </optgroup>
+                    <optgroup label="Middle East">
+                      <option value="AED">د.إ AED - UAE Dirham</option>
+                      <option value="SAR">﷼ SAR - Saudi Riyal</option>
+                      <option value="QAR">ر.ق QAR - Qatari Riyal</option>
+                      <option value="KWD">د.ك KWD - Kuwaiti Dinar</option>
+                      <option value="ILS">₪ ILS - Israeli Shekel</option>
+                      <option value="TRY">₺ TRY - Turkish Lira</option>
+                    </optgroup>
+                    <optgroup label="Europe">
+                      <option value="EUR">€ EUR - Euro</option>
+                      <option value="GBP">£ GBP - British Pound</option>
+                      <option value="CHF">Fr CHF - Swiss Franc</option>
+                      <option value="SEK">kr SEK - Swedish Krona</option>
+                      <option value="NOK">kr NOK - Norwegian Krone</option>
+                      <option value="DKK">kr DKK - Danish Krone</option>
+                      <option value="PLN">zł PLN - Polish Zloty</option>
+                      <option value="RUB">₽ RUB - Russian Ruble</option>
+                      <option value="UAH">₴ UAH - Ukrainian Hryvnia</option>
+                    </optgroup>
+                    <optgroup label="Americas">
+                      <option value="USD">$ USD - US Dollar</option>
+                      <option value="CAD">C$ CAD - Canadian Dollar</option>
+                      <option value="MXN">$ MXN - Mexican Peso</option>
+                      <option value="BRL">R$ BRL - Brazilian Real</option>
+                      <option value="ARS">$ ARS - Argentine Peso</option>
+                      <option value="CLP">$ CLP - Chilean Peso</option>
+                      <option value="COP">$ COP - Colombian Peso</option>
+                    </optgroup>
+                    <optgroup label="Africa">
+                      <option value="ZAR">R ZAR - South African Rand</option>
+                      <option value="NGN">₦ NGN - Nigerian Naira</option>
+                      <option value="EGP">E£ EGP - Egyptian Pound</option>
+                      <option value="KES">KSh KES - Kenyan Shilling</option>
+                      <option value="GHS">GH₵ GHS - Ghanaian Cedi</option>
+                      <option value="MAD">د.م MAD - Moroccan Dirham</option>
+                    </optgroup>
+                    <optgroup label="Oceania">
+                      <option value="AUD">A$ AUD - Australian Dollar</option>
+                      <option value="NZD">NZ$ NZD - New Zealand Dollar</option>
+                      <option value="FJD">FJ$ FJD - Fijian Dollar</option>
+                    </optgroup>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Account Section -->
+              <div class="settings-section">
+                <h3 data-i18n="account_section">Account</h3>
+                <div class="setting-item" onclick="showProfile()">
+                  <div class="setting-icon">👤</div>
+                  <div class="setting-content">
+                    <div class="setting-title" data-i18n="profile">Profile</div>
+                    <div class="setting-desc" data-i18n="profile_desc">Manage your account details</div>
+                  </div>
+                  <div class="setting-arrow">›</div>
+                </div>
+                <div class="setting-item" onclick="showPaymentMethods()">
+                  <div class="setting-icon">💳</div>
+                  <div class="setting-content">
+                    <div class="setting-title" data-i18n="payment_methods">Payment Methods</div>
+                    <div class="setting-desc" data-i18n="payment_methods_desc">UPI, Cards, Bank accounts</div>
+                  </div>
+                  <div class="setting-arrow">›</div>
+                </div>
+              </div>
+
+              <!-- App Section -->
+              <div class="settings-section">
+                <h3 data-i18n="app_section">App</h3>
+                <div class="setting-item">
+                  <div class="setting-icon">🔔</div>
+                  <div class="setting-content">
+                    <div class="setting-title" data-i18n="notifications">Notifications</div>
+                    <div class="setting-desc" data-i18n="notifications_desc">Push notifications, reminders</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-icon">🌙</div>
+                  <div class="setting-content">
+                    <div class="setting-title" data-i18n="dark_mode">Dark Mode</div>
+                    <div class="setting-desc" data-i18n="dark_mode_desc">Switch to dark theme</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this.checked)">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Data Section -->
+              <div class="settings-section">
+                <h3 data-i18n="data_management">📊 Data Management</h3>
+                <div class="setting-item" onclick="exportDataJSON()">
+                  <div class="setting-icon">📁</div>
+                  <div class="setting-content">
+                    <div class="setting-title" data-i18n="export_data">Export as JSON</div>
+                    <div class="setting-desc" data-i18n="export_data_desc">Download all your data</div>
+                  </div>
+                  <div class="setting-arrow">↓</div>
+                </div>
+                <div class="setting-item" onclick="exportDataCSV()">
+                  <div class="setting-icon">📄</div>
+                  <div class="setting-content">
+                    <div class="setting-title" data-i18n="export_csv">Export as CSV</div>
+                    <div class="setting-desc" data-i18n="export_csv_desc">Spreadsheet-friendly format</div>
+                  </div>
+                  <div class="setting-arrow">↓</div>
+                </div>
+                <div class="setting-item" onclick="importData()">
+                  <div class="setting-icon">📥</div>
+                  <div class="setting-content">
+                    <div class="setting-title" data-i18n="import_data">Import Data</div>
+                    <div class="setting-desc" data-i18n="import_data_desc">Restore from backup</div>
+
+                    <!-- Profile View -->
+                    <div id="profile-view" class="view" style="display: none;">
+                      <div class="view-header">
+                        <h2 data-i18n="profile">Profile</h2>
+                      </div>
+                      <div class="view-content">
+
+                        <!-- Account Section -->
+                        <div
+                          style="padding: 24px; background: var(--surface); border-radius: 12px; margin-bottom: 16px;">
+                          <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                            <div
+                              style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                              👤
+                            </div>
+                            <div>
+                              <div id="profile-display-name"
+                                style="font-size: 20px; font-weight: 600; color: var(--text);">User</div>
+                              <div style="font-size: 14px; color: var(--secondary-text);">user@example.com</div>
+                            </div>
+                          </div>
+                          <button onclick="editProfile()"
+                            style="width: 100%; padding: 12px; background: var(--surface-elevated); border: 1px solid var(--borders); border-radius: 8px; color: var(--text); font-size: 14px; cursor: pointer;">
+                            Edit Profile
+                          </button>
+                        </div>
+
+                        <!-- Premium Section -->
+                        <div
+                          style="padding: 24px; background: linear-gradient(135deg, #FFF9E6 0%, #FFE4B3 100%); border-radius: 12px; margin-bottom: 16px; border: 2px solid #667eea;">
+                          <div style="font-size: 24px; margin-bottom: 8px;">✨</div>
+                          <div style="font-size: 18px; font-weight: 600; color: #667eea; margin-bottom: 8px;">Upgrade to
+                            Premium</div>
+                          <div style="font-size: 14px; color: #6B5835; margin-bottom: 16px;">Unlock AI insights,
+                            unlimited
+                            groups, and advanced analytics</div>
+                          <button onclick="showPremium()"
+                            style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer;">
+                            Learn More
+                          </button>
+                        </div>
+
+                        <!-- Settings Menu -->
+                        <div
+                          style="background: var(--surface); border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
+                          <div style="padding: 16px; border-bottom: 1px solid var(--borders);">
+                            <div style="font-size: 16px; font-weight: 600; color: var(--text);">⚙️ Settings</div>
+                          </div>
+
+                          <button onclick="showLanguageSettings()" class="settings-item">
+                            <span>🌍</span>
+                            <span>Language & Region</span>
+                            <span style="margin-left: auto; color: var(--secondary-text);">→</span>
+                          </button>
+
+                          <button onclick="showNotificationSettings()" class="settings-item">
+                            <span>🔔</span>
+                            <span>Notifications</span>
+                            <span style="margin-left: auto; color: var(--secondary-text);">→</span>
+                          </button>
+
+                          <button onclick="showAppearanceSettings()" class="settings-item">
+                            <span>🎨</span>
+                            <span>Appearance</span>
+                            <span style="margin-left: auto; color: var(--secondary-text);">→</span>
+                          </button>
+
+                          <button onclick="showDataSettings()" class="settings-item">
+                            <span>📊</span>
+                            <span>Data & Privacy</span>
+                            <span style="margin-left: auto; color: var(--secondary-text);">→</span>
+                          </button>
+                        </div>
+
+                        <!-- About Section -->
+                        <div
+                          style="background: var(--surface); border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
+                          <div style="padding: 16px; border-bottom: 1px solid var(--borders);">
+                            <div style="font-size: 16px; font-weight: 600; color: var(--text);">ℹ️ About</div>
+                          </div>
+
+                          <button onclick="showHelp()" class="settings-item">
+                            <span>❓</span>
+                            <span>Help & Support</span>
+                            <span style="margin-left: auto; color: var(--secondary-text);">→</span>
+                          </button>
+
+                          <button onclick="showPrivacy()" class="settings-item">
+                            <span>🔒</span>
+                            <span>Terms & Privacy</span>
+                            <span style="margin-left: auto; color: var(--secondary-text);">→</span>
+                          </button>
+
+                          <div class="settings-item" style="cursor: default;">
+                            <span>📱</span>
+                            <span>App Version</span>
+                            <span style="margin-left: auto; color: var(--secondary-text);">2.0</span>
+                          </div>
+                        </div>
+
+                        <!-- Sign Out -->
+                        <button onclick="signOut()"
+                          style="width: 100%; padding: 12px; background: var(--surface); border: 1px solid #EF4444; border-radius: 8px; color: #EF4444; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 80px;">
+                          Sign Out
+                        </button>
+
+                      </div>
+                    </div>
+                  </div>
+                  <div class="setting-arrow">↑</div>
+                </div>
+              </div>
+
+              <!-- About Section -->
+              <div class="settings-section">
+                <h3 data-i18n="about">About</h3>
+                <div class="setting-item">
+                  <div class="setting-icon">ℹ️</div>
+                  <div class="setting-content">
+                    <div class="setting-title" data-i18n="global_edition">monEZ Global Edition</div>
+                    <div class="setting-desc" data-i18n="version_info">v2.0 • 55 currencies • 25 languages</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Country View -->
+          <div id="country-view" class="view">
+            <header class="app-header">
+              <h2><span data-i18n="country">Country</span></h2>
+            </header>
+            <div class="content-container">
+              <!-- Search Bar -->
+              <div style="padding: 16px; padding-bottom: 0;">
+                <input type="text" id="country-search" class="search-input" placeholder="Search countries..."
+                  data-i18n-placeholder="search_countries"
+                  style="width: 100%; padding: 12px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px;"
+                  oninput="filterCountries(this.value)" />
+              </div>
+              <!-- Countries Grid -->
+              <div id="countries-grid"
+                style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 16px;">
+                <!-- Countries will be rendered here -->
+              </div>
+            </div>
+          </div>
       </main>
 
       <!-- Bottom Navigation - Strategic 4-Tab Design -->
@@ -6698,100 +6693,7 @@
       }, 2000);
     }
 
-    function startVoiceInput() {
-      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        showNotification('🎤 Listening... (Simulated)', 'info');
-        setTimeout(() => {
-          document.getElementById('expense-desc').value = 'Voice Entry: Pizza with friends';
-          document.getElementById('expense-amount').value = '25.00';
-          showNotification('✅ Voice processed: "Pizza $25"', 'success');
-        }, 1500);
-        return;
-      }
-      showNotification('🎤 Voice control not fully configured in this environment.', 'info');
-    }
 
-    function tryAIFeature(type) {
-      if (type === 'receipt') {
-        const modal = document.createElement('div');
-        modal.id = 'ai-scan-modal';
-        modal.className = 'modal';
-        modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000;';
-
-        modal.innerHTML = `
-          <div class="animate-enter" style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-              <h3 style="margin: 0;">🤖 AI Receipt Parser (Beta)</h3>
-              <button onclick="document.getElementById('ai-scan-modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
-            </div>
-            <p style="font-size: 14px; color: var(--secondary-text); margin-bottom: 12px;">Paste your receipt text below. Our local AI will try to find the total.</p>
-            <textarea id="receipt-text" style="width: 100%; height: 100px; background: var(--surface-elevated); border: 1px solid var(--borders); border-radius: 8px; padding: 12px; color: var(--text); margin-bottom: 16px;" placeholder="Example: Lunch at BurgerKing total $15.50 thank you..."></textarea>
-            <button onclick="processReceipt()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Analyze Text</button>
-          </div>
-        `;
-        document.body.appendChild(modal);
-      } else {
-        showNotification('Voice & Analytics features coming in v3.0!', 'info');
-      }
-    }
-
-    function processReceipt() {
-      const text = document.getElementById('receipt-text').value;
-      if (!text) return showNotification('Please paste some text', 'error');
-
-      const lowerText = text.toLowerCase();
-
-      // Strategy 1: Look for "Total" followed by a number (Word boundary to avoid Subtotal)
-      const totalMatch = lowerText.match(/\btotal[\s$:]+([\d,]+\.?\d*)/);
-      if (totalMatch && totalMatch[1]) {
-        const amount = parseFloat(totalMatch[1].replace(/,/g, ''));
-        finishProcessing(amount, text);
-        return;
-      }
-
-      // Strategy 2: Look for "Amount" or "Due"
-      const amountMatch = lowerText.match(/(amount|due)[\s$:]+([\d,]+\.?\d*)/);
-      if (amountMatch && amountMatch[2]) {
-        const amount = parseFloat(amountMatch[2].replace(/,/g, ''));
-        finishProcessing(amount, text);
-        return;
-      }
-
-      // Strategy 3: Heuristic Max (Fall back to finding specific price formats)
-      // Look explicitly for numbers with decimal points (most prices have cents)
-      const decimalNumbers = text.match(/[\d,]+\.\d{2}/g);
-      if (decimalNumbers) {
-        const cleanNumbers = decimalNumbers.map(n => parseFloat(n.replace(/,/g, '')));
-        const max = Math.max(...cleanNumbers);
-        finishProcessing(max, text);
-        return;
-      }
-
-      // Fallback: Old max logic but ignore integers > 1000 (likely order IDs)
-      const allNumbers = text.match(/\d+(\.\d{1,2})?/g);
-      if (allNumbers) {
-        const numbers = allNumbers.map(n => parseFloat(n)).filter(n => n < 2000); // Sanity check
-        if (numbers.length > 0) {
-          finishProcessing(Math.max(...numbers), text);
-          return;
-        }
-      }
-
-      showNotification('Could not confidently find a total amount.', 'error');
-    }
-
-    function finishProcessing(amount, text) {
-      if (isNaN(amount)) return showNotification('Invalid amount detected', 'error');
-
-      document.getElementById('ai-scan-modal').remove();
-      showAddExpense();
-
-      setTimeout(() => {
-        document.getElementById('expense-amount').value = amount.toFixed(2);
-        document.getElementById('expense-desc').value = 'Scanned: ' + text.substring(0, 15) + '...';
-        showNotification(`✅ Found Total: ${formatCurrency(amount)}`, 'success');
-      }, 300);
-    }
 
     function startPremiumTrial() {
       showNotification('🚀 Premium trial started! All features unlocked for 7 days. Welcome to the premium experience!', 'success', 5000);
