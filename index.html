@@ -1605,6 +1605,70 @@
 
 
     /* View Header */
+  
+    /* Premium UI Enhancements */
+    .segmented-control {
+      background: var(--surface-elevated);
+      padding: 4px;
+      border-radius: 12px;
+      display: flex;
+      position: relative;
+      border: 1px solid var(--borders);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    
+    .segment-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: var(--secondary-text);
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 1;
+      transition: all 0.3s;
+      border-radius: 8px;
+    }
+    
+    .segment-btn.active {
+      background: white;
+      color: var(--primary-accent); /* Updated from --primary */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-weight: 600;
+    }
+
+    .spending-bar-container {
+      margin: 20px 0;
+      background: var(--surface);
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--borders);
+    }
+
+    .spending-bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--secondary-text);
+    }
+
+    .spending-progress {
+      height: 12px;
+      background: var(--surface-elevated);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .spending-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      width: 0%; /* Animated via JS */
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 6px;
+    }
+
   </style>
 </head>
 
@@ -1845,6 +1909,20 @@
                 <span class="stat-number" id="this-month"></span>
                 <span class="stat-label" data-i18n="this_month">This Month</span>
               </div>
+            </div>
+          </div>
+
+          <!-- Spending Visualizer -->
+          <div class="spending-bar-container animate-enter" style="animation-delay: 0.2s;">
+            <div class="spending-bar-label">
+              <span>Monthly Spending Goal</span>
+              <span id="spending-percentage">0%</span>
+            </div>
+            <div class="spending-progress">
+              <div id="spending-bar" class="spending-fill"></div>
+            </div>
+            <div style="font-size: 12px; color: var(--secondary-text); margin-top: 8px; text-align: right;">
+              Target: <span id="budget-target">$1,000</span>
             </div>
           </div>
 
@@ -6539,6 +6617,7 @@ function renderFriendsList() {
 
       if (totalEl) totalEl.textContent = formatCurrency(total);
       if (monthEl) monthEl.textContent = formatCurrency(thisMonth || total);
+  updateSpendingVisualizer();
     }
 
     function setupPWAListeners() {
@@ -6580,7 +6659,7 @@ function renderFriendsList() {
       hideLoadingScreen();
 
       // Initialize Supabase
-      SupabaseManager.init();
+      SupabaseManager.init(); setExpenseType('personal');
 
       // Check for existing session
       const session = await SupabaseManager.getSession();
