@@ -5466,7 +5466,7 @@
             avatar: name.charAt(0).toUpperCase()
           };
 
-          AppState.friends.push(newFriend);
+          if (!StateManager.addFriend(newFriend)) return;
           storage.save('friends', AppState.friends);
 
           nameInput.value = '';
@@ -5654,7 +5654,7 @@
         color: color
       };
 
-      AppState.friends.push(newFriend);
+      if (!StateManager.addFriend(newFriend)) return;
 
       try {
         storage.save('friends', AppState.friends);
