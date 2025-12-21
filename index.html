@@ -5027,7 +5027,7 @@
       };
 
       // Add to state
-      AppState.expenses.unshift(expense);
+      if (!StateManager.addExpense(expense)) return;
 
       // Save
       saveToLocalStorage();
@@ -6460,7 +6460,7 @@
       // We can't easily record that unless we impersonate them. 
       // For now, let's assume this is "I Paid Friend".
 
-      AppState.expenses.unshift(settlement);
+      if (!StateManager.addExpense(settlement)) return;
 
       try {
         storage.save('expenses', AppState.expenses);
