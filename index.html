@@ -4443,6 +4443,180 @@
       return { valid: true, value: Math.round(num * 100) / 100 }; // Round to 2 decimals
     }
 
+
+    /**
+     * State Manager - Centralized state validation and mutation control
+     * Prevents invalid data from entering AppState
+     */
+    const StateManager = {
+      // Validation schemas
+      validateExpense(expense) {
+        if (!expense) return { valid: false, error: 'Expense is required' };
+        if (!expense.amount || expense.amount <= 0) {
+          return { valid: false, error: 'Invalid amount' };
+        }
+        if (!expense.description || !expense.description.trim()) {
+          return { valid: false, error: 'Description is required' };
+        }
+        if (!expense.paidBy) {
+          return { valid: false, error: 'Paid by is required' };
+        }
+        if (!expense.isPersonal && (!expense.splitWith || expense.splitWith.length === 0)) {
+          return { valid: false, error: 'Split participants required' };
+        }
+        return { valid: true };
+      },
+
+      validateFriend(friend) {
+        if (!friend) return { valid: false, error: 'Friend is required' };
+        if (!friend.name || !friend.name.trim()) {
+          return { valid: false, error: 'Friend name is required' };
+        }
+        if (!friend.id) {
+          return { valid: false, error: 'Friend ID is required' };
+        }
+        return { valid: true };
+      },
+
+      // Safe mutation methods
+      addExpense(expense) {
+        const validation = this.validateExpense(expense);
+        if (!validation.valid) {
+          console.error('Invalid expense:', validation.error);
+          showNotification(validation.error, 'error');
+          return false;
+        }
+        
+        // Add timestamp if not present
+        if (!expense.timestamp) {
+          expense.timestamp = Date.now();
+        }
+        
+        AppState.expenses.unshift(expense);
+        saveToLocalStorage();
+        return true;
+      },
+
+      addFriend(friend) {
+        const validation = this.validateFriend(friend);
+        if (!validation.valid) {
+          console.error('Invalid friend:', validation.error);
+          showNotification(validation.error, 'error');
+          return false;
+        }
+        
+        // Check for duplicates
+        const exists = AppState.friends.some(f => f.id === friend.id);
+        if (exists) {
+          showNotification('Friend already exists', 'error');
+          return false;
+        }
+        
+        AppState.friends.push(friend);
+        saveToLocalStorage();
+        return true;
+      },
+
+      removeExpense(expenseId) {
+        const index = AppState.expenses.findIndex(e => e.id === expenseId);
+        if (index === -1) {
+          console.warn('Expense not found:', expenseId);
+          return false;
+        }
+        
+        AppState.expenses.splice(index, 1);
+        saveToLocalStorage();
+        updateBalance(); // Recalculate balances
+        return true;
+      }
+    };
+
+
+    /**
+     * Data Migration System
+     * Handles schema version upgrades for localStorage data
+     */
+    const SCHEMA_VERSION = 2;
+
+    const DataMigration = {
+      migrate(data) {
+        const version = data.version || 1;
+        
+        if (version < 2) {
+          console.log('Migrating data from v1 to v2...');
+          data = this.migrateV1toV2(data);
+        }
+        
+        data.version = SCHEMA_VERSION;
+        return data;
+      },
+
+      migrateV1toV2(data) {
+        // Add timestamps to expenses if missing
+        if (data.expenses) {
+          data.expenses = data.expenses.map(expense => {
+            if (!expense.timestamp) {
+              // Convert date string to timestamp if available
+              if (expense.date) {
+                expense.timestamp = new Date(expense.date).getTime();
+              } else {
+                expense.timestamp = Date.now();
+              }
+            }
+            return expense;
+          });
+        }
+        
+        // Add IDs to friends if missing
+        if (data.friends) {
+          data.friends = data.friends.map(friend => {
+            if (!friend.id) {
+              friend.id = 'friend_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+            return friend;
+          });
+        }
+        
+        return data;
+      },
+
+      loadWithMigration() {
+        try {
+          // Try loading new atomic format first
+          const atomicData = localStorage.getItem('monez_data');
+          if (atomicData) {
+            let data = safeJSONParse(atomicData, null);
+            if (data) {
+              data = this.migrate(data);
+              return data;
+            }
+          }
+          
+          // Fallback to legacy format
+          const expenses = localStorage.getItem('monez_expenses');
+          const friends = localStorage.getItem('monez_friends');
+          const groups = localStorage.getItem('monez_groups');
+          
+          const legacyData = {
+            expenses: safeJSONParse(expenses, []),
+            friends: safeJSONParse(friends, []),
+            groups: safeJSONParse(groups, []),
+            version: 1
+          };
+          
+          return this.migrate(legacyData);
+        } catch (e) {
+          console.error('Migration error:', e);
+          return {
+            expenses: [],
+            friends: [],
+            groups: [],
+            version: SCHEMA_VERSION
+          };
+        }
+      }
+    };
+
     function formatCurrency(amount) {
       return i18n.formatCurrency(amount);
     }
