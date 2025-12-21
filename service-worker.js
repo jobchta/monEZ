@@ -1,4 +1,4 @@
-const CACHE_NAME = "monez-v2.27"; // Force refresh - deployment fix
+const CACHE_NAME = "monez-v2.28"; // Force refresh - deployment fix
 const urlsToCache = [
   '/',
   '/index.html',
@@ -80,4 +80,4 @@ self.addEventListener("fetch", event => {
   );
 });
 
-console.log('monEZ Service Worker v2.27 loaded');
+console.log('monEZ Service Worker v2.28 loaded');
