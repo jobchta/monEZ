@@ -6528,6 +6528,9 @@
       document.querySelectorAll('.split-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           if (btn.classList.contains('premium')) {
+            // SECURITY: Prevent duplicate submissions
+            let isSavingExpense = false;
+
             showPremiumModal();
             return;
           }
@@ -6540,9 +6543,28 @@
       form.addEventListener('submit', (e) => {
         e.preventDefault();
 
+        // SECURITY: Prevent duplicate submissions
+        if (isSavingExpense) {
+          console.warn('Save already in progress');
+          return;
+        }
+        isSavingExpense = true;
+
+        // Disable submit button
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Saving...';
+        }
+
         const validation = validateAmount($('amount').value);
         if (!validation.valid) {
           showNotification(validation.error, 'error');
+          isSavingExpense = false;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Save Expense';
+          }
           return;
         }
         const amount = validation.value;
