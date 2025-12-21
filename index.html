@@ -6808,18 +6808,18 @@
         updateBalance();
 
         // Success animation
-        const submitBtn = form.querySelector('.btn-primary');
-        const originalContent = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="btn-text">✅ Saved!</span>';
-        submitBtn.style.background = '#10B981';
+        let submitBtnSuccess = form.querySelector('.btn-primary');
+        const originalContent = submitBtnSuccess.innerHTML;
+        submitBtnSuccess.innerHTML = '<span class="btn-text">✅ Saved!</span>';
+        submitBtnSuccess.style.background = '#10B981';
 
         setTimeout(() => {
           // Reset form
           resetForm();
 
           // Reset button
-          submitBtn.innerHTML = originalContent;
-          submitBtn.style.background = '';
+          submitBtnSuccess.innerHTML = originalContent;
+          submitBtnSuccess.style.background = '';
 
           showNotification(t('expense_added'), 'success');
           showHome();
