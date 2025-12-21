@@ -4486,12 +4486,12 @@
           showNotification(validation.error, 'error');
           return false;
         }
-        
+
         // Add timestamp if not present
         if (!expense.timestamp) {
           expense.timestamp = Date.now();
         }
-        
+
         AppState.expenses.unshift(expense);
         saveToLocalStorage();
         return true;
@@ -4504,14 +4504,14 @@
           showNotification(validation.error, 'error');
           return false;
         }
-        
+
         // Check for duplicates
         const exists = AppState.friends.some(f => f.id === friend.id);
         if (exists) {
           showNotification('Friend already exists', 'error');
           return false;
         }
-        
+
         AppState.friends.push(friend);
         saveToLocalStorage();
         return true;
@@ -4523,7 +4523,7 @@
           console.warn('Expense not found:', expenseId);
           return false;
         }
-        
+
         AppState.expenses.splice(index, 1);
         saveToLocalStorage();
         updateBalance(); // Recalculate balances
@@ -4541,12 +4541,12 @@
     const DataMigration = {
       migrate(data) {
         const version = data.version || 1;
-        
+
         if (version < 2) {
           console.log('Migrating data from v1 to v2...');
           data = this.migrateV1toV2(data);
         }
-        
+
         data.version = SCHEMA_VERSION;
         return data;
       },
@@ -4566,7 +4566,7 @@
             return expense;
           });
         }
-        
+
         // Add IDs to friends if missing
         if (data.friends) {
           data.friends = data.friends.map(friend => {
@@ -4576,7 +4576,7 @@
             return friend;
           });
         }
-        
+
         return data;
       },
 
@@ -4591,19 +4591,19 @@
               return data;
             }
           }
-          
+
           // Fallback to legacy format
           const expenses = localStorage.getItem('monez_expenses');
           const friends = localStorage.getItem('monez_friends');
           const groups = localStorage.getItem('monez_groups');
-          
+
           const legacyData = {
             expenses: safeJSONParse(expenses, []),
             friends: safeJSONParse(friends, []),
             groups: safeJSONParse(groups, []),
             version: 1
           };
-          
+
           return this.migrate(legacyData);
         } catch (e) {
           console.error('Migration error:', e);
@@ -6782,8 +6782,15 @@
           status: 'pending'
         };
 
-        AppState.expenses.unshift(expense);
-        saveToLocalStorage(); // Persist to localStorage
+        // GAP FIX #1: Use StateManager for validation
+        if (!StateManager.addExpense(expense)) {
+          isSavingExpense = false;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Save Expense';
+          }
+          return;
+        }
 
         // Sync to cloud if authenticated
         if (AppState.isAuthenticated) {
