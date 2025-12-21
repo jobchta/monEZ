@@ -6262,12 +6262,18 @@
         // SECURITY: Prevent division by zero
         if (!expense.splitWith || expense.splitWith.length === 0) {
           console.warn('Invalid expense: no split participants', expense);
+          // GAP FIX #6: Notify user of silent error
+          showNotification('Cannot calculate split: no participants found', 'error');
           return;
         }
 
         // Handle standard split expenses
         const totalPeople = expense.splitWith.length + 1;
-        const sharePerPerson = expense.amount / totalPeople;
+
+        // GAP FIX #5: Use cents for precision
+        const amountCents = Math.round(expense.amount * 100);
+        const shareCents = Math.round(amountCents / totalPeople);
+        const sharePerPerson = shareCents / 100;
 
         expense.splitWith.forEach(friendName => {
           if (expense.paidBy === 'You') {
