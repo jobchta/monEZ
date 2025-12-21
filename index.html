@@ -6524,7 +6524,12 @@
       form.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        const amount = parseFloat($('amount').value);
+        const validation = validateAmount($('amount').value);
+        if (!validation.valid) {
+          showNotification(validation.error, 'error');
+          return;
+        }
+        const amount = validation.value;
         const description = $('description').value.trim();
         const selectedFriends = Array.from(AppState.selectedFriends);
 
@@ -7384,7 +7389,11 @@
         const reader = new FileReader();
         reader.onload = (event) => {
           try {
-            const data = JSON.parse(event.target.result);
+            const data = safeJSONParse(event.target.result, null);
+              if (!data) {
+                showNotification('Invalid JSON file', 'error');
+                return;
+              }
 
             // Validate and import with ACID transaction
             storage.transaction([
