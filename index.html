@@ -2639,7 +2639,7 @@
       load(key, defaultValue = null) {
         try {
           const data = localStorage.getItem(this.PREFIX + key);
-          return data ? JSON.parse(data) : defaultValue;
+          return data ? safeJSONParse(data, defaultValue) : defaultValue;
         } catch (e) {
           console.error('Load error:', e);
           return defaultValue;
@@ -6759,7 +6759,7 @@
         const startedFresh = localStorage.getItem('monez_started_fresh');
 
         if (expenses) {
-          AppState.expenses = JSON.parse(expenses);
+          AppState.expenses = safeJSONParse(expenses, []);
         } else if (startedFresh) {
           // User chose to start fresh - don't load sample data
           AppState.expenses = [];
@@ -6768,13 +6768,13 @@
         }
 
         if (friends) {
-          AppState.friends = JSON.parse(friends);
+          AppState.friends = safeJSONParse(friends, []);
         } else if (startedFresh) {
           AppState.friends = [];
         }
 
         if (groups) {
-          AppState.groups = JSON.parse(groups);
+          AppState.groups = safeJSONParse(groups, []);
         } else if (startedFresh) {
           AppState.groups = [];
         }
