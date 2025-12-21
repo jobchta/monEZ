@@ -4406,6 +4406,43 @@
       return div.innerHTML;
     }
 
+    /**
+     * Safely parse JSON with error handling
+     * @param {string} str - JSON string to parse
+     * @param {*} fallback - Fallback value if parse fails
+     * @returns {*} - Parsed object or fallback
+     */
+    function safeJSONParse(str, fallback = null) {
+      try {
+        return str ? JSON.parse(str) : fallback;
+      } catch (e) {
+        console.error('JSON parse error:', e.message);
+        return fallback;
+      }
+    }
+
+    /**
+     * Validate monetary amount input
+     * @param {*} value - Value to validate
+     * @returns {Object} - {valid: boolean, value?: number, error?: string}
+     */
+    function validateAmount(value) {
+      const num = parseFloat(value);
+      if (isNaN(num)) {
+        return { valid: false, error: 'Please enter a valid number' };
+      }
+      if (num <= 0) {
+        return { valid: false, error: 'Amount must be positive' };
+      }
+      if (!isFinite(num)) {
+        return { valid: false, error: 'Amount is too large' };
+      }
+      if (num > 1000000) {
+        return { valid: false, error: 'Amount exceeds maximum (1,000,000)' };
+      }
+      return { valid: true, value: Math.round(num * 100) / 100 }; // Round to 2 decimals
+    }
+
     function formatCurrency(amount) {
       return i18n.formatCurrency(amount);
     }
