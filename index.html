@@ -6062,7 +6062,17 @@
 
         // Handle direct settlements (100% value transfer)
         if (expense.isSettlement) {
+          // SECURITY: Validate settlement has participant
+          if (!expense.splitWith || expense.splitWith.length === 0) {
+            console.warn('Invalid settlement: no participant', expense);
+            return;
+          }
           const friendName = expense.splitWith[0]; // Settlement is always 1-on-1
+          if (!friendName) {
+            console.warn('Invalid settlement: empty friend name', expense);
+            return;
+          }
+
           if (expense.paidBy === 'You') {
             // You paid friend -> You reduce what you owe them (or they owe you more)
             const currentBalance = balanceMap.get(friendName) || 0;
@@ -6072,6 +6082,12 @@
             const currentBalance = balanceMap.get(friendName) || 0;
             balanceMap.set(friendName, currentBalance - expense.amount);
           }
+          return;
+        }
+
+        // SECURITY: Prevent division by zero
+        if (!expense.splitWith || expense.splitWith.length === 0) {
+          console.warn('Invalid expense: no split participants', expense);
           return;
         }
 
@@ -6745,14 +6761,26 @@
       }
     }
 
-    // LocalStorage persistence
+    // LocalStorage persistence - ATOMIC SAVE to prevent race conditions
     function saveToLocalStorage() {
       try {
+        // SECURITY: Save as single atomic operation
+        const data = {
+          expenses: AppState.expenses,
+          friends: AppState.friends,
+          groups: AppState.groups,
+          version: '1.0',
+          timestamp: Date.now()
+        };
+        localStorage.setItem('monez_data', JSON.stringify(data));
+
+        // Keep legacy keys for backward compatibility
         localStorage.setItem('monez_expenses', JSON.stringify(AppState.expenses));
         localStorage.setItem('monez_friends', JSON.stringify(AppState.friends));
         localStorage.setItem('monez_groups', JSON.stringify(AppState.groups));
       } catch (e) {
         console.error('Error saving to localStorage:', e);
+        showNotification('Failed to save data. Storage may be full.', 'error');
       }
     }
 
@@ -7390,10 +7418,10 @@
         reader.onload = (event) => {
           try {
             const data = safeJSONParse(event.target.result, null);
-              if (!data) {
-                showNotification('Invalid JSON file', 'error');
-                return;
-              }
+            if (!data) {
+              showNotification('Invalid JSON file', 'error');
+              return;
+            }
 
             // Validate and import with ACID transaction
             storage.transaction([
