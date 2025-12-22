@@ -4554,7 +4554,11 @@
         return { valid: true };
       },
 
-      // Safe mutation methods
+      /**
+       * Adds an expense to the application state
+       * @param {Object} expense - Expense object to add
+       * @returns {boolean} True if added successfully, false otherwise
+       */
       addExpense(expense) {
         const validation = this.validateExpense(expense);
         if (!validation.valid) {
@@ -4573,6 +4577,11 @@
         return true;
       },
 
+      /**
+       * Adds a friend to the application state
+       * @param {Object} friend - Friend object to add
+       * @returns {boolean} True if added successfully, false otherwise
+       */
       addFriend(friend) {
         const validation = this.validateFriend(friend);
         if (!validation.valid) {
@@ -4742,6 +4751,12 @@
       requestAnimationFrame(update);
     }
 
+    /**
+     * Display a notification to the user
+     * @param {string} message - Message to display
+     * @param {string} type - Notification type: 'success', 'error', or 'info'
+     * @param {number} duration - Duration in milliseconds (default: 3000)
+     */
     function showNotification(message, type = 'success', duration = 3000) {
       const notification = document.createElement('div');
       notification.style.cssText = `
