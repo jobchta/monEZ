@@ -5370,7 +5370,7 @@
         storage.save('settings', settings);
 
         showNotification('✅ Profile updated! Reloading...', 'success');
-        setTimeout(() => location.reload(), 1000);
+        setTimeout(() => location.reload(), DELAYS.RELOAD);
       }
 
       function showPremium() {
@@ -5412,7 +5412,7 @@
         document.head.appendChild(style);
 
         showNotification('🎉 Welcome to Gold Club!', 'success');
-        setTimeout(() => location.reload(), 1500);
+        setTimeout(() => location.reload(), DELAYS.RELOAD_PREMIUM);
       }
 
       function showHelp() {
@@ -5687,7 +5687,7 @@
         const btn = document.querySelector('#share-connect-modal .btn-secondary');
         if (btn) {
           btn.textContent = '✅ Copied!';
-          setTimeout(() => btn.textContent = '📋 Copy', 2000);
+          setTimeout(() => btn.textContent = '📋 Copy', DELAYS.BUTTON_RESET);
         }
       }).catch(() => {
         showNotification('❌ Could not copy link', 'error');
@@ -7178,7 +7178,7 @@
       updateBalance();
       updateExpenseStats();
 
-      setTimeout(() => showPWAPrompt(), 3000);
+      setTimeout(() => showPWAPrompt(), DELAYS.PWA_PROMPT);
       setupPWAListeners();
 
       showNotification(t('started_fresh_msg'), 'success', 5000);
