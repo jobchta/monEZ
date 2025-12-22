@@ -6672,6 +6672,9 @@
       const form = $('expense-form');
       if (!form) return;
 
+      // SECURITY: Prevent duplicate submissions
+      let isSavingExpense = false;
+
       // Setup category selection
       document.querySelectorAll('.category-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -6686,9 +6689,6 @@
       document.querySelectorAll('.split-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           if (btn.classList.contains('premium')) {
-            // SECURITY: Prevent duplicate submissions
-            let isSavingExpense = false;
-
             showPremiumModal();
             return;
           }
