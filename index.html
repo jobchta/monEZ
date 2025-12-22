@@ -4511,8 +4511,21 @@
      * State Manager - Centralized state validation and mutation control
      * Prevents invalid data from entering AppState
      */
+    /**
+     * State management module with validation
+     * Provides safe methods to mutate application state
+     */
     const StateManager = {
-      // Validation schemas
+      /**
+       * Validates an expense object
+       * @param {Object} expense - Expense to validate
+       * @param {number} expense.amount - Amount (must be > 0)
+       * @param {string} expense.description - Description (required)
+       * @param {string} expense.paidBy - Who paid (required)
+       * @param {boolean} expense.isPersonal - Personal or split
+       * @param {Array<string>} expense.splitWith - Participants (required if !isPersonal)
+       * @returns {{valid: boolean, error?: string}}
+       */
       validateExpense(expense) {
         if (!expense) return { valid: false, error: 'Expense is required' };
         if (!expense.amount || expense.amount <= 0) {
@@ -7869,6 +7882,27 @@
       document.addEventListener('DOMContentLoaded', init);
     } else {
       init();
+    }
+
+    // Offline/Online Detection
+    window.addEventListener('online', () => {
+      AppState.syncStatus = 'online';
+      showNotification('✅ Back online', 'success');
+
+      // Auto-sync when back online
+      if (AppState.isAuthenticated) {
+        syncNow();
+      }
+    });
+
+    window.addEventListener('offline', () => {
+      AppState.syncStatus = 'offline';
+      showNotification('📴 You are offline. Changes saved locally.', 'info');
+    });
+
+    // Check initial online status
+    if (!navigator.onLine) {
+      AppState.syncStatus = 'offline';
     }
   </script>
 
