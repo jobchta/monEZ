@@ -6131,7 +6131,7 @@
 
       // Sync delete to cloud if authenticated
       if (AppState.isAuthenticated) {
-        SupabaseManager.deleteExpense(expenseId).then(() => {
+        SupabaseManager.deleteExpense(id).then(() => {
         });
       }
 
@@ -6759,8 +6759,6 @@
           paidBy: 'You',
           // Only add split friends if in split mode
           splitWith: currentExpenseType === 'personal' ? [] : selectedFriends,
-          paidBy: 'You',
-          splitWith: selectedFriends,
           category: AppState.selectedCategory || getExpenseCategory(description),
           location: 'Current Location',
           status: 'pending'
