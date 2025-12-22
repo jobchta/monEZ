@@ -4118,6 +4118,28 @@
       { name: 'Priya Singh', avatar: 'P', color: '#F59E0B' },
       { name: 'Amit Sharma', avatar: 'A', color: '#8B5CF6' },
       { name: 'Sarah Johnson', avatar: 'S', color: '#EF4444' },
+// Quick fix: Define setExpenseType globally
+function setExpenseType(type) {
+    AppState.currentExpenseType = type;
+
+    // Update UI
+    const personalBtn = document.querySelector('[onclick*="setExpenseType(\'personal\')"]');
+    const splitBtn = document.querySelector('[onclick*="setExpenseType(\'split\')"]');
+
+    if (personalBtn && splitBtn) {
+        personalBtn.classList.toggle('active', type === 'personal');
+        splitBtn.classList.toggle('active', type === 'split');
+    }
+
+    // Show/hide split section
+    const splitSection = document.getElementById('split-section');
+    if (splitSection) {
+        splitSection.style.display = type === 'split' ? 'block' : 'none';
+    }
+}
+
+// Make it globally accessible
+window.setExpenseType = setExpenseType;
       { name: 'Mike Chen', avatar: 'M', color: '#06B6D4' }
     ];
 
