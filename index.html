@@ -4848,6 +4848,16 @@
       updateNavigation('groups');
     }
 
+    /**
+     * Show a specific view and hide all others
+     * @param {string} viewName - Name of the view to show ('home', 'expenses', 'balances', 'groups')
+     */
+    function showView(viewName) {
+      showView('premium');
+      renderPremiumFeatures();
+      updateNavigation('premium');
+    }
+
     function showPremiumFeatures() {
       showView('premium');
       renderPremiumFeatures();
@@ -6059,6 +6069,10 @@
       }
     }
 
+    /**
+     * Update navigation bar to highlight active view
+     * @param {string} activeView - Name of the currently active view
+     */
     function updateNavigation(activeView) {
       document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
@@ -6231,6 +6245,10 @@
     }
     window.editExpense = editExpense;
 
+    /**
+     * Delete an expense from the application
+     * @param {string|number} id - ID of the expense to delete
+     */
     function deleteExpense(id) {
       if (!confirm(t('confirm_delete_expense'))) return;
 
