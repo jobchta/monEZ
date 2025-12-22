@@ -6893,8 +6893,16 @@
           status: 'pending'
         };
 
+
+        // DEBUG: Log expense object before save
+        console.log('DEBUG: Attempting to save expense:', expense);
+        console.log('DEBUG: currentExpenseType:', AppState.currentExpenseType);
+        console.log('DEBUG: isPersonal:', expense.isPersonal);
+        console.log('DEBUG: splitWith:', expense.splitWith);
+
         // GAP FIX #1: Use StateManager for validation
         if (!StateManager.addExpense(expense)) {
+          console.error('DEBUG: StateManager.addExpense returned false!');
           isSavingExpense = false;
           if (submitBtn) {
             submitBtn.disabled = false;
@@ -6902,6 +6910,8 @@
           }
           return;
         }
+
+        console.log('DEBUG: Expense added successfully!');
 
         // Sync to cloud if authenticated
         if (AppState.isAuthenticated) {
