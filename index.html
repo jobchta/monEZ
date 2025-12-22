@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- DEBUG: updated at 2025-12-19T13:16:00+05:30 -->
 <html lang="en">
 
 <head>
@@ -4094,6 +4093,27 @@
     // Shorthand translation function
     const t = (key, params) => i18n.t(key, params);
 
+
+    // Application Constants
+    const DELAYS = {
+      PWA_PROMPT: 3000,
+      PWA_PROMPT_LATER: 5000,
+      NOTIFICATION: 5000,
+      ANIMATION: 300,
+      BUTTON_RESET: 2000,
+      FOCUS_DELAY: 100,
+      AUTO_CLOSE: 10000,
+      RELOAD: 1000,
+      RELOAD_PREMIUM: 1500
+    };
+
+    const SIZES = {
+      MODAL_MAX_WIDTH: 400,
+      PADDING_LG: 24,
+      PADDING_MD: 16,
+      PADDING_SM: 8
+    };
+
     const AppState = {
       expenses: [],
       friends: [],
@@ -4405,6 +4425,23 @@
     // Enhanced Helper Functions
     function $(id) {
       return document.getElementById(id);
+    }
+
+    /**
+     * Safe DOM element getter with null checking
+     * @param {string} id - Element ID  
+     * @param {Object} options - Configuration options
+     * @returns {HTMLElement|null}
+     */
+    function safeGet(id, options = {}) {
+      const element = document.getElementById(id);
+
+      if (!element && options.required) {
+        console.error(`Required element not found: ${id}`);
+        if (options.fallback) options.fallback();
+      }
+
+      return element;
     }
 
     /**
@@ -5268,8 +5305,16 @@
       }
 
       function saveProfileDetails() {
-        const name = document.getElementById('profile-name').value;
-        const currency = document.getElementById('profile-currency').value;
+        const nameInput = safeGet('profile-name');
+        const currencyInput = safeGet('profile-currency');
+
+        if (!nameInput || !currencyInput) {
+          showNotification('Form error', 'error');
+          return;
+        }
+
+        const name = nameInput.value;
+        const currency = currencyInput.value;
 
         if (!name) return showNotification('Name cannot be empty', 'error');
 
@@ -5577,7 +5622,13 @@
           url: getShareLink()
         }).then(() => {
           showNotification('📤 Shared successfully!', 'success');
-        }).catch(() => { });
+        }).catch(error => {
+          console.error('Share failed:', error);
+          if (error.name !== 'AbortError') {
+            showNotification('Share failed. Link copied instead.', 'info');
+            copyShareLink();
+          }
+        });
       } else {
         copyShareLink();
       }
@@ -5680,7 +5731,10 @@
           url: getShareLink()
         }).then(() => {
           showNotification('📨 Group invite sent!', 'success');
-        }).catch(() => { });
+        }).catch(error => {
+          console.error('Group invite share failed:', error);
+          showNotification('Share failed', 'error');
+        });
       } else {
         navigator.clipboard.writeText(inviteMessage).then(() => {
           showNotification('📋 Group invite copied!', 'success');
