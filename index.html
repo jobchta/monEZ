@@ -5096,7 +5096,7 @@
         <div class="animate-enter" style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">💳 Settle Up</h3>
-            <button onclick="document.getElementById('settle-modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
+            <button onclick="const m = document.getElementById('settle-modal'); if (m) m.remove();" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
           </div>
           ${debtsHtml}
         </div>
@@ -5332,7 +5332,7 @@
         <div class="animate-enter" style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="margin: 0;">👤 Edit Profile</h3>
-            <button onclick="document.getElementById('edit-profile-modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+            <button onclick="const m = document.getElementById('edit-profile-modal'); if (m) m.remove();" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
           </div>
           
     // Global expense type state
@@ -5392,7 +5392,7 @@
           <button onclick="activatePremium()" style="width: 100%; padding: 15px; background: linear-gradient(to right, #D4AF37, #F2D06B); color: black; border: none; border-radius: 50px; font-weight: bold; font-size: 16px; cursor: pointer; transition: transform 0.2s;">
             UNLOCK FOR FREE (Beta)
           </button>
-          <button onclick="document.getElementById('premium-modal').remove()" style="background: none; border: none; color: #888; margin-top: 15px; cursor: pointer;">No thanks</button>
+          <button onclick="const m = document.getElementById('premium-modal'); if (m) m.remove();" style="background: none; border: none; color: #888; margin-top: 15px; cursor: pointer;">No thanks</button>
         </div>
       `;
         document.body.appendChild(modal);
@@ -5425,7 +5425,7 @@
         <div class="animate-enter" style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="margin: 0;">❓ Help Center</h3>
-            <button onclick="document.getElementById('help-modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
+            <button onclick="const m = document.getElementById('help-modal'); if (m) m.remove();" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
           </div>
           <details style="margin-bottom: 10px; border-bottom: 1px solid var(--borders); padding-bottom: 10px;">
             <summary style="font-weight: 600; cursor: pointer;">How do I split a bill?</summary>
@@ -7761,7 +7761,7 @@
         <div class="animate-enter" style="background: var(--surface); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="margin: 0;">💳 Payment Methods</h3>
-            <button onclick="document.getElementById('payment-modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
+            <button onclick="const m = document.getElementById('payment-modal'); if (m) m.remove();" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text);">×</button>
           </div>
           
           <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 20px; border-radius: 12px; color: white; margin-bottom: 12px; position: relative; overflow: hidden;">
