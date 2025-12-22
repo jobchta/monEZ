@@ -6743,7 +6743,7 @@
         }
 
         // Check validation based on expense type
-        if (currentExpenseType === 'split' && selectedFriends.length === 0) {
+        if (AppState.currentExpenseType === 'split' && selectedFriends.length === 0) {
           showNotification(t('select_friend'), 'error');
           return;
         }
@@ -6755,10 +6755,10 @@
           amount,
           date: new Date().toISOString(),
           // Use global currentExpenseType
-          isPersonal: currentExpenseType === 'personal',
+          isPersonal: AppState.currentExpenseType === 'personal',
           paidBy: 'You',
           // Only add split friends if in split mode
-          splitWith: currentExpenseType === 'personal' ? [] : selectedFriends,
+          splitWith: AppState.currentExpenseType === 'personal' ? [] : selectedFriends,
           category: AppState.selectedCategory || getExpenseCategory(description),
           location: 'Current Location',
           status: 'pending'
