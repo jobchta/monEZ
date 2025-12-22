@@ -4701,6 +4701,11 @@
       }
     };
 
+    /**
+     * Format a number as currency with the current currency symbol
+     * @param {number} amount - Amount to format
+     * @returns {string} Formatted currency string (e.g., "$100.00")
+     */
     function formatCurrency(amount) {
       return i18n.formatCurrency(amount);
     }
@@ -7082,6 +7087,10 @@
     }
 
     // LocalStorage persistence - ATOMIC SAVE to prevent race conditions
+    /**
+     * Save application state to localStorage
+     * Persists expenses, friends, and groups data
+     */
     function saveToLocalStorage() {
       try {
         // SECURITY: Save as single atomic operation
@@ -7104,6 +7113,10 @@
       }
     }
 
+    /**
+     * Load application state from localStorage
+     * Restores expenses, friends, and groups data
+     */
     function loadFromLocalStorage() {
       try {
         const expenses = localStorage.getItem('monez_expenses');
