@@ -6237,6 +6237,9 @@
           return;
         }
 
+        // Skip personal expenses (they don't affect balances)
+        if (expense.isPersonal) return;
+
         // SECURITY: Prevent division by zero
         if (!expense.splitWith || expense.splitWith.length === 0) {
           console.warn('Invalid expense: no split participants', expense);
