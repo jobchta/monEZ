@@ -7376,6 +7376,11 @@
       // Initialize Supabase
       SupabaseManager.init();
 
+      // CRITICAL FIX: Setup form listeners IMMEDIATELY
+      // This must happen before any delays or modals to prevent
+      // default form submission when user is quick
+      setupExpenseForm();
+
       // Check for existing session
       const session = await SupabaseManager.getSession();
       if (session?.user) {
