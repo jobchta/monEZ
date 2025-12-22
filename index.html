@@ -4451,6 +4451,11 @@
      */
     function sanitizeHTML(str) {
       if (typeof str !== 'string') return '';
+
+      // Remove script tags and event handlers
+      str = str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+      str = str.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
+
       const div = document.createElement('div');
       div.textContent = str;
       return div.innerHTML;
