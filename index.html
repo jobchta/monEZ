@@ -2667,7 +2667,6 @@
             }
           }
         });
-        console.log('Restored from backup:', new Date(backup._timestamp));
       }
 
       verify() {
@@ -4155,17 +4154,11 @@
 
       // Initialize Supabase client
       init() {
-        console.log('🔍 Checking Supabase...', typeof window.supabase);
-
         if (typeof window.supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY) {
           const { createClient } = window.supabase;
           this.client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          console.log('✅ Supabase connected to:', SUPABASE_URL);
           return true;
         }
-        console.log('⚠️ Supabase not configured - running in offline mode');
-        console.log('   window.supabase:', typeof window.supabase);
-        console.log('   SUPABASE_URL:', SUPABASE_URL);
         return false;
       },
 
@@ -4563,7 +4556,6 @@
         const version = data.version || 1;
 
         if (version < 2) {
-          console.log('Migrating data from v1 to v2...');
           data = this.migrateV1toV2(data);
         }
 
@@ -5484,7 +5476,7 @@
           }
 
           container.innerHTML = AppState.friends.map(friend =>
-            '<div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface-elevated); border-radius: 8px;"><div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">' + friend.avatar + '</div><div style="flex: 1;"><div style="font-weight: 600;">' + friend.name + '</div>' + (friend.contact ? '<div style="font-size: 12px; color: var(--secondary-text);">' + friend.contact + '</div>' : '') + '</div><button onclick="removeFriend(' + friend.id + ')" style="background: none; border: none; color: var(--error); cursor: pointer; font-size: 18px;">🗑️</button></div>'
+            '<div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface-elevated); border-radius: 8px;"><div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">' + sanitizeHTML(friend.avatar) + '</div><div style="flex: 1;"><div style="font-weight: 600;">' + sanitizeHTML(friend.name) + '</div>' + (friend.contact ? '<div style="font-size: 12px; color: var(--secondary-text);">' + sanitizeHTML(friend.contact) + '</div>' : '') + '</div><button onclick="removeFriend(' + friend.id + ')" style="background: none; border: none; color: var(--error); cursor: pointer; font-size: 18px;">🗑️</button></div>'
           ).join('');
         }
 
@@ -5654,7 +5646,6 @@
       // Sync to cloud if authenticated
       if (AppState.isAuthenticated) {
         SupabaseManager.syncFriends().then(() => {
-          console.log('✅ Friend synced to cloud');
         });
       }
 
@@ -5820,8 +5811,8 @@
             item.innerHTML = `
         <div class="activity-icon" style="background: #10B981;">${expense.category || '💰'}</div>
               <div class="activity-content" style="flex: 1;">
-                <div class="activity-title">${expense.description}</div>
-                <div class="activity-meta">${expense.date} • ${expense.paidBy === 'You' ? t('you') : expense.paidBy}</div>
+                <div class="activity-title">${sanitizeHTML(expense.description)}</div>
+                <div class="activity-meta">${expense.date} • ${expense.paidBy === 'You' ? t('you') : sanitizeHTML(expense.paidBy)}</div>
               </div>
               <div class="activity-amount">${formatCurrency(expense.amount)}</div>
       `;
@@ -5926,7 +5917,6 @@
       // Sync to cloud if authenticated
       if (AppState.isAuthenticated) {
         SupabaseManager.syncGroups().then(() => {
-          console.log('✅ Group synced to cloud');
         });
       }
 
@@ -6008,9 +5998,9 @@
             ${expense.category || '💰'}
           </div>
           <div class="activity-content">
-            <div class="activity-title">${expense.description}</div>
+            <div class="activity-title">${sanitizeHTML(expense.description)}</div>
             <div class="activity-meta">
-              ${i18n.formatDate(expense.date)} • ${expense.location || t('unknown_location')} ${statusIcon}
+              ${i18n.formatDate(expense.date)} • ${expense.location ? sanitizeHTML(expense.location) : t('unknown_location')} ${statusIcon}
             </div>
           </div>
           <div class="activity-amount">${formatCurrency(expense.amount)}</div>
@@ -6142,7 +6132,6 @@
       // Sync delete to cloud if authenticated
       if (AppState.isAuthenticated) {
         SupabaseManager.deleteExpense(expenseId).then(() => {
-          console.log('✅ Expense deleted from cloud');
         });
       }
 
@@ -6188,7 +6177,7 @@
             ${avatar}
           </div>
           <div class="balance-content">
-            <div class="balance-name">${balance.name}</div>
+            <div class="balance-name">${sanitizeHTML(balance.name)}</div>
             <div class="balance-status">${statusText} • ${t('last_activity', { time: balance.lastActivity || '2 days ago' })}</div>
           </div>
           <div class="balance-amount-container">
@@ -6196,8 +6185,8 @@
               ${formatCurrency(Math.abs(balance.amount))}
             </div>
             ${!isPositive ?
-            `<button class="settle-btn-small" onclick="settleBalance('${balance.name}', ${Math.abs(balance.amount)})">${t('pay_now')}</button>` :
-            `<button class="settle-btn-small" onclick="remindUser('${balance.name}')">${t('remind')}</button>`
+            `<button class="settle-btn-small" onclick="settleBalance('${sanitizeHTML(balance.name)}', ${Math.abs(balance.amount)})">${t('pay_now')}</button>` :
+            `<button class="settle-btn-small" onclick="remindUser('${sanitizeHTML(balance.name)}')">${t('remind')}</button>`
           }
           </div>
       `;
@@ -6531,9 +6520,9 @@
 
         card.innerHTML = `
           <div class="person-avatar" style="background: ${friend.color}">
-            ${friend.avatar}
+            ${sanitizeHTML(friend.avatar)}
           </div>
-          <div class="person-name">${friend.name.split(' ')[0]}</div>
+          <div class="person-name">${sanitizeHTML(friend.name.split(' ')[0])}</div>
         `;
 
         // Enhanced selection handling
@@ -6790,7 +6779,6 @@
         // Sync to cloud if authenticated
         if (AppState.isAuthenticated) {
           SupabaseManager.syncExpenses().then(() => {
-            console.log('✅ Expense synced to cloud');
           });
         }
 
@@ -7244,7 +7232,6 @@
       if (session?.user) {
         AppState.user = session.user;
         AppState.isAuthenticated = true;
-        console.log('✅ User session restored:', session.user.email);
       }
 
       // Initialize app after loading
@@ -7299,7 +7286,6 @@
       const swUrl = `/service-worker.js?v=${Date.now()}`;
       navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' })
         .then(reg => {
-          console.log('monEZ: Service Worker registered');
           // Force immediate update check
           reg.update();
           // Auto-reload when new service worker activates
@@ -7307,7 +7293,6 @@
             const newWorker = reg.installing;
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
-                console.log('New service worker activated, reloading...');
                 window.location.reload();
               }
             });
@@ -7756,7 +7741,6 @@
     notificationStyle.textContent = '.premium-notification { position: fixed; top: 20px; right: 20px; background: white; border-radius: 8px; padding: 12px; z-index: 10000; }';
     document.head.appendChild(notificationStyle);
 
-    console.log('💎 monEZ loaded successfully!');
 
 
 
@@ -7766,12 +7750,9 @@
         setExpenseType('split');
       }, 100);
     }
-    console.log('Available shortcuts: Alt+1 (Home), Alt+2 (Expenses), Alt+3 (Balances), Alt+4 (Groups), Alt+5 (Premium), Alt+A (Add)');
-    console.log('Swipe right to go back, PWA features enabled ✨');
     // --- INITIALIZATION ---
     function init() {
       try {
-        console.log('🚀 monEZ Initializing...');
 
         // Load data
         loadFromLocalStorage();
@@ -7789,7 +7770,6 @@
         setupPWAListeners();
         setTimeout(() => showPWAPrompt(), 5000);
 
-        console.log('✅ monEZ Initialized');
       } catch (e) {
         console.error('❌ Initialization failed:', e);
         showNotification('Startup error: ' + e.message, 'error');
