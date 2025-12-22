@@ -4107,6 +4107,7 @@
       user: null,
       animations: true,
       theme: 'light',
+      balance: 0, // Used in updateBalance()
       pwaPromptShown: false,
       deferredPrompt: null,
       syncStatus: 'offline', // 'offline', 'syncing', 'synced', 'error'
@@ -4380,10 +4381,10 @@ window.setExpenseType = setExpenseType;
         amount: 2850,
         date: 'Today, 8:30 PM',
         paidBy: 'You',
-        splitWith: ['Raj Kumar', 'Priya Singh'],
+        splitWith: ['Ra    mar'     iya Singh'],
         category: '🍽️',
         location: 'Connaught Place, Delhi',
-        status: 'pending'
+          atus: 'pending'
       },
       {
         id: 2,
@@ -4393,16 +4394,14 @@ window.setExpenseType = setExpenseType;
         paidBy: 'Raj Kumar',
         splitWith: ['You'],
         category: '🚗',
-        location: 'Airport → Hotel',
-        status: 'settled'
+        location: 'Airpor    Hote            status: 'settled'
       },
-      {
-        id: 3,
-        description: 'IMAX Movie Experience',
+                id: 3,
+        description: 'IMAX Movie      ience',
         amount: 1200,
-        date: 'Yesterday, 9:30 PM',
+        date: 'Yesterday     0 PM',
         paidBy: 'Priya Singh',
-        splitWith: ['You', 'Amit Sharma'],
+          litWith: ['You', 'Amit Sharma'],
         category: '🎬',
         location: 'PVR Director\'s Cut',
         status: 'settled'
@@ -4410,12 +4409,10 @@ window.setExpenseType = setExpenseType;
     ];
     // Enhanced Helper Functions
     function $(id) {
-      return document.getElementById(id);
-    }
-
-    /**
-     * Sanitize HTML to prevent XSS attacks
-     * @param {string} str - String to sanitize
+      return document.getElementById(    
+           /**
+     * Sanitize HTML to pr      XSS attacks
+     * @param {string} str     ring to sanitize
      * @returns {string} - Sanitized HTML-safe string
      */
     function sanitizeHTML(str) {
@@ -4435,14 +4432,14 @@ window.setExpenseType = setExpenseType;
       try {
         return str ? JSON.parse(str) : fallback;
       } catch (e) {
-        console.error('JSON parse error:', e.message);
+        console.error('JSON parse error:'    mess     
         return fallback;
       }
     }
 
     /**
-     * Validate monetary amount input
-     * @param {*} value - Value to validate
+     * Validate mon      amount input
+     * @param {*} value - Value t     idate
      * @returns {Object} - {valid: boolean, value?: number, error?: string}
      */
     function validateAmount(value) {
@@ -4519,12 +4516,10 @@ window.setExpenseType = setExpenseType;
       addFriend(friend) {
         const validation = this.validateFriend(friend);
         if (!validation.valid) {
-          console.error('Invalid friend:', validation.error);
-          showNotification(validation.error, 'error');
+          console.error('Invalid friend:', validation    or);           showNotification(v     tion.error, 'error');
           return false;
         }
-
-        // Check for duplicates
+         // Check for duplicates
         const exists = AppState.friends.some(f => f.id === friend.id);
         if (exists) {
           showNotification('Friend already exists', 'error');
