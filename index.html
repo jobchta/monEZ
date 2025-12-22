@@ -596,9 +596,6 @@
     }
 
     /* Luxury Groups Preview */
-    .groups-preview {
-      /* ... existing styles ... */
-    }
 
     /* Category Analytics Chart */
     .chart-container {
@@ -5430,7 +5427,8 @@
 
       function activatePremium() {
         localStorage.setItem('isPremium', 'true');
-        document.getElementById('premium-modal').remove();
+        const modal = safeGet('premium-modal');
+        if (modal) modal.remove();
 
         // Apply gold theme immediately
         const style = document.createElement('style');
@@ -7445,7 +7443,7 @@
             });
           });
         })
-        .catch(err => console.log('monEZ: Service Worker registration failed', err));
+        .catch(err => console.error('Service Worker registration failed:', err));
     }
 
     // Global functions for HTML onclick handlers
