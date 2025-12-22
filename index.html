@@ -6917,7 +6917,11 @@
         submitBtnSuccess.innerHTML = '<span class="btn-text">✅ Saved!</span>';
         submitBtnSuccess.style.background = '#10B981';
 
+
         setTimeout(() => {
+          // CRITICAL: Reset saving flag to allow next save
+          isSavingExpense = false;
+
           // Reset form
           resetForm();
 
