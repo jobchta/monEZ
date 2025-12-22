@@ -4096,23 +4096,20 @@
     const t = (key, params) => i18n.t(key, params);
 
     const AppState = {
-      currentView: 'home',
-      user: null, // Supabase user object
-      isAuthenticated: false,
-      isLoading: true,
       expenses: [],
       friends: [],
       groups: [],
-      balance: 0,
-      settings: {
-        currency: 'USD',
-        darkMode: false,
-        notifications: false
-      },
+      selectedFriends: new Set(), // CRITICAL: Initialize to prevent TypeError
+      selectedCategory: null,
+      currentView: 'home',
+      currentExpenseType: 'personal',
+      isAuthenticated: false,
+      user: null,
+      animations: true,
+      theme: 'light',
       pwaPromptShown: false,
       deferredPrompt: null,
       syncStatus: 'offline', // 'offline', 'syncing', 'synced', 'error'
-      animations: { enabled: true } // Fix for navigation crash
     };
 
     // Demo data for first-time users
